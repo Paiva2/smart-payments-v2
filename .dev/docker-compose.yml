@@ -20,7 +20,7 @@ services:
     volumes:
       - ./data/kafka/data:/var/lib/kafka/data
     networks:
-      - demo
+      - smart-payments
 
   redpanda:
     container_name: smart-payments-redpanda
@@ -42,4 +42,4 @@ services:
 
 networks:
   smart-payments:
-    driver: bridge
+    external: true
