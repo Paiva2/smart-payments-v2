@@ -19,19 +19,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.com.smartpayments.authenticator.core.common.exception.GenericInvalidBirthdateException;
-import org.com.smartpayments.authenticator.core.common.exception.GenericPasswordInvalidException;
 import org.com.smartpayments.authenticator.core.common.exception.GenericPhoneInvalidException;
 import org.com.smartpayments.authenticator.core.domain.enums.EUserType;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -112,7 +109,6 @@ public class User {
     @PreUpdate
     @PrePersist
     private void makeValidations() {
-        this.validatePassword();
         this.validatePhone();
         this.validateBirthdate();
         this.formatCpfCnpj();
@@ -145,32 +141,5 @@ public class User {
                 throw new GenericPhoneInvalidException("Phone must have 11 digits!");
             }
         }
-    }
-
-    private void validatePassword() {
-        if (!this.isPasswordMaxSizeValid()) {
-            throw new GenericPasswordInvalidException("Password is too long!");
-        }
-
-        if (!isPasswordFormatValid()) {
-            throw new GenericPasswordInvalidException("Password must have one special character, one upper letter and at least 6 characters!");
-        }
-    }
-
-    private boolean isPasswordMaxSizeValid() {
-        final int MAX_BYTES_PASSWORD = 72;
-
-        if (this.passwordHash == null) return false;
-
-        return this.passwordHash.getBytes(StandardCharsets.UTF_8).length <= MAX_BYTES_PASSWORD;
-    }
-
-    private boolean isPasswordFormatValid() {
-        final String PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{6,}$";
-        final Pattern pattern = Pattern.compile(PASSWORD_REGEX);
-
-        if (this.passwordHash == null) return false;
-
-        return pattern.matcher(this.passwordHash).matches();
     }
 }

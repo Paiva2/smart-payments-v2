@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.com.smartpayments.authenticator.core.common.exception.GenericCpfCnpjInvalidException;
 import org.com.smartpayments.authenticator.core.common.exception.GenericException;
+import org.com.smartpayments.authenticator.core.common.exception.GenericPasswordInvalidException;
 import org.com.smartpayments.authenticator.core.common.exception.RoleNotFoundException;
 import org.com.smartpayments.authenticator.core.domain.enums.ECountry;
 import org.com.smartpayments.authenticator.core.domain.enums.ERole;
@@ -23,12 +24,13 @@ import org.com.smartpayments.authenticator.core.ports.out.dataProvider.RoleDataP
 import org.com.smartpayments.authenticator.core.ports.out.dataProvider.UserDataProviderPort;
 import org.com.smartpayments.authenticator.core.ports.out.dto.AsyncEmailOutput;
 import org.com.smartpayments.authenticator.core.ports.out.utils.PasswordUtilsPort;
-import org.com.smartpayments.authenticator.core.ports.out.utils.PersonalDocumentUtils;
+import org.com.smartpayments.authenticator.core.ports.out.utils.PersonalDocumentUtilsPort;
 import org.com.smartpayments.authenticator.core.ports.out.utils.TokenUtilsPort;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -52,7 +54,7 @@ public class RegisterUserUsecase implements UsecaseVoidPort<RegisterUserInput> {
     private final RoleDataProviderPort roleDataProviderPort;
     private final AsyncMessageDataProviderPort asyncMessageDataProviderPort;
 
-    private final PersonalDocumentUtils personalDocumentUtils;
+    private final PersonalDocumentUtilsPort personalDocumentUtilsPort;
     private final PasswordUtilsPort passwordUtilsPort;
     private final TokenUtilsPort tokenUtilsPort;
 
@@ -68,6 +70,7 @@ public class RegisterUserUsecase implements UsecaseVoidPort<RegisterUserInput> {
     @Override
     @Transactional
     public void execute(RegisterUserInput input) {
+        validatePassword(input.getPassword());
         validateDocument(input);
         checkEmailUsed(input.getEmail());
         checkDocumentUsed(input.getCpfCnpj());
@@ -86,16 +89,24 @@ public class RegisterUserUsecase implements UsecaseVoidPort<RegisterUserInput> {
         }
     }
 
+    private void validatePassword(String password) {
+        final int MAX_BYTES_PASSWORD = 72;
+
+        if (password.getBytes(StandardCharsets.UTF_8).length > MAX_BYTES_PASSWORD) {
+            throw new GenericPasswordInvalidException("Password is too long!");
+        }
+    }
+
     private void validateDocument(RegisterUserInput input) {
         if (isNull(input.getType())) {
             input.setType(EUserType.NATURAL);
         }
 
-        if (Objects.equals(input.getType(), EUserType.NATURAL) && !personalDocumentUtils.isValidCpf(input.getCpfCnpj())) {
+        if (Objects.equals(input.getType(), EUserType.NATURAL) && !personalDocumentUtilsPort.isValidCpf(input.getCpfCnpj())) {
             throw new GenericCpfCnpjInvalidException("Invalid Cpf!");
         }
 
-        if (Objects.equals(input.getType(), EUserType.LEGAL) && !personalDocumentUtils.isValidCnpj(input.getCpfCnpj())) {
+        if (Objects.equals(input.getType(), EUserType.LEGAL) && !personalDocumentUtilsPort.isValidCnpj(input.getCpfCnpj())) {
             throw new GenericCpfCnpjInvalidException("Invalid Cnpj!");
         }
     }
