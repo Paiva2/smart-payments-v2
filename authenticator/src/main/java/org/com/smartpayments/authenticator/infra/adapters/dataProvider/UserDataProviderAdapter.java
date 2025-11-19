@@ -25,6 +25,11 @@ public class UserDataProviderAdapter implements UserDataProviderPort {
     }
 
     @Override
+    public Optional<User> findActiveByEmail(String email) {
+        return repository.findByEmailAndActiveIsTrue(email.toLowerCase(Locale.ROOT).trim());
+    }
+
+    @Override
     public Optional<User> findByCpfCnpj(String cpfCnpj) {
         return repository.findByCpfCnpj(cpfCnpj.replaceAll("\\D", ""));
     }

@@ -1,12 +1,12 @@
 package org.com.smartpayments.authenticator.infra.adapters.utils;
 
-import org.com.smartpayments.authenticator.core.ports.out.utils.PersonalDocumentUtils;
+import org.com.smartpayments.authenticator.core.ports.out.utils.PersonalDocumentUtilsPort;
 import org.springframework.stereotype.Component;
 
 import java.util.InputMismatchException;
 
 @Component
-public class PersonalDocumentUtilsAdaspter implements PersonalDocumentUtils {
+public class PersonalDocumentUtilsPortAdaspter implements PersonalDocumentUtilsPort {
     @Override
     public Boolean isValidCpf(String cpf) {
         if (cpf == null) {

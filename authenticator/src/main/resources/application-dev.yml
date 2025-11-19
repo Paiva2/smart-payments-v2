@@ -28,3 +28,7 @@ spring:
 
 kong:
   url: localhost:8000
+
+auth:
+  jwt:
+    secret: SUPER_SECRET_JWT

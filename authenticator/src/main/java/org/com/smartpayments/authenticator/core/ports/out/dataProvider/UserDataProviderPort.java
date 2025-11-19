@@ -9,6 +9,8 @@ public interface UserDataProviderPort {
 
     Optional<User> findByEmail(String email);
 
+    Optional<User> findActiveByEmail(String email);
+
     Optional<User> findByCpfCnpj(String cpfCnpj);
 
     Optional<User> findByEmailToken(String emailToken);
