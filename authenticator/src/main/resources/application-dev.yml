@@ -1,5 +1,6 @@
 server:
   port: 8081
+  api-suffix: api/authenticator
 
 spring:
   application:
@@ -18,6 +19,12 @@ spring:
         format_sql: false
   kafka:
     bootstrap-servers: localhost:9092
+    topics:
+      mail-sender: mail.sender
+      mail-sender-dlt: mail.sender.dlt
     consumer:
       auto-offset-reset: latest
       group-id: authenticator_group
+
+kong:
+  url: localhost:8000

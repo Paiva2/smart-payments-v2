@@ -1,0 +1,11 @@
+CREATE TABLE roles (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(15) NOT NULL UNIQUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT NULL
+);
+
+INSERT INTO roles (id, name) VALUES
+    (1, 'GUEST'),
+    (2, 'MEMBER'),
+    (3, 'ADMIN');

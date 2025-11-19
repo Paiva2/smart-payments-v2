@@ -1,0 +1,20 @@
+CREATE TABLE users (
+    id BIGSERIAL PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(50) NOT NULL UNIQUE,
+    cpf_cnpj VARCHAR(20) NOT NULL UNIQUE,
+    password_hash VARCHAR(100) NOT NULL,
+    type VARCHAR(15) NOT NULL DEFAULT 'NATURAL',
+    ddi VARCHAR(5) NOT NULL DEFAULT '+55',
+    phone VARCHAR(30) DEFAULT NULL,
+    birthdate DATE NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    password_token VARCHAR(180) UNIQUE DEFAULT NULL,
+    password_token_sent_at TIMESTAMP DEFAULT NULL,
+    email_token VARCHAR(180) UNIQUE DEFAULT NULL,
+    email_token_sent_at TIMESTAMP DEFAULT NULL,
+    email_confirmed_at TIMESTAMP DEFAULT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT NULL
+);

@@ -1,0 +1,219 @@
+package org.com.smartpayments.authenticator.core.domain.usecase.user.registerUser;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.com.smartpayments.authenticator.core.common.exception.GenericCpfCnpjInvalidException;
+import org.com.smartpayments.authenticator.core.common.exception.GenericException;
+import org.com.smartpayments.authenticator.core.common.exception.RoleNotFoundException;
+import org.com.smartpayments.authenticator.core.domain.enums.ECountry;
+import org.com.smartpayments.authenticator.core.domain.enums.ERole;
+import org.com.smartpayments.authenticator.core.domain.enums.EUserType;
+import org.com.smartpayments.authenticator.core.domain.model.Address;
+import org.com.smartpayments.authenticator.core.domain.model.Role;
+import org.com.smartpayments.authenticator.core.domain.model.User;
+import org.com.smartpayments.authenticator.core.domain.model.UserRole;
+import org.com.smartpayments.authenticator.core.domain.usecase.user.registerUser.exception.DocumentAlreadyUsedException;
+import org.com.smartpayments.authenticator.core.domain.usecase.user.registerUser.exception.EmailAlreadyUsedException;
+import org.com.smartpayments.authenticator.core.ports.in.UsecaseVoidPort;
+import org.com.smartpayments.authenticator.core.ports.in.dto.RegisterUserInput;
+import org.com.smartpayments.authenticator.core.ports.out.dataProvider.AsyncMessageDataProviderPort;
+import org.com.smartpayments.authenticator.core.ports.out.dataProvider.RoleDataProviderPort;
+import org.com.smartpayments.authenticator.core.ports.out.dataProvider.UserDataProviderPort;
+import org.com.smartpayments.authenticator.core.ports.out.dto.AsyncEmailOutput;
+import org.com.smartpayments.authenticator.core.ports.out.utils.PasswordUtilsPort;
+import org.com.smartpayments.authenticator.core.ports.out.utils.PersonalDocumentUtils;
+import org.com.smartpayments.authenticator.core.ports.out.utils.TokenUtilsPort;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
+
+import static java.util.Objects.isNull;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class RegisterUserUsecase implements UsecaseVoidPort<RegisterUserInput> {
+    private final static ObjectMapper mapper = new ObjectMapper();
+    private final static String MAIL_ACTIVATION_TEMPLATE = "user-email-activation";
+    private final static String MAIL_ACTIVATION_SUBJECT = "Welcome to smart payments!";
+
+    private final UserDataProviderPort userDataProviderPort;
+    private final RoleDataProviderPort roleDataProviderPort;
+    private final AsyncMessageDataProviderPort asyncMessageDataProviderPort;
+
+    private final PersonalDocumentUtils personalDocumentUtils;
+    private final PasswordUtilsPort passwordUtilsPort;
+    private final TokenUtilsPort tokenUtilsPort;
+
+    @Value("${spring.kafka.topics.mail-sender}")
+    private String SEND_EMAIL_TOPIC;
+
+    @Value("${kong.url}")
+    private String GATEWAY_URL;
+
+    @Value("${server.api-suffix}")
+    private String API_SUFFIX;
+
+    @Override
+    @Transactional
+    public void execute(RegisterUserInput input) {
+        validateDocument(input);
+        checkEmailUsed(input.getEmail());
+        checkDocumentUsed(input.getCpfCnpj());
+
+        User user = fillUser(input);
+        persistUser(user);
+
+        sendEmailActivationEmail(user);
+    }
+
+    private void checkEmailUsed(String email) {
+        Optional<User> user = userDataProviderPort.findByEmail(email);
+
+        if (user.isPresent()) {
+            throw new EmailAlreadyUsedException();
+        }
+    }
+
+    private void validateDocument(RegisterUserInput input) {
+        if (isNull(input.getType())) {
+            input.setType(EUserType.NATURAL);
+        }
+
+        if (Objects.equals(input.getType(), EUserType.NATURAL) && !personalDocumentUtils.isValidCpf(input.getCpfCnpj())) {
+            throw new GenericCpfCnpjInvalidException("Invalid Cpf!");
+        }
+
+        if (Objects.equals(input.getType(), EUserType.LEGAL) && !personalDocumentUtils.isValidCnpj(input.getCpfCnpj())) {
+            throw new GenericCpfCnpjInvalidException("Invalid Cnpj!");
+        }
+    }
+
+    private void checkDocumentUsed(String document) {
+        Optional<User> user = userDataProviderPort.findByCpfCnpj(document);
+
+        if (user.isPresent()) {
+            throw new DocumentAlreadyUsedException();
+        }
+    }
+
+    private Address fillAddress(RegisterUserInput input, User user) {
+        return Address.builder()
+            .street(input.getAddress().getStreet())
+            .neighborhood(input.getAddress().getNeighborhood())
+            .number(input.getAddress().getNumber())
+            .zipcode(input.getAddress().getZipcode())
+            .complement(input.getAddress().getComplement())
+            .city(input.getAddress().getCity())
+            .state(input.getAddress().getState())
+            .country(ECountry.BR)
+            .user(user)
+            .build();
+    }
+
+    private UserRole fillUserRole(User user) {
+        Role role = roleDataProviderPort.findByName(ERole.MEMBER)
+            .orElseThrow(() -> new RoleNotFoundException(ERole.MEMBER.toString()));
+
+        return UserRole.builder()
+            .id(new UserRole.UserRoleId(null, role.getId()))
+            .user(user)
+            .role(role)
+            .build();
+    }
+
+    private String generateEmailToken() {
+        final int MAX_GENERATED_TOKEN_ATTEMPTS = 10;
+        final int TOKEN_BYTES = 32;
+
+        for (int i = 0; i < MAX_GENERATED_TOKEN_ATTEMPTS; i++) {
+            String randomToken = tokenUtilsPort.generateEmailToken(TOKEN_BYTES);
+
+            if (userDataProviderPort.findByEmailToken(randomToken).isEmpty()) {
+                return randomToken;
+            }
+        }
+
+        throw new GenericException("Error generating email token!");
+    }
+
+    private Date convertDate(String dateStr) {
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+            return formatter.parse(dateStr);
+        } catch (ParseException exception) {
+            log.error(exception.getMessage());
+            throw new GenericException("Error while parsing date!");
+        }
+    }
+
+    private User fillUser(RegisterUserInput input) {
+        User newUser = User.builder()
+            .firstName(input.getFirstName())
+            .lastName(input.getLastName())
+            .email(input.getEmail().toLowerCase(Locale.ROOT).trim())
+            .passwordHash(passwordUtilsPort.hashPassword(input.getPassword()))
+            .cpfCnpj(input.getCpfCnpj())
+            .type(input.getType())
+            .ddi("+55")
+            .phone(input.getPhone())
+            .birthdate(convertDate(input.getBirthdate()))
+            .active(true)
+            .emailToken(generateEmailToken())
+            .emailTokenSentAt(new Date())
+            .userRoles(new ArrayList<>())
+            .build();
+
+        final Address address = fillAddress(input, newUser);
+        final UserRole userRole = fillUserRole(newUser);
+
+        newUser.setAddress(address);
+        newUser.getUserRoles().add(userRole);
+
+        return newUser;
+    }
+
+    private void persistUser(User user) {
+        userDataProviderPort.persist(user);
+    }
+
+    private String mountActivationLink(String emailToken) {
+        return GATEWAY_URL + "/" + API_SUFFIX + "/user/mail_activation/" + emailToken;
+    }
+
+    private HashMap<String, Object> fillEmailVariables(User user) {
+        return new HashMap<>() {{
+            put("${FIRST_NAME}", user.getFirstName());
+            put("${ACTIVATION_LINK}", mountActivationLink(user.getEmailToken()));
+        }};
+    }
+
+    private void sendEmailActivationEmail(User user) {
+        final AsyncEmailOutput email = AsyncEmailOutput.builder()
+            .to(user.getEmail())
+            .templateName(MAIL_ACTIVATION_TEMPLATE)
+            .subject(MAIL_ACTIVATION_SUBJECT)
+            .cc(new ArrayList<>())
+            .variables(fillEmailVariables(user))
+            .build();
+
+        try {
+            asyncMessageDataProviderPort.sendMessage(SEND_EMAIL_TOPIC, mapper.writeValueAsString(email));
+        } catch (JsonProcessingException e) {
+            String message = "Error while sending email!";
+            log.error(message, e);
+            throw new GenericException(message);
+        }
+    }
+}
