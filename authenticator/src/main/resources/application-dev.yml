@@ -5,10 +5,12 @@ server:
 spring:
   application:
     name: authenticator
+
   datasource:
     url: jdbc:postgresql://localhost:5431/auth-db
     username: pg
     password: 123
+
   jpa:
     hibernate:
       ddl-auto: none
@@ -17,6 +19,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
+
+  flyway:
+    placeholder-prefix: '#{'
+    placeholder-suffix: '}'
+
   kafka:
     bootstrap-servers: localhost:9092
     topics:
@@ -25,6 +32,16 @@ spring:
     consumer:
       auto-offset-reset: latest
       group-id: authenticator_group
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_USER}
+    password: ${GMAIL_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
 
 kong:
   url: localhost:8000
