@@ -5,10 +5,12 @@ import lombok.AllArgsConstructor;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.activeEmail.ActiveEmailUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.authUser.AuthUserUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.registerUser.RegisterUserUsecase;
+import org.com.smartpayments.authenticator.core.domain.usecase.user.sendActiveEmail.SendActiveEmailUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.updateUserProfile.UpdateUserProfileUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.userProfile.UserProfileUsecase;
 import org.com.smartpayments.authenticator.core.ports.in.dto.AuthUserInput;
 import org.com.smartpayments.authenticator.core.ports.in.dto.RegisterUserInput;
+import org.com.smartpayments.authenticator.core.ports.in.dto.SendActiveEmailInput;
 import org.com.smartpayments.authenticator.core.ports.in.dto.UpdateUserProfileInput;
 import org.com.smartpayments.authenticator.core.ports.out.dto.AuthUserOutput;
 import org.com.smartpayments.authenticator.core.ports.out.dto.UserProfileOutput;
@@ -27,12 +29,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @AllArgsConstructor
 @RequestMapping("${server.api-suffix}")
-public class UserRestController {
+public class UserController {
     private final RegisterUserUsecase registerUserUsecase;
     private final AuthUserUsecase authUserUsecase;
     private final UserProfileUsecase userProfileUsecase;
     private final UpdateUserProfileUsecase updateUserProfileUsecase;
     private final ActiveEmailUsecase activeEmailUsecase;
+    private final SendActiveEmailUsecase sendActiveEmailUsecase;
 
     @PostMapping("/user/register")
     public ResponseEntity<Void> registerUser(@RequestBody @Valid RegisterUserInput input) {
@@ -59,6 +62,12 @@ public class UserRestController {
         input.setUserId(userId);
         UserProfileOutput output = updateUserProfileUsecase.execute(input);
         return ResponseEntity.status(HttpStatus.OK).body(output);
+    }
+
+    @PostMapping("/user/email_activation")
+    public ResponseEntity<UserProfileOutput> sendEmailActivation(@RequestBody @Valid SendActiveEmailInput input) {
+        sendActiveEmailUsecase.execute(input);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @GetMapping("/user/email_activation/{token}")

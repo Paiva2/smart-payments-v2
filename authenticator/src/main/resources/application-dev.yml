@@ -44,7 +44,7 @@ spring:
       mail.smtp.starttls.required: true
 
 kong:
-  url: localhost:8000
+  url: http://localhost:8000
 
 auth:
   jwt:

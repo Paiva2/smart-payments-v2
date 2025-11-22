@@ -32,6 +32,7 @@ public class SecurityFilterConfig extends OncePerRequestFilter {
         new AntPathRequestMatcher("/api/authenticator/user/register"),
         new AntPathRequestMatcher("/api/authenticator/user/auth"),
         new AntPathRequestMatcher("/api/authenticator/user/email_activation/{token}"),
+        new AntPathRequestMatcher("/api/authenticator/user/email_activation"),
         new AntPathRequestMatcher("/api/authenticator/user/internal")
     );
 

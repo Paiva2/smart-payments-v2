@@ -201,7 +201,7 @@ public class RegisterUserUsecase implements UsecaseVoidPort<RegisterUserInput> {
     }
 
     private String mountActivationLink(String emailToken) {
-        return GATEWAY_URL + "/" + API_SUFFIX + "/user/mail_activation/" + emailToken;
+        return GATEWAY_URL + "/" + API_SUFFIX + "/user/email_activation/" + emailToken;
     }
 
     private HashMap<String, Object> fillEmailVariables(User user) {
