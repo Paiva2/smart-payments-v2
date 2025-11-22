@@ -90,7 +90,7 @@ public class User {
     @Column(name = "email_token_sent_at")
     private Date emailTokenSentAt;
 
-    @Column(name = "email_confirmed_at", updatable = false)
+    @Column(name = "email_confirmed_at")
     private Date emailConfirmedAt;
 
     @CreationTimestamp

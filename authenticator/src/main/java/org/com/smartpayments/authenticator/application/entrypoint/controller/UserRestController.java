@@ -2,6 +2,7 @@ package org.com.smartpayments.authenticator.application.entrypoint.controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.com.smartpayments.authenticator.core.domain.usecase.user.activeEmail.ActiveEmailUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.authUser.AuthUserUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.registerUser.RegisterUserUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.updateUserProfile.UpdateUserProfileUsecase;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,11 +27,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @AllArgsConstructor
 @RequestMapping("${server.api-suffix}")
-public class UserController {
+public class UserRestController {
     private final RegisterUserUsecase registerUserUsecase;
     private final AuthUserUsecase authUserUsecase;
     private final UserProfileUsecase userProfileUsecase;
     private final UpdateUserProfileUsecase updateUserProfileUsecase;
+    private final ActiveEmailUsecase activeEmailUsecase;
 
     @PostMapping("/user/register")
     public ResponseEntity<Void> registerUser(@RequestBody @Valid RegisterUserInput input) {
@@ -56,6 +59,16 @@ public class UserController {
         input.setUserId(userId);
         UserProfileOutput output = updateUserProfileUsecase.execute(input);
         return ResponseEntity.status(HttpStatus.OK).body(output);
+    }
+
+    @GetMapping("/user/email_activation/{token}")
+    public ResponseEntity<String> activeEmail(@PathVariable("token") String token) {
+        try {
+            activeEmailUsecase.execute(token);
+            return ResponseEntity.status(HttpStatus.OK).body("E-mail activated. You can close this window.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid link. This link is invalid or has been already used.");
+        }
     }
 
     @GetMapping("/user/internal")
