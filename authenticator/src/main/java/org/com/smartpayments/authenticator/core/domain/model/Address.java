@@ -18,6 +18,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.com.smartpayments.authenticator.core.domain.enums.EBrState;
 import org.com.smartpayments.authenticator.core.domain.enums.ECountry;
+import org.com.smartpayments.authenticator.core.ports.out.dto.AddressOutput;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -72,4 +73,19 @@ public class Address {
     @JoinColumn(name = "user_id")
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private User user;
+
+    public AddressOutput toAddressOutput() {
+        return AddressOutput.builder()
+            .id(this.id)
+            .street(this.street)
+            .neighborhood(this.neighborhood)
+            .number(this.number)
+            .zipcode(this.zipcode)
+            .complement(this.complement)
+            .city(this.city)
+            .state(this.state)
+            .country(this.country)
+            .updatedAt(this.updatedAt)
+            .build();
+    }
 }

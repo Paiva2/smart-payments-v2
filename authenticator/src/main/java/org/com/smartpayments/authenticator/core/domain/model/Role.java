@@ -1,11 +1,21 @@
 package org.com.smartpayments.authenticator.core.domain.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.com.smartpayments.authenticator.core.domain.enums.ERole;
+import org.com.smartpayments.authenticator.core.ports.out.dto.RoleOutput;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -38,4 +48,11 @@ public class Role {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "role")
     private List<UserRole> userRoles;
+    
+    public RoleOutput toRoleOutput() {
+        return RoleOutput.builder()
+            .id(this.id)
+            .name(this.name)
+            .build();
+    }
 }

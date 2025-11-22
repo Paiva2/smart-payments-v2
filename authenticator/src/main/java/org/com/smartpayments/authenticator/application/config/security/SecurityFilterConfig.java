@@ -47,7 +47,7 @@ public class SecurityFilterConfig extends OncePerRequestFilter {
 
         try {
             DecodedJWT jwtDecoded = jwtUtilsPort.verifyAuthJwt(token);
-            User user = userDataProviderPort.findActiveByIdWithRoles(Long.valueOf(jwtDecoded.getSubject()))
+            User user = userDataProviderPort.findByIdWithRoles(Long.valueOf(jwtDecoded.getSubject()))
                 .orElseThrow(UserNotFoundException::new);
 
             UserDetailsImpl userDetails = UserDetailsImpl.builder()

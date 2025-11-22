@@ -21,6 +21,7 @@ import lombok.NoArgsConstructor;
 import org.com.smartpayments.authenticator.core.common.exception.GenericInvalidBirthdateException;
 import org.com.smartpayments.authenticator.core.common.exception.GenericPhoneInvalidException;
 import org.com.smartpayments.authenticator.core.domain.enums.EUserType;
+import org.com.smartpayments.authenticator.core.ports.out.dto.UserProfileOutput;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -141,5 +142,25 @@ public class User {
                 throw new GenericPhoneInvalidException("Phone must have 11 digits!");
             }
         }
+    }
+
+    public UserProfileOutput toProfileOutput() {
+        return UserProfileOutput.builder()
+            .id(this.id)
+            .firstName(this.firstName)
+            .lastName(this.lastName)
+            .email(this.email)
+            .cpfCnpj(this.cpfCnpj)
+            .type(this.type)
+            .ddi(this.ddi)
+            .phone(this.phone)
+            .birthdate(this.birthdate)
+            .active(this.active)
+            .createdAt(this.createdAt)
+            .updatedAt(this.updatedAt)
+            .address(isEmpty(this.address) ? null : this.address.toAddressOutput())
+            .roles(isEmpty(this.userRoles) ? null : this.userRoles.stream().map(UserRole::getRole).map(Role::toRoleOutput).toList())
+            .emailConfirmedAt(this.emailConfirmedAt)
+            .build();
     }
 }

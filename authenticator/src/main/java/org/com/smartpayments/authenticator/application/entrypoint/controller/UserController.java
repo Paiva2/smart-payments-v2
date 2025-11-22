@@ -4,9 +4,11 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.authUser.AuthUserUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.registerUser.RegisterUserUsecase;
+import org.com.smartpayments.authenticator.core.domain.usecase.user.userProfile.UserProfileUsecase;
 import org.com.smartpayments.authenticator.core.ports.in.dto.AuthUserInput;
 import org.com.smartpayments.authenticator.core.ports.in.dto.RegisterUserInput;
 import org.com.smartpayments.authenticator.core.ports.out.dto.AuthUserOutput;
+import org.com.smartpayments.authenticator.core.ports.out.dto.UserProfileOutput;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
     private final RegisterUserUsecase registerUserUsecase;
     private final AuthUserUsecase authUserUsecase;
+    private final UserProfileUsecase userProfileUsecase;
 
     @PostMapping("/user/register")
     public ResponseEntity<Void> registerUser(@RequestBody @Valid RegisterUserInput input) {
@@ -37,9 +40,10 @@ public class UserController {
     }
 
     @GetMapping("/user/profile")
-    public ResponseEntity<String> userProfile(Authentication authentication) {
+    public ResponseEntity<UserProfileOutput> userProfile(Authentication authentication) {
         Long userId = (Long) authentication.getPrincipal();
-        return ResponseEntity.status(HttpStatus.OK).body("OK:" + userId);
+        UserProfileOutput output = userProfileUsecase.execute(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(output);
     }
 
     @GetMapping("/user/internal")
