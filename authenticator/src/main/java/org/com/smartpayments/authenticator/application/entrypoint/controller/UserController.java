@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,6 +39,11 @@ public class UserController {
     @GetMapping("/user/profile")
     public ResponseEntity<String> userProfile(Authentication authentication) {
         Long userId = (Long) authentication.getPrincipal();
+        return ResponseEntity.status(HttpStatus.OK).body("OK:" + userId);
+    }
+
+    @GetMapping("/user/internal")
+    public ResponseEntity<String> findUserForInternalServices(@RequestHeader("X-User-Id") Long userId) {
         return ResponseEntity.status(HttpStatus.OK).body("OK:" + userId);
     }
 }

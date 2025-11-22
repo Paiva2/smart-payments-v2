@@ -15,19 +15,19 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import static org.com.smartpayments.authenticator.application.config.security.SecurityFilterConfig.PUBLIC_ENDPOINTS;
-
 @Configuration
 @AllArgsConstructor
 @EnableWebSecurity
 public class SecurityConfig {
     private final SecurityFilterConfig securityFilterConfig;
+    private final ServiceSignatureValidator serviceSignatureValidator;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(req -> {
             req.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll();
             req.requestMatchers(publicEndpoints()).permitAll();
+            req.requestMatchers(internalEndpoints()).access(serviceSignatureValidator);
             req.anyRequest().authenticated();
         });
 
@@ -45,8 +45,14 @@ public class SecurityConfig {
 
     private RequestMatcher publicEndpoints() {
         return new OrRequestMatcher(
-            PUBLIC_ENDPOINTS.get(0),
-            PUBLIC_ENDPOINTS.get(1)
+            securityFilterConfig.NON_FILTERABLE_ENDPOINTS.getFirst(),
+            securityFilterConfig.NON_FILTERABLE_ENDPOINTS.get(1)
+        );
+    }
+
+    private RequestMatcher internalEndpoints() {
+        return new OrRequestMatcher(
+            securityFilterConfig.NON_FILTERABLE_ENDPOINTS.get(2)
         );
     }
 

@@ -6,7 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.com.smartpayments.authenticator.core.common.exception.UserNotFoundException;
 import org.com.smartpayments.authenticator.core.domain.model.User;
 import org.com.smartpayments.authenticator.core.ports.out.dataProvider.UserDataProviderPort;
@@ -25,11 +25,12 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SecurityFilterConfig extends OncePerRequestFilter {
-    public static final List<AntPathRequestMatcher> PUBLIC_ENDPOINTS = List.of(
+    public final List<AntPathRequestMatcher> NON_FILTERABLE_ENDPOINTS = List.of(
         new AntPathRequestMatcher("/api/authenticator/user/register"),
-        new AntPathRequestMatcher("/api/authenticator/user/auth")
+        new AntPathRequestMatcher("/api/authenticator/user/auth"),
+        new AntPathRequestMatcher("/api/authenticator/user/internal")
     );
 
     private final UserDataProviderPort userDataProviderPort;
@@ -74,7 +75,7 @@ public class SecurityFilterConfig extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return PUBLIC_ENDPOINTS.stream().anyMatch(matcher -> matcher.matches(request));
+        return NON_FILTERABLE_ENDPOINTS.stream().anyMatch(matcher -> matcher.matches(request));
     }
 
     private String getToken(HttpServletRequest request) {
