@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.com.smartpayments.authenticator.core.common.exception.UserNotFoundException;
 import org.com.smartpayments.authenticator.core.domain.model.User;
+import org.com.smartpayments.authenticator.core.ports.out.dataProvider.AuthenticationBlackListDataProviderPort;
 import org.com.smartpayments.authenticator.core.ports.out.dataProvider.UserDataProviderPort;
 import org.com.smartpayments.authenticator.core.ports.out.utils.JwtUtilsPort;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,7 @@ public class SecurityFilterConfig extends OncePerRequestFilter {
     );
 
     private final UserDataProviderPort userDataProviderPort;
+    private final AuthenticationBlackListDataProviderPort authenticationBlackListDataProviderPort;
     private final JwtUtilsPort jwtUtilsPort;
 
     @Override
@@ -42,6 +44,11 @@ public class SecurityFilterConfig extends OncePerRequestFilter {
 
         if (isNull(token)) {
             response.sendError(HttpStatus.UNAUTHORIZED.value(), "Token missing.");
+            return;
+        }
+
+        if (authenticationBlackListDataProviderPort.existsByTokenHash(token)) {
+            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Token invalid.");
             return;
         }
 
