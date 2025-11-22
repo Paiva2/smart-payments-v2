@@ -7,6 +7,8 @@ import java.util.Optional;
 public interface UserDataProviderPort {
     User persist(User user);
 
+    Optional<User> findActiveById(Long id);
+
     Optional<User> findByIdWithRoles(Long id);
 
     Optional<User> findActiveByIdWithDependencies(Long id);
