@@ -20,6 +20,11 @@ public class UserDataProviderAdapter implements UserDataProviderPort {
     }
 
     @Override
+    public Optional<User> findActiveByIdWithRoles(Long id) {
+        return repository.findByIdActiveWithRoles(id);
+    }
+
+    @Override
     public Optional<User> findByEmail(String email) {
         return repository.findByEmail(email.toLowerCase(Locale.ROOT).trim());
     }

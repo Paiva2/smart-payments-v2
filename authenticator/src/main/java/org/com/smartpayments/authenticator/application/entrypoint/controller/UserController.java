@@ -9,6 +9,8 @@ import org.com.smartpayments.authenticator.core.ports.in.dto.RegisterUserInput;
 import org.com.smartpayments.authenticator.core.ports.out.dto.AuthUserOutput;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,5 +33,11 @@ public class UserController {
     public ResponseEntity<AuthUserOutput> authUser(@RequestBody @Valid AuthUserInput input) {
         AuthUserOutput output = authUserUsecase.execute(input);
         return ResponseEntity.status(HttpStatus.OK).body(output);
+    }
+
+    @GetMapping("/user/profile")
+    public ResponseEntity<String> userProfile(Authentication authentication) {
+        Long userId = (Long) authentication.getPrincipal();
+        return ResponseEntity.status(HttpStatus.OK).body("OK:" + userId);
     }
 }

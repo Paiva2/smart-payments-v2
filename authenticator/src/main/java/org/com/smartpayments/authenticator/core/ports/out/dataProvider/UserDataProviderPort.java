@@ -7,6 +7,8 @@ import java.util.Optional;
 public interface UserDataProviderPort {
     User persist(User user);
 
+    Optional<User> findActiveByIdWithRoles(Long id);
+
     Optional<User> findByEmail(String email);
 
     Optional<User> findActiveByEmail(String email);
