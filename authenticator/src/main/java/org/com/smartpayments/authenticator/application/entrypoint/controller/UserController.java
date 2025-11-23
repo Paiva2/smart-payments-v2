@@ -9,6 +9,7 @@ import org.com.smartpayments.authenticator.core.domain.usecase.user.registerUser
 import org.com.smartpayments.authenticator.core.domain.usecase.user.resetPasswordPublic.ResetPasswordPublicUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.sendActiveEmail.SendActiveEmailUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.updateUserProfile.UpdateUserProfileUsecase;
+import org.com.smartpayments.authenticator.core.domain.usecase.user.uploadProfileImage.UploadProfileImageUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.userProfile.UserProfileUsecase;
 import org.com.smartpayments.authenticator.core.ports.in.dto.AuthUserInput;
 import org.com.smartpayments.authenticator.core.ports.in.dto.ForgotPasswordInput;
@@ -16,6 +17,7 @@ import org.com.smartpayments.authenticator.core.ports.in.dto.RegisterUserInput;
 import org.com.smartpayments.authenticator.core.ports.in.dto.ResetPasswordInput;
 import org.com.smartpayments.authenticator.core.ports.in.dto.SendActiveEmailInput;
 import org.com.smartpayments.authenticator.core.ports.in.dto.UpdateUserProfileInput;
+import org.com.smartpayments.authenticator.core.ports.in.dto.UploadProfileImageInput;
 import org.com.smartpayments.authenticator.core.ports.out.dto.AuthUserOutput;
 import org.com.smartpayments.authenticator.core.ports.out.dto.ForgotPasswordOutput;
 import org.com.smartpayments.authenticator.core.ports.out.dto.UserProfileOutput;
@@ -29,7 +31,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @AllArgsConstructor
@@ -43,6 +47,7 @@ public class UserController {
     private final SendActiveEmailUsecase sendActiveEmailUsecase;
     private final ForgotPasswordUsecase forgotPasswordUsecase;
     private final ResetPasswordPublicUsecase resetPasswordPublicUsecase;
+    private final UploadProfileImageUsecase uploadProfileImageUsecase;
 
     @PostMapping("/user/register")
     public ResponseEntity<Void> registerUser(@RequestBody @Valid RegisterUserInput input) {
@@ -98,6 +103,13 @@ public class UserController {
         input.setToken(token);
         resetPasswordPublicUsecase.execute(input);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PostMapping(path = "/user/profile_image", consumes = "multipart/form-data")
+    public ResponseEntity<Void> updateUserProfile(Authentication authentication, @RequestParam("file") MultipartFile file) {
+        Long userId = (Long) authentication.getPrincipal();
+        uploadProfileImageUsecase.execute(new UploadProfileImageInput(userId, file));
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @GetMapping("/user/internal")

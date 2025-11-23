@@ -49,6 +49,11 @@ kong:
 ui:
   url: http://localhost:3000
 
+file:
+  image:
+    upload:
+      bucket_name: "smart-payments-dev"
+
 auth:
   jwt:
     secret: SUPER_SECRET_JWT

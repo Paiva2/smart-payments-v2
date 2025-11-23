@@ -21,7 +21,7 @@ public class UserDataProviderAdapter implements UserDataProviderPort {
 
     @Override
     public Optional<User> findActiveById(Long id) {
-        return repository.findByIdAndActiveIsTrue(id);
+        return repository.findByIdAndActiveIsTrueAndEmailConfirmedAtNotNull(id);
     }
 
     @Override

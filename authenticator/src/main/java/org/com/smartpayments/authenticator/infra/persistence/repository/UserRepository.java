@@ -23,7 +23,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
 
-    Optional<User> findByIdAndActiveIsTrue(@Param("id") Long id);
+    Optional<User> findByIdAndActiveIsTrueAndEmailConfirmedAtNotNull(@Param("id") Long id);
 
     Optional<User> findByEmailAndActiveIsTrue(String email);
 
