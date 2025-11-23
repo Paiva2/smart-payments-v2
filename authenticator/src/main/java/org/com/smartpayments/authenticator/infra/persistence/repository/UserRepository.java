@@ -22,7 +22,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByIdActiveWithDeps(@Param("id") Long id);
 
     Optional<User> findByEmail(String email);
-    
+
     Optional<User> findByIdAndActiveIsTrue(@Param("id") Long id);
 
     Optional<User> findByEmailAndActiveIsTrue(String email);
@@ -30,4 +30,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByCpfCnpj(String cpfCnpj);
 
     Optional<User> findByEmailToken(String token);
+
+    Optional<User> findByPasswordTokenAndActiveIsTrue(String token);
 }

@@ -14,12 +14,11 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static java.util.Objects.nonNull;
+import static org.com.smartpayments.authenticator.core.common.constants.Constants.MAX_EXPIRATION_DAYS_EMAIL_ACTIVATION_TOKEN;
 
 @Service
 @AllArgsConstructor
 public class ActiveEmailUsecase implements UsecaseVoidPort<String> {
-    private final static Integer LINK_EXPIRATION_DAYS = 1;
-
     private final UserDataProviderPort userDataProviderPort;
 
     @Override
@@ -46,7 +45,7 @@ public class ActiveEmailUsecase implements UsecaseVoidPort<String> {
 
     private void validateTokenSentAtLimit(Date tokenSentAt) {
         Calendar limit = Calendar.getInstance();
-        limit.add(Calendar.DAY_OF_MONTH, -LINK_EXPIRATION_DAYS);
+        limit.add(Calendar.DAY_OF_MONTH, -MAX_EXPIRATION_DAYS_EMAIL_ACTIVATION_TOKEN);
 
         if (tokenSentAt.before(limit.getTime())) {
             throw new EmailTokenExpiredException();

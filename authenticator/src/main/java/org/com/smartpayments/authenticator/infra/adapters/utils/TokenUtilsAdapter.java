@@ -10,7 +10,7 @@ import java.util.Base64;
 public class TokenUtilsAdapter implements TokenUtilsPort {
 
     @Override
-    public String generateEmailToken(int bytes) {
+    public String generateUrlBasedToken(int bytes) {
         SecureRandom random = new SecureRandom();
         byte[] buffer = new byte[bytes];
         random.nextBytes(buffer);

@@ -53,4 +53,9 @@ public class UserDataProviderAdapter implements UserDataProviderPort {
     public Optional<User> findByEmailToken(String emailToken) {
         return repository.findByEmailToken(emailToken);
     }
+
+    @Override
+    public Optional<User> findActiveByPasswordToken(String passwordToken) {
+        return repository.findByPasswordTokenAndActiveIsTrue(passwordToken);
+    }
 }

@@ -20,4 +20,6 @@ public interface UserDataProviderPort {
     Optional<User> findByCpfCnpj(String cpfCnpj);
 
     Optional<User> findByEmailToken(String emailToken);
+
+    Optional<User> findActiveByPasswordToken(String passwordToken);
 }

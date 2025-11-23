@@ -48,13 +48,15 @@ public class SecurityConfig {
             securityFilterConfig.NON_FILTERABLE_ENDPOINTS.getFirst(),
             securityFilterConfig.NON_FILTERABLE_ENDPOINTS.get(1),
             securityFilterConfig.NON_FILTERABLE_ENDPOINTS.get(2),
-            securityFilterConfig.NON_FILTERABLE_ENDPOINTS.get(3)
+            securityFilterConfig.NON_FILTERABLE_ENDPOINTS.get(3),
+            securityFilterConfig.NON_FILTERABLE_ENDPOINTS.get(4),
+            securityFilterConfig.NON_FILTERABLE_ENDPOINTS.get(5)
         );
     }
 
     private RequestMatcher internalEndpoints() {
         return new OrRequestMatcher(
-            securityFilterConfig.NON_FILTERABLE_ENDPOINTS.get(4)
+            securityFilterConfig.NON_FILTERABLE_ENDPOINTS_INTERNAL.getFirst()
         );
     }
 

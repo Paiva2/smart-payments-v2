@@ -28,11 +28,16 @@ import static java.util.Objects.nonNull;
 @Component
 @RequiredArgsConstructor
 public class SecurityFilterConfig extends OncePerRequestFilter {
-    public final List<AntPathRequestMatcher> NON_FILTERABLE_ENDPOINTS = List.of(
+    public List<AntPathRequestMatcher> NON_FILTERABLE_ENDPOINTS = List.of(
         new AntPathRequestMatcher("/api/authenticator/user/register"),
         new AntPathRequestMatcher("/api/authenticator/user/auth"),
         new AntPathRequestMatcher("/api/authenticator/user/email_activation/{token}"),
         new AntPathRequestMatcher("/api/authenticator/user/email_activation"),
+        new AntPathRequestMatcher("/api/authenticator/user/forgot_password"),
+        new AntPathRequestMatcher("/api/authenticator/user/reset_password/{token}")
+    );
+
+    public final List<AntPathRequestMatcher> NON_FILTERABLE_ENDPOINTS_INTERNAL = List.of(
         new AntPathRequestMatcher("/api/authenticator/user/internal")
     );
 
@@ -84,7 +89,8 @@ public class SecurityFilterConfig extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return NON_FILTERABLE_ENDPOINTS.stream().anyMatch(matcher -> matcher.matches(request));
+        return NON_FILTERABLE_ENDPOINTS.stream().anyMatch(matcher -> matcher.matches(request)) ||
+            NON_FILTERABLE_ENDPOINTS_INTERNAL.stream().anyMatch(matcher -> matcher.matches(request));
     }
 
     private String getToken(HttpServletRequest request) {

@@ -47,7 +47,7 @@ import static java.util.Objects.isNull;
 @RequiredArgsConstructor
 public class RegisterUserUsecase implements UsecaseVoidPort<RegisterUserInput> {
     private final static ObjectMapper mapper = new ObjectMapper();
-    private final static Integer LINK_VALIDATION_IN_DAYS = 1;
+    private final static Integer LINK_EXPIRATION_IN_DAYS = 1;
     private final static String MAIL_ACTIVATION_TEMPLATE = "user-email-activation";
     private final static String MAIL_ACTIVATION_SUBJECT = "Welcome to smart payments!";
 
@@ -150,7 +150,7 @@ public class RegisterUserUsecase implements UsecaseVoidPort<RegisterUserInput> {
         final int TOKEN_BYTES = 32;
 
         for (int i = 0; i < MAX_GENERATED_TOKEN_ATTEMPTS; i++) {
-            String randomToken = tokenUtilsPort.generateEmailToken(TOKEN_BYTES);
+            String randomToken = tokenUtilsPort.generateUrlBasedToken(TOKEN_BYTES);
 
             if (userDataProviderPort.findByEmailToken(randomToken).isEmpty()) {
                 return randomToken;
@@ -208,7 +208,7 @@ public class RegisterUserUsecase implements UsecaseVoidPort<RegisterUserInput> {
         return new HashMap<>() {{
             put("${FIRST_NAME}", user.getFirstName());
             put("${ACTIVATION_LINK}", mountActivationLink(user.getEmailToken()));
-            put("${EXPIRATION_TIME}", LINK_VALIDATION_IN_DAYS);
+            put("${EXPIRATION_TIME}", LINK_EXPIRATION_IN_DAYS);
         }};
     }
 

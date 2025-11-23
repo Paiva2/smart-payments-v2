@@ -4,15 +4,20 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.activeEmail.ActiveEmailUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.authUser.AuthUserUsecase;
+import org.com.smartpayments.authenticator.core.domain.usecase.user.forgotPassword.ForgotPasswordUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.registerUser.RegisterUserUsecase;
+import org.com.smartpayments.authenticator.core.domain.usecase.user.resetPasswordPublic.ResetPasswordPublicUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.sendActiveEmail.SendActiveEmailUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.updateUserProfile.UpdateUserProfileUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.userProfile.UserProfileUsecase;
 import org.com.smartpayments.authenticator.core.ports.in.dto.AuthUserInput;
+import org.com.smartpayments.authenticator.core.ports.in.dto.ForgotPasswordInput;
 import org.com.smartpayments.authenticator.core.ports.in.dto.RegisterUserInput;
+import org.com.smartpayments.authenticator.core.ports.in.dto.ResetPasswordInput;
 import org.com.smartpayments.authenticator.core.ports.in.dto.SendActiveEmailInput;
 import org.com.smartpayments.authenticator.core.ports.in.dto.UpdateUserProfileInput;
 import org.com.smartpayments.authenticator.core.ports.out.dto.AuthUserOutput;
+import org.com.smartpayments.authenticator.core.ports.out.dto.ForgotPasswordOutput;
 import org.com.smartpayments.authenticator.core.ports.out.dto.UserProfileOutput;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +41,8 @@ public class UserController {
     private final UpdateUserProfileUsecase updateUserProfileUsecase;
     private final ActiveEmailUsecase activeEmailUsecase;
     private final SendActiveEmailUsecase sendActiveEmailUsecase;
+    private final ForgotPasswordUsecase forgotPasswordUsecase;
+    private final ResetPasswordPublicUsecase resetPasswordPublicUsecase;
 
     @PostMapping("/user/register")
     public ResponseEntity<Void> registerUser(@RequestBody @Valid RegisterUserInput input) {
@@ -78,6 +85,19 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid link. This link is invalid or has been already used.");
         }
+    }
+
+    @PutMapping("/user/forgot_password")
+    public ResponseEntity<ForgotPasswordOutput> forgotPassword(@RequestBody @Valid ForgotPasswordInput input) {
+        ForgotPasswordOutput output = forgotPasswordUsecase.execute(input);
+        return ResponseEntity.status(HttpStatus.OK).body(output);
+    }
+
+    @PutMapping("/user/reset_password/{token}")
+    public ResponseEntity<ForgotPasswordOutput> resetPassword(@PathVariable("token") String token, @RequestBody @Valid ResetPasswordInput input) {
+        input.setToken(token);
+        resetPasswordPublicUsecase.execute(input);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @GetMapping("/user/internal")
