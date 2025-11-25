@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.activeEmail.ActiveEmailUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.authUser.AuthUserUsecase;
+import org.com.smartpayments.authenticator.core.domain.usecase.user.changePassword.ChangePasswordUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.forgotPassword.ForgotPasswordUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.registerUser.RegisterUserUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.resetPasswordPublic.ResetPasswordPublicUsecase;
@@ -12,6 +13,7 @@ import org.com.smartpayments.authenticator.core.domain.usecase.user.updateUserPr
 import org.com.smartpayments.authenticator.core.domain.usecase.user.uploadProfileImage.UploadProfileImageUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.userProfile.UserProfileUsecase;
 import org.com.smartpayments.authenticator.core.ports.in.dto.AuthUserInput;
+import org.com.smartpayments.authenticator.core.ports.in.dto.ChangePasswordInput;
 import org.com.smartpayments.authenticator.core.ports.in.dto.ForgotPasswordInput;
 import org.com.smartpayments.authenticator.core.ports.in.dto.RegisterUserInput;
 import org.com.smartpayments.authenticator.core.ports.in.dto.ResetPasswordInput;
@@ -48,6 +50,7 @@ public class UserController {
     private final ForgotPasswordUsecase forgotPasswordUsecase;
     private final ResetPasswordPublicUsecase resetPasswordPublicUsecase;
     private final UploadProfileImageUsecase uploadProfileImageUsecase;
+    private final ChangePasswordUsecase changePasswordUsecase;
 
     @PostMapping("/user/register")
     public ResponseEntity<Void> registerUser(@RequestBody @Valid RegisterUserInput input) {
@@ -103,6 +106,14 @@ public class UserController {
         input.setToken(token);
         resetPasswordPublicUsecase.execute(input);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PutMapping("/user/change_password")
+    public ResponseEntity<ForgotPasswordOutput> changePassword(Authentication authentication, @RequestBody @Valid ChangePasswordInput input) {
+        Long userId = (Long) authentication.getPrincipal();
+        input.setUserId(userId);
+        changePasswordUsecase.execute(input);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PostMapping(path = "/user/profile_image", consumes = "multipart/form-data")

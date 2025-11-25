@@ -1,0 +1,117 @@
+INSERT INTO public.email_templates (name, html_body)
+VALUES ('user-password-changed', '<!doctype html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <title>Password Changed — Smart Payments</title>
+      <style>
+         html,body { margin:0; padding:0; height:100%; background-color:#f4f6f8; }
+         img { border:0; -ms-interpolation-mode:bicubic; display:block; }
+         a { color:inherit; text-decoration:none; }
+
+         .email-wrap { width:100%; background-color:#f4f6f8; padding:24px 0; }
+         .email-container {
+            width:100%; max-width:620px; margin:0 auto; background:#ffffff;
+            border-radius:8px; overflow:hidden;
+            box-shadow:0 6px 18px rgba(19,24,33,0.06);
+         }
+         .header {
+            background:linear-gradient(90deg,#0b74ff,#00c6ff);
+            padding:24px; text-align:center; color:#ffffff;
+         }
+         .logo {
+            font-family: ''Helvetica Neue'', Helvetica, Arial, sans-serif;
+            font-size:20px; font-weight:700; letter-spacing:0.2px;
+         }
+         .preheader {
+            display:none !important; visibility:hidden; opacity:0;
+            color:transparent; height:0; width:0;
+         }
+
+         .content {
+            padding:28px 32px;
+            font-family: ''Helvetica Neue'', Helvetica, Arial, sans-serif;
+            color:#111827;
+         }
+         .greeting {
+            font-size:20px; font-weight:700; margin:0 0 12px 0;
+         }
+         .lead {
+            font-size:15px; line-height:1.5;
+            margin:0 0 18px 0; color:#334155;
+         }
+
+         .btn {
+            display:inline-block; padding:12px 20px;
+            border-radius:8px; background:#0b74ff; color:#ffffff;
+            font-weight:600; font-size:15px;
+         }
+         .btn-secondary { background:#e6eefc; color:#0b74ff; }
+         .btn:visited { color:#ffffff; }
+
+         .divider { height:1px; background:#eef2f7; margin:20px 0; }
+
+         .footer {
+            padding:18px 32px; font-size:13px; color:#94a3b8;
+         }
+
+         @media only screen and (max-width:480px) {
+            .content { padding:20px; }
+            .header { padding:18px; }
+            .logo { font-size:18px; }
+            .greeting { font-size:18px; }
+            .btn { width:100%; text-align:center; display:block; }
+         }
+      </style>
+   </head>
+   <body>
+      <div class="preheader">Your Smart Payments password has been updated.</div>
+      <table role="presentation" class="email-wrap" width="100%" cellpadding="0" cellspacing="0">
+         <tr>
+            <td align="center">
+               <table role="presentation" class="email-container" width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                     <td class="header">
+                        <div class="logo">Smart Payments</div>
+                     </td>
+                  </tr>
+
+                  <tr>
+                     <td class="content">
+                        <p class="greeting">Hi ${FIRST_NAME},</p>
+
+                        <p class="lead">
+                           This is a confirmation that the password for your <strong>Smart Payments</strong> account
+                           was successfully changed.
+                        </p>
+
+                        <p class="lead">
+                           If you made this change, no further action is required.
+                        </p>
+
+                        <div class="divider"></div>
+
+                        <p class="lead">
+                           <strong>If you did not change your password</strong>, please secure your account immediately.
+                           We strongly recommend resetting your password as soon as possible and reviewing any suspicious activity.
+                        </p>
+                     </td>
+                  </tr>
+
+                  <tr>
+                     <td class="footer">
+                        <p style="margin:0 0 8px 0;">
+                           Best regards,<br/>
+                           <strong>The Smart Payments Team</strong>
+                        </p>
+                     </td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+      </table>
+   </body>
+</html>
+')
