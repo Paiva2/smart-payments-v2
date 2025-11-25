@@ -6,11 +6,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.com.smartpayments.authenticator.core.domain.enums.ERole;
 
+import java.io.Serializable;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoleOutput {
+public class RoleOutput implements Serializable {
     private Long id;
     private ERole name;
 }

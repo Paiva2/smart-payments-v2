@@ -6,10 +6,27 @@ spring:
   application:
     name: authenticator
 
+  cache:
+    type: redis
+    redis:
+      time-to-live: 60000
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: admin
+        
+  
   datasource:
     url: jdbc:postgresql://localhost:5431/auth-db
     username: pg
     password: 123
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
   jpa:
     hibernate:

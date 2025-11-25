@@ -13,6 +13,7 @@ import org.com.smartpayments.authenticator.core.ports.in.dto.UpdateUserProfileIn
 import org.com.smartpayments.authenticator.core.ports.out.dataProvider.UserDataProviderPort;
 import org.com.smartpayments.authenticator.core.ports.out.dto.UserProfileOutput;
 import org.com.smartpayments.authenticator.core.ports.out.utils.PersonalDocumentUtilsPort;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import java.util.Date;
 import java.util.Objects;
 
 import static java.util.Objects.isNull;
+import static org.com.smartpayments.authenticator.core.common.constants.Constants.USER_PROFILE_CACHE_LABEL;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Slf4j
@@ -33,6 +35,7 @@ public class UpdateUserProfileUsecase implements UsecasePort<UpdateUserProfileIn
 
     @Override
     @Transactional
+    @CacheEvict(value = USER_PROFILE_CACHE_LABEL, key = "#input.userId")
     public UserProfileOutput execute(UpdateUserProfileInput input) {
         User user = findUser(input.getUserId());
 

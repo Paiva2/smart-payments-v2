@@ -14,6 +14,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -107,6 +108,9 @@ public class User {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserRole> userRoles;
 
+    @Transient
+    private String profilePictureUrl;
+
     @PreUpdate
     @PrePersist
     private void makeValidations() {
@@ -152,6 +156,7 @@ public class User {
             .email(this.email)
             .cpfCnpj(this.cpfCnpj)
             .type(this.type)
+            .profilePictureUrl(this.profilePictureUrl)
             .ddi(this.ddi)
             .phone(this.phone)
             .birthdate(this.birthdate)

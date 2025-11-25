@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.com.smartpayments.authenticator.core.domain.enums.EUserType;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -15,11 +16,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserProfileOutput {
+public class UserProfileOutput implements Serializable {
     private Long id;
     private String firstName;
     private String lastName;
     private String email;
+    private String profilePictureUrl;
     private String cpfCnpj;
     private EUserType type;
     private String ddi;

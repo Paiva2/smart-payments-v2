@@ -7,13 +7,14 @@ import lombok.NoArgsConstructor;
 import org.com.smartpayments.authenticator.core.domain.enums.EBrState;
 import org.com.smartpayments.authenticator.core.domain.enums.ECountry;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddressOutput {
+public class AddressOutput implements Serializable {
     private Long id;
     private String street;
     private String neighborhood;

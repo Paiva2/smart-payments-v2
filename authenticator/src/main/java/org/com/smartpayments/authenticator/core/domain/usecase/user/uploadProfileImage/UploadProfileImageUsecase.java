@@ -9,15 +9,19 @@ import org.com.smartpayments.authenticator.core.ports.in.dto.UploadProfileImageI
 import org.com.smartpayments.authenticator.core.ports.out.dataProvider.ImageUploadDataProviderPort;
 import org.com.smartpayments.authenticator.core.ports.out.dataProvider.UserDataProviderPort;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import static java.util.Objects.isNull;
+import static org.com.smartpayments.authenticator.core.common.constants.Constants.*;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Service
 @RequiredArgsConstructor
 public class UploadProfileImageUsecase implements UsecaseVoidPort<UploadProfileImageInput> {
+    private static final Integer FIVE_DAYS_IN_MINUTES_EXP_PRESIGNED_URL = 7200;
+
     private final UserDataProviderPort userDataProviderPort;
     private final ImageUploadDataProviderPort imageUploadDataProviderPort;
 
@@ -25,12 +29,20 @@ public class UploadProfileImageUsecase implements UsecaseVoidPort<UploadProfileI
     private String profileImageDestination;
 
     @Override
+    @CacheEvict(value = USER_PROFILE_CACHE_LABEL, key = "#input.userId")
     public void execute(UploadProfileImageInput input) {
         User user = findUser(input.getUserId());
 
         checkIsImage(input.getProfileImage());
 
-        imageUploadDataProviderPort.uploadImage(profileImageDestination, user.getId().toString(), input.getProfileImage());
+        imageUploadDataProviderPort.uploadImage(
+            profileImageDestination,
+            UPLOAD_PROFILE_IMAGE_PATH,
+            user.getId().toString(),
+            DEFAULT_FILE_NAME_PROFILE_PICTURE,
+            FIVE_DAYS_IN_MINUTES_EXP_PRESIGNED_URL,
+            input.getProfileImage()
+        );
     }
 
     private User findUser(Long userId) {
