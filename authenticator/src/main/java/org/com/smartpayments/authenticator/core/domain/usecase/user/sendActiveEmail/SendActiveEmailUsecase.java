@@ -54,7 +54,13 @@ public class SendActiveEmailUsecase implements UsecaseVoidPort<SendActiveEmailIn
     @Override
     @Transactional
     public void execute(SendActiveEmailInput input) {
-        User user = findUser(input.getEmail());
+        User user;
+
+        if (isNull(input.getUser())) {
+            user = findUser(input.getEmail());
+        } else {
+            user = input.getUser();
+        }
 
         if (!user.getActive()) {
             throw new UserNotActiveException();
@@ -111,7 +117,7 @@ public class SendActiveEmailUsecase implements UsecaseVoidPort<SendActiveEmailIn
         return new HashMap<>() {{
             put("${FIRST_NAME}", user.getFirstName());
             put("${ACTIVATION_LINK}", mountActivationLink(user.getEmailToken()));
-            put("${EXPIRATION_TIME}", MAX_EXPIRATION_DAYS_EMAIL_ACTIVATION_TOKEN);
+            put("${EXPIRATION_TIME}", MAX_EXPIRATION_DAYS_EMAIL_ACTIVATION_TOKEN + " day");
         }};
     }
 

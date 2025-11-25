@@ -208,7 +208,7 @@ public class RegisterUserUsecase implements UsecaseVoidPort<RegisterUserInput> {
         return new HashMap<>() {{
             put("${FIRST_NAME}", user.getFirstName());
             put("${ACTIVATION_LINK}", mountActivationLink(user.getEmailToken()));
-            put("${EXPIRATION_TIME}", LINK_EXPIRATION_IN_DAYS);
+            put("${EXPIRATION_TIME}", LINK_EXPIRATION_IN_DAYS + " day");
         }};
     }
 

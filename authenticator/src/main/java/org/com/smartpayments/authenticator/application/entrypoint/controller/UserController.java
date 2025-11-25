@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.activeEmail.ActiveEmailUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.authUser.AuthUserUsecase;
+import org.com.smartpayments.authenticator.core.domain.usecase.user.changeEmail.ChangeEmailUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.changePassword.ChangePasswordUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.forgotPassword.ForgotPasswordUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.registerUser.RegisterUserUsecase;
@@ -13,6 +14,7 @@ import org.com.smartpayments.authenticator.core.domain.usecase.user.updateUserPr
 import org.com.smartpayments.authenticator.core.domain.usecase.user.uploadProfileImage.UploadProfileImageUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.userProfile.UserProfileUsecase;
 import org.com.smartpayments.authenticator.core.ports.in.dto.AuthUserInput;
+import org.com.smartpayments.authenticator.core.ports.in.dto.ChangeEmailInput;
 import org.com.smartpayments.authenticator.core.ports.in.dto.ChangePasswordInput;
 import org.com.smartpayments.authenticator.core.ports.in.dto.ForgotPasswordInput;
 import org.com.smartpayments.authenticator.core.ports.in.dto.RegisterUserInput;
@@ -51,6 +53,7 @@ public class UserController {
     private final ResetPasswordPublicUsecase resetPasswordPublicUsecase;
     private final UploadProfileImageUsecase uploadProfileImageUsecase;
     private final ChangePasswordUsecase changePasswordUsecase;
+    private final ChangeEmailUsecase changeEmailUsecase;
 
     @PostMapping("/user/register")
     public ResponseEntity<Void> registerUser(@RequestBody @Valid RegisterUserInput input) {
@@ -85,7 +88,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @GetMapping("/user/email_activation/{token}")
+    @PutMapping("/user/email_activation/{token}")
     public ResponseEntity<String> activeEmail(@PathVariable("token") String token) {
         try {
             activeEmailUsecase.execute(token);
@@ -93,6 +96,14 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid link. This link is invalid or has been already used.");
         }
+    }
+
+    @PutMapping("/user/change_email")
+    public ResponseEntity<Void> changeEmail(Authentication authentication, @RequestBody @Valid ChangeEmailInput input) {
+        Long userId = (Long) authentication.getPrincipal();
+        input.setUserId(userId);
+        changeEmailUsecase.execute(input);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @PutMapping("/user/forgot_password")

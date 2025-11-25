@@ -104,7 +104,7 @@ public class ForgotPasswordUsecase implements UsecasePort<ForgotPasswordInput, F
         return new HashMap<>() {{
             put("${FIRST_NAME}", user.getFirstName());
             put("${RESET_LINK}", mountActivationLink(user.getEmailToken()));
-            put("${EXPIRATION_TIME}", MAX_EXPIRATION_DAYS_PASSWORD_TOKEN);
+            put("${EXPIRATION_TIME}", MAX_EXPIRATION_DAYS_PASSWORD_TOKEN + " day");
         }};
     }
 
