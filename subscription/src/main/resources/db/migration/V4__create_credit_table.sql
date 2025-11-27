@@ -1,0 +1,9 @@
+CREATE TABLE credits (
+     id BIGSERIAL PRIMARY KEY,
+     type VARCHAR(50) NOT NULL UNIQUE,
+     value NUMERIC(12, 2) NOT NULL DEFAULT 0,
+     active BOOLEAN NOT NULL,
+     description TEXT,
+     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     updated_at TIMESTAMP DEFAULT NULL
+);
