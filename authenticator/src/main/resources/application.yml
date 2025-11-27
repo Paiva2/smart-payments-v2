@@ -1,0 +1,78 @@
+server:
+  port: 8081
+  api-suffix: api/authenticator
+
+spring:
+  application:
+    name: authenticator
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: ${REDIS_DEFAULT_TTL}
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB_NAME}
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+
+  flyway:
+    placeholder-prefix: '#{'
+    placeholder-suffix: '}'
+
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST}:${KAFKA_PORT}
+    topics:
+      mail-sender: mail.sender
+      mail-sender-dlt: mail.sender.dlt
+    consumer:
+      auto-offset-reset: latest
+      group-id: authenticator_group
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_USER}
+    password: ${GMAIL_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+
+kong:
+  url: ${KONG_URL}
+
+ui:
+  url: ${UI_URL}
+
+file:
+  image:
+    upload:
+      bucket_name: ${S3_BUCKET_NAME}
+
+auth:
+  jwt:
+    secret: ${JWT_SECRET}
+  services:
+    internal:
+      secret: ${JWT_SERVICES_INTERNAL_SECRET}

@@ -87,5 +87,22 @@ wait_for_health "authenticator"
 
 cd ..
 
+# =====================
+# SUBSCRIPTION
+# =====================
+
+echo ""
+echo -e "${BLUE}${BOLD}➡ Entering subscription/.dev...${RESET}"
+cd subscription/.dev
+
+echo -e "${BLUE}${BOLD}🚀 Starting subscription docker compose...${RESET}"
+docker compose -p smart-payments up -d
+echo -e "${GREEN}✔ Subscription started.${RESET}"
+
+check_containers "subscription"
+wait_for_health "subscription"
+
+cd ..
+
 echo ""
 echo -e "${GREEN}${BOLD}🎉 All service dependencies have been successfully started!${RESET}"

@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  subscription-db:
+    container_name: "subscription-db"
+    image: "bitnami/postgresql:16"
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: pg
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: subscription
+    networks:
+      - smart-payments
+
+networks:
+  smart-payments:
+    external: true
