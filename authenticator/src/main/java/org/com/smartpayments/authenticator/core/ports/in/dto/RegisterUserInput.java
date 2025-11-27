@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.com.smartpayments.authenticator.core.domain.enums.EBrState;
@@ -13,6 +14,7 @@ import org.com.smartpayments.authenticator.core.domain.enums.EUserType;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterUserInput {
@@ -47,6 +49,7 @@ public class RegisterUserInput {
     private Address address;
 
     @Data
+    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Address {

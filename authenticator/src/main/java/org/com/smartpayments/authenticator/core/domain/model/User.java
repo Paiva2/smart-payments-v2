@@ -17,8 +17,9 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.com.smartpayments.authenticator.core.common.exception.GenericInvalidBirthdateException;
 import org.com.smartpayments.authenticator.core.common.exception.GenericPhoneInvalidException;
 import org.com.smartpayments.authenticator.core.domain.enums.EUserType;
@@ -36,7 +37,8 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Builder
 @NoArgsConstructor

@@ -14,8 +14,9 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.com.smartpayments.authenticator.core.domain.enums.EBrState;
 import org.com.smartpayments.authenticator.core.domain.enums.ECountry;
 import org.com.smartpayments.authenticator.core.ports.out.dto.AddressOutput;
@@ -24,7 +25,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Builder
 @NoArgsConstructor

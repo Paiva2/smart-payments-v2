@@ -16,7 +16,7 @@ spring:
       host: localhost
       port: 6379
       password: admin
-        
+
   
   datasource:
     url: jdbc:postgresql://localhost:5431/auth-db
@@ -42,6 +42,7 @@ spring:
     placeholder-suffix: '}'
 
   kafka:
+    enable: true
     bootstrap-servers: localhost:9092
     topics:
       mail-sender: mail.sender

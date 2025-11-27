@@ -41,6 +41,7 @@ spring:
     placeholder-suffix: '}'
 
   kafka:
+    enable: true
     bootstrap-servers: ${KAFKA_HOST}:${KAFKA_PORT}
     topics:
       mail-sender: mail.sender

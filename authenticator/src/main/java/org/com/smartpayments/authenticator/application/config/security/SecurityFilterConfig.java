@@ -34,7 +34,8 @@ public class SecurityFilterConfig extends OncePerRequestFilter {
         new AntPathRequestMatcher("/api/authenticator/user/email_activation/{token}"),
         new AntPathRequestMatcher("/api/authenticator/user/email_activation"),
         new AntPathRequestMatcher("/api/authenticator/user/forgot_password"),
-        new AntPathRequestMatcher("/api/authenticator/user/reset_password/{token}")
+        new AntPathRequestMatcher("/api/authenticator/user/reset_password/{token}"),
+        new AntPathRequestMatcher("/api/authenticator/user/test")
     );
 
     public final List<AntPathRequestMatcher> NON_FILTERABLE_ENDPOINTS_INTERNAL = List.of(
