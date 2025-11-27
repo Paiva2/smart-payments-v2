@@ -2,6 +2,7 @@ package org.com.smartpayments.authenticator.application.config.exception;
 
 import org.com.smartpayments.authenticator.core.common.exception.base.BadRequestException;
 import org.com.smartpayments.authenticator.core.common.exception.base.ConflictException;
+import org.com.smartpayments.authenticator.core.common.exception.base.ForbiddenException;
 import org.com.smartpayments.authenticator.core.common.exception.base.NotFoundException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -54,6 +55,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNotFoundException(NotFoundException ex) {
         return new ResponseEntity<>(mapErrors(ex, HttpStatus.NOT_FOUND.value()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Map<String, Object>> handleForbiddenException(ForbiddenException ex) {
+        return new ResponseEntity<>(mapErrors(ex, HttpStatus.FORBIDDEN.value()), HttpStatus.FORBIDDEN);
     }
 
     private Map<String, Object> mapErrors(Exception ex, Map<String, List<String>> errors, int statusValue) {

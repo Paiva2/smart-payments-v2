@@ -1,6 +1,5 @@
 package org.com.smartpayments.authenticator.integration.core.domain.usecase.user.registerUser;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import org.com.smartpayments.authenticator.core.domain.enums.EBrState;
 import org.com.smartpayments.authenticator.core.domain.enums.ERole;
@@ -12,7 +11,7 @@ import org.com.smartpayments.authenticator.core.ports.in.dto.RegisterUserInput;
 import org.com.smartpayments.authenticator.infra.persistence.repository.AddressRepository;
 import org.com.smartpayments.authenticator.infra.persistence.repository.UserRepository;
 import org.com.smartpayments.authenticator.infra.persistence.repository.UserRoleRepository;
-import org.com.smartpayments.authenticator.integration.config.IntegrationTestBase;
+import org.com.smartpayments.authenticator.integration.fixtures.IntegrationTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,9 +36,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class RegisterUserUsecaseTest extends IntegrationTestBase {
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
+class RegisterUserIntegrationTest extends IntegrationTestBase {
     @Autowired
     private MockMvc mockMvc;
 

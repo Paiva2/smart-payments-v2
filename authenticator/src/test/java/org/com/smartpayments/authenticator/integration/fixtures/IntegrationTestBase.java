@@ -1,5 +1,6 @@
-package org.com.smartpayments.authenticator.integration.config;
+package org.com.smartpayments.authenticator.integration.fixtures;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -20,6 +21,8 @@ import java.util.Random;
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 public abstract class IntegrationTestBase {
+    protected final ObjectMapper objectMapper = new ObjectMapper();
+
     @Autowired
     private Flyway flyway;
 
