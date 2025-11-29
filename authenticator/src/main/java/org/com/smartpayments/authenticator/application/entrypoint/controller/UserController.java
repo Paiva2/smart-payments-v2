@@ -24,6 +24,7 @@ import org.com.smartpayments.authenticator.core.ports.in.dto.UpdateUserProfileIn
 import org.com.smartpayments.authenticator.core.ports.in.dto.UploadProfileImageInput;
 import org.com.smartpayments.authenticator.core.ports.out.dto.AuthUserOutput;
 import org.com.smartpayments.authenticator.core.ports.out.dto.ForgotPasswordOutput;
+import org.com.smartpayments.authenticator.core.ports.out.dto.UploadProfileImageOutput;
 import org.com.smartpayments.authenticator.core.ports.out.dto.UserProfileOutput;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -127,10 +128,10 @@ public class UserController {
     }
 
     @PostMapping(path = "/user/profile_image", consumes = "multipart/form-data")
-    public ResponseEntity<Void> updateUserProfile(Authentication authentication, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<UploadProfileImageOutput> updateUserProfile(Authentication authentication, @RequestParam("file") MultipartFile file) {
         Long userId = (Long) authentication.getPrincipal();
-        uploadProfileImageUsecase.execute(new UploadProfileImageInput(userId, file));
-        return ResponseEntity.status(HttpStatus.OK).build();
+        UploadProfileImageOutput output = uploadProfileImageUsecase.execute(new UploadProfileImageInput(userId, file));
+        return ResponseEntity.status(HttpStatus.OK).body(output);
     }
 
     /*@GetMapping("/user/internal")

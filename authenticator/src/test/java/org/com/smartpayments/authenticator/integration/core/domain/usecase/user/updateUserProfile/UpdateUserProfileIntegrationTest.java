@@ -37,7 +37,7 @@ public class UpdateUserProfileIntegrationTest extends IntegrationTestBase {
     private String authToken;
 
     @BeforeEach
-    public void beforeAll() {
+    public void beforeEach() {
         user = userUtils.createUser(ERole.MEMBER, true, true);
         authToken = "Bearer " + userUtils.generateAuthToken(user.getId());
     }

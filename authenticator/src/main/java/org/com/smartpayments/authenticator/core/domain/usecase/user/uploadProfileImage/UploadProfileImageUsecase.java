@@ -4,10 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.com.smartpayments.authenticator.core.common.exception.UserNotFoundException;
 import org.com.smartpayments.authenticator.core.domain.model.User;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.uploadProfileImage.exception.InvalidProfilePictureImageException;
-import org.com.smartpayments.authenticator.core.ports.in.UsecaseVoidPort;
+import org.com.smartpayments.authenticator.core.ports.in.UsecasePort;
 import org.com.smartpayments.authenticator.core.ports.in.dto.UploadProfileImageInput;
 import org.com.smartpayments.authenticator.core.ports.out.dataProvider.ImageUploadDataProviderPort;
 import org.com.smartpayments.authenticator.core.ports.out.dataProvider.UserDataProviderPort;
+import org.com.smartpayments.authenticator.core.ports.out.dto.UploadProfileImageOutput;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Service
 @RequiredArgsConstructor
-public class UploadProfileImageUsecase implements UsecaseVoidPort<UploadProfileImageInput> {
+public class UploadProfileImageUsecase implements UsecasePort<UploadProfileImageInput, UploadProfileImageOutput> {
     private static final Integer FIVE_DAYS_IN_MINUTES_EXP_PRESIGNED_URL = 7200;
 
     private final UserDataProviderPort userDataProviderPort;
@@ -30,12 +31,12 @@ public class UploadProfileImageUsecase implements UsecaseVoidPort<UploadProfileI
 
     @Override
     @CacheEvict(value = USER_PROFILE_CACHE_LABEL, key = "#input.userId")
-    public void execute(UploadProfileImageInput input) {
+    public UploadProfileImageOutput execute(UploadProfileImageInput input) {
         User user = findUser(input.getUserId());
 
         checkIsImage(input.getProfileImage());
 
-        imageUploadDataProviderPort.uploadImage(
+        String url = imageUploadDataProviderPort.uploadImage(
             profileImageDestination,
             UPLOAD_PROFILE_IMAGE_PATH,
             user.getId().toString(),
@@ -43,6 +44,8 @@ public class UploadProfileImageUsecase implements UsecaseVoidPort<UploadProfileI
             FIVE_DAYS_IN_MINUTES_EXP_PRESIGNED_URL,
             input.getProfileImage()
         );
+
+        return new UploadProfileImageOutput(url);
     }
 
     private User findUser(Long userId) {
