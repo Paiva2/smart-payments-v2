@@ -14,6 +14,7 @@ import org.com.smartpayments.authenticator.core.domain.model.User;
 import org.com.smartpayments.authenticator.core.domain.model.UserRole;
 import org.com.smartpayments.authenticator.core.ports.out.dataProvider.RoleDataProviderPort;
 import org.com.smartpayments.authenticator.core.ports.out.dataProvider.UserDataProviderPort;
+import org.com.smartpayments.authenticator.core.ports.out.utils.JwtUtilsPort;
 import org.com.smartpayments.authenticator.core.ports.out.utils.PasswordUtilsPort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,7 @@ public class UserUtils {
     private final UserDataProviderPort userDataProviderPort;
     private final RoleDataProviderPort roleDataProviderPort;
     private final PasswordUtilsPort passwordUtilsPort;
+    private final JwtUtilsPort jwtUtilsPort;
 
     @SneakyThrows
     @Transactional
@@ -61,6 +63,10 @@ public class UserUtils {
         newUser.getUserRoles().add(userRole);
 
         return userDataProviderPort.persist(newUser);
+    }
+
+    public String generateAuthToken(Long userId) {
+        return jwtUtilsPort.generateAuthJwt(userId, 1);
     }
 
     private UserRole fillUserRole(ERole role, User user) {

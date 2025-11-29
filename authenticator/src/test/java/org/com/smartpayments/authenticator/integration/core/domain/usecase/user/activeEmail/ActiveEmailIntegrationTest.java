@@ -3,7 +3,7 @@ package org.com.smartpayments.authenticator.integration.core.domain.usecase.user
 import org.com.smartpayments.authenticator.core.domain.enums.ERole;
 import org.com.smartpayments.authenticator.core.domain.model.User;
 import org.com.smartpayments.authenticator.infra.persistence.repository.UserRepository;
-import org.com.smartpayments.authenticator.integration.fixtures.IntegrationTestBase;
+import org.com.smartpayments.authenticator.integration.fixtures.bases.IntegrationTestBase;
 import org.com.smartpayments.authenticator.integration.utils.UserUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

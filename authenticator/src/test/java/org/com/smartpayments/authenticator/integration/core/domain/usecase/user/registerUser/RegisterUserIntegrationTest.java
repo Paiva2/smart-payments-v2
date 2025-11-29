@@ -11,7 +11,7 @@ import org.com.smartpayments.authenticator.core.ports.in.dto.RegisterUserInput;
 import org.com.smartpayments.authenticator.infra.persistence.repository.AddressRepository;
 import org.com.smartpayments.authenticator.infra.persistence.repository.UserRepository;
 import org.com.smartpayments.authenticator.infra.persistence.repository.UserRoleRepository;
-import org.com.smartpayments.authenticator.integration.fixtures.IntegrationTestBase;
+import org.com.smartpayments.authenticator.integration.fixtures.bases.IntegrationTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

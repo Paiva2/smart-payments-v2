@@ -53,6 +53,7 @@ auth:
     internal:
       secret: test-internal-secret
 
+
 file:
   image:
     upload:
