@@ -1,6 +1,6 @@
 package org.com.smartpayments.authenticator.core.domain.usecase.user.updateUserProfile;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.com.smartpayments.authenticator.core.common.exception.GenericCpfCnpjInvalidException;
 import org.com.smartpayments.authenticator.core.common.exception.GenericException;
@@ -10,9 +10,11 @@ import org.com.smartpayments.authenticator.core.domain.enums.EUserType;
 import org.com.smartpayments.authenticator.core.domain.model.User;
 import org.com.smartpayments.authenticator.core.ports.in.UsecasePort;
 import org.com.smartpayments.authenticator.core.ports.in.dto.UpdateUserProfileInput;
+import org.com.smartpayments.authenticator.core.ports.out.dataProvider.ImageUploadDataProviderPort;
 import org.com.smartpayments.authenticator.core.ports.out.dataProvider.UserDataProviderPort;
 import org.com.smartpayments.authenticator.core.ports.out.dto.UserProfileOutput;
 import org.com.smartpayments.authenticator.core.ports.out.utils.PersonalDocumentUtilsPort;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,16 +24,23 @@ import java.util.Date;
 import java.util.Objects;
 
 import static java.util.Objects.isNull;
+import static org.com.smartpayments.authenticator.core.common.constants.Constants.PROFILE_PICTURE_PRESIGNED_URL_EXP_DAYS;
 import static org.com.smartpayments.authenticator.core.common.constants.Constants.USER_PROFILE_CACHE_LABEL;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Slf4j
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UpdateUserProfileUsecase implements UsecasePort<UpdateUserProfileInput, UserProfileOutput> {
+    private final static String UPLOAD_IMAGE_PATH = "user-profile-picture";
+
     private final UserDataProviderPort userDataProviderPort;
 
     private final PersonalDocumentUtilsPort personalDocumentUtilsPort;
+    private final ImageUploadDataProviderPort imageUploadDataProviderPort;
+
+    @Value("${file.image.upload.bucket_name}")
+    private String profileImageDestination;
 
     @Override
     @Transactional
@@ -46,6 +55,8 @@ public class UpdateUserProfileUsecase implements UsecasePort<UpdateUserProfileIn
         updateUser(input, user);
         user = persistUser(user);
 
+        user.setProfilePictureUrl(findProfilePictureUrl(user.getId()));
+
         return user.toProfileOutput();
     }
 
@@ -55,7 +66,7 @@ public class UpdateUserProfileUsecase implements UsecasePort<UpdateUserProfileIn
 
     private Date parseDate(String birthdate) {
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             return sdf.parse(birthdate);
         } catch (Exception e) {
             String message = "Error while changing birthdate!";
@@ -102,5 +113,10 @@ public class UpdateUserProfileUsecase implements UsecasePort<UpdateUserProfileIn
 
     private User persistUser(User user) {
         return userDataProviderPort.persist(user);
+    }
+
+    private String findProfilePictureUrl(Long userId) {
+        String key = String.format("%s/%s", UPLOAD_IMAGE_PATH, userId);
+        return imageUploadDataProviderPort.findMostRecentFromDestination(profileImageDestination, key, PROFILE_PICTURE_PRESIGNED_URL_EXP_DAYS);
     }
 }
