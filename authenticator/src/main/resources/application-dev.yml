@@ -78,3 +78,7 @@ auth:
   services:
     internal:
       secret: INTERNAL_SUPER_SECRET
+
+aws:
+  s3:
+    region: us-east-1
