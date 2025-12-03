@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN user_payment_gateway_external_id VARCHAR(200) UNIQUE DEFAULT NULL;

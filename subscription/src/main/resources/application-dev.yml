@@ -34,3 +34,8 @@ kong:
 
 ui:
   url: http://localhost:3000
+
+external:
+  payment-gateway:
+    uri: https://api-sandbox.asaas.com/v3/
+    api-key: ${ASAAS_API_KEY}

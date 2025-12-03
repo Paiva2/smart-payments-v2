@@ -32,6 +32,9 @@ public class User {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "user_payment_gateway_external_id", unique = true, nullable = true, length = 200)
+    private String userPaymentGatewayExternalId;
+
     @Column(name = "first_name", nullable = false, length = 50)
     private String firstName;
 

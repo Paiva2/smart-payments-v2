@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: 0
   api-suffix: api/subscription
 
 spring:
@@ -34,3 +34,8 @@ kong:
 
 ui:
   url: ${UI_URL}
+
+external:
+  payment-gateway:
+    uri: https://api.asaas.com/
+    api-key: ${ASAAS_API_KEY}

@@ -1,0 +1,1 @@
+ALTER TABLE purchases ADD COLUMN purchase_type VARCHAR(20) NOT NULL;

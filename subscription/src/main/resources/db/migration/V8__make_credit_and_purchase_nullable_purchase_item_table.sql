@@ -1,0 +1,2 @@
+ALTER TABLE purchase_items ALTER COLUMN credit_id DROP NOT NULL;
+ALTER TABLE purchase_items ALTER COLUMN plan_id DROP NOT NULL;

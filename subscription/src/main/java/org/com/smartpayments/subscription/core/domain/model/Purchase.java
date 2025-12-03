@@ -1,5 +1,6 @@
 package org.com.smartpayments.subscription.core.domain.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -19,6 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.com.smartpayments.subscription.core.domain.enums.EPaymentMethod;
 import org.com.smartpayments.subscription.core.domain.enums.EPurchaseStatus;
+import org.com.smartpayments.subscription.core.domain.enums.EPurchaseType;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -39,6 +41,9 @@ public class Purchase {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "external_id", unique = true, length = 200)
+    private String externalId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method", nullable = false, length = 20)
     private EPaymentMethod paymentMethod;
@@ -49,6 +54,10 @@ public class Purchase {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
     private EPurchaseStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "purchase_type", nullable = false, length = 20)
+    private EPurchaseType purchaseType;
 
     @Column(name = "installments", nullable = false)
     private Integer installments;
@@ -65,6 +74,9 @@ public class Purchase {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "purchase")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "purchase", cascade = CascadeType.ALL)
     private List<PurchaseItem> items;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "purchase")
+    private List<PurchaseCharge> charges;
 }
