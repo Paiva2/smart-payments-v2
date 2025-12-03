@@ -1,4 +1,4 @@
-package org.com.smartpayments.subscription.application.config;
+package org.com.smartpayments.subscription.application.config.http;
 
 import org.com.smartpayments.subscription.core.domain.common.exception.PaymentGatewayClientErrorException;
 import org.springframework.context.annotation.Bean;

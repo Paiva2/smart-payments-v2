@@ -1,4 +1,4 @@
-package org.com.smartpayments.subscription.application.config;
+package org.com.smartpayments.subscription.application.config.http;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
