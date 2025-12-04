@@ -6,7 +6,6 @@ import org.com.smartpayments.subscription.core.domain.common.exception.InvalidSu
 import org.com.smartpayments.subscription.core.domain.common.exception.PlanNotFoundException;
 import org.com.smartpayments.subscription.core.domain.common.exception.UserNotFoundException;
 import org.com.smartpayments.subscription.core.domain.core.ports.in.UsecasePort;
-import org.com.smartpayments.subscription.core.domain.core.ports.in.dto.CreatePurchaseChargeInput;
 import org.com.smartpayments.subscription.core.domain.core.ports.in.dto.NewSubscriptionPurchaseInput;
 import org.com.smartpayments.subscription.core.domain.core.ports.out.dataprovider.PlanDataProviderPort;
 import org.com.smartpayments.subscription.core.domain.core.ports.out.dataprovider.PurchaseDataProviderPort;
@@ -19,9 +18,7 @@ import org.com.smartpayments.subscription.core.domain.core.ports.out.external.pa
 import org.com.smartpayments.subscription.core.domain.core.ports.out.external.paymentGateway.PaymentGatewayUserClientPort;
 import org.com.smartpayments.subscription.core.domain.core.usecase.purchase.newSubscriptionPurchase.exception.SubscriptionChargeNotFoundException;
 import org.com.smartpayments.subscription.core.domain.core.usecase.purchase.newSubscriptionPurchase.validator.NewSubscriptionPurchaseValidator;
-import org.com.smartpayments.subscription.core.domain.core.usecase.purchaseCharge.createPurchaseCharge.CreatePurchaseChargeUsecase;
 import org.com.smartpayments.subscription.core.domain.enums.EPlan;
-import org.com.smartpayments.subscription.core.domain.enums.EPurchaseChargeStatus;
 import org.com.smartpayments.subscription.core.domain.enums.EPurchaseStatus;
 import org.com.smartpayments.subscription.core.domain.enums.EPurchaseType;
 import org.com.smartpayments.subscription.core.domain.model.Plan;
@@ -54,8 +51,6 @@ public class NewSubscriptionPurchaseUsecase implements UsecasePort<NewSubscripti
 
     private final PaymentGatewaySubscriptionClientPort paymentGatewaySubscriptionClientPort;
     private final PaymentGatewayUserClientPort paymentGatewayUserClientPort;
-
-    private final CreatePurchaseChargeUsecase createPurchaseChargeUsecase;
 
     @Override
     @Transactional
@@ -196,27 +191,6 @@ public class NewSubscriptionPurchaseUsecase implements UsecasePort<NewSubscripti
 
         GetSubscriptionChargesOutput.DataOutput firstCharge = subscriptionCharges.getData().getFirst();
 
-        persistFirstPurchaseCharge(purchase, firstCharge);
-
         return isNull(firstCharge.getInvoiceUrl()) ? firstCharge.getBankSlipUrl() : firstCharge.getInvoiceUrl();
-    }
-
-    private void persistFirstPurchaseCharge(Purchase purchase, GetSubscriptionChargesOutput.DataOutput input) {
-        CreatePurchaseChargeInput createChargeInput = CreatePurchaseChargeInput.builder()
-            .purchase(purchase)
-            .externalChargeId(input.getId())
-            .value(input.getValue())
-            .description(input.getDescription())
-            .billingType(input.getBillingType())
-            .pixTransaction(input.getPixTransaction())
-            .pixQrCodeId(input.getPixQrCodeId())
-            .status(EPurchaseChargeStatus.valueOf(input.getStatus()))
-            .dueDate(input.getDueDate())
-            .paymentDate(input.getPaymentDate())
-            .invoiceUrl(input.getInvoiceUrl())
-            .bankSlipUrl(input.getBankSlipUrl())
-            .build();
-
-        createPurchaseChargeUsecase.execute(createChargeInput);
     }
 }
