@@ -110,7 +110,7 @@ public class PaymentGatewaySubscriptionClientAdapter implements PaymentGatewaySu
             try {
                 HttpEntity<String> request = new HttpEntity<>(authHeader());
 
-                ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+                ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, request, String.class);
 
                 return ((DeleteSubscriptionOutput) convertResponseOutput(response.getBody(), DeleteSubscriptionOutput.class));
             } catch (HttpStatusCodeException e) {

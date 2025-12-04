@@ -30,7 +30,7 @@ public class PurchaseController {
         return ResponseEntity.ok().body(output);
     }
 
-    @PostMapping("purchase/credits")
+    @PostMapping("purchase/credit")
     public ResponseEntity<NewCreditsPurchaseOutput> newCreditsPurchase(Authentication authentication, @RequestBody @Valid NewCreditsPurchaseInput input) {
         Long userId = (Long) authentication.getPrincipal();
         input.setUserId(userId);
