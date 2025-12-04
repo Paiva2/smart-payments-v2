@@ -1,14 +1,14 @@
-package org.com.smartpayments.subscription.infra.adapters.external;
+package org.com.smartpayments.subscription.infra.adapters.external.paymentGateway;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.com.smartpayments.subscription.core.domain.common.exception.PaymentGatewayClientErrorException;
-import org.com.smartpayments.subscription.core.domain.core.ports.out.external.PaymentGatewaySubscriptionClientPort;
 import org.com.smartpayments.subscription.core.domain.core.ports.out.external.dto.CreateSubscriptionOutput;
 import org.com.smartpayments.subscription.core.domain.core.ports.out.external.dto.DeleteSubscriptionOutput;
 import org.com.smartpayments.subscription.core.domain.core.ports.out.external.dto.GetSubscriptionChargesOutput;
 import org.com.smartpayments.subscription.core.domain.core.ports.out.external.dto.NewSubscriptionClientInput;
+import org.com.smartpayments.subscription.core.domain.core.ports.out.external.paymentGateway.PaymentGatewaySubscriptionClientPort;
 import org.com.smartpayments.subscription.core.domain.model.User;
 import org.com.smartpayments.subscription.infra.utils.PaymentGatewayUtils;
 import org.springframework.http.HttpEntity;

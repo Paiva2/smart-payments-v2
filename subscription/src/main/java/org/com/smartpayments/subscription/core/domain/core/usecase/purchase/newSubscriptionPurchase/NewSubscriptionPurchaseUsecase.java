@@ -12,11 +12,11 @@ import org.com.smartpayments.subscription.core.domain.core.ports.out.dataprovide
 import org.com.smartpayments.subscription.core.domain.core.ports.out.dataprovider.PurchaseDataProviderPort;
 import org.com.smartpayments.subscription.core.domain.core.ports.out.dataprovider.UserDataProviderPort;
 import org.com.smartpayments.subscription.core.domain.core.ports.out.dto.NewSubscriptionPurchaseOutput;
-import org.com.smartpayments.subscription.core.domain.core.ports.out.external.PaymentGatewaySubscriptionClientPort;
-import org.com.smartpayments.subscription.core.domain.core.ports.out.external.PaymentGatewayUserClientPort;
 import org.com.smartpayments.subscription.core.domain.core.ports.out.external.dto.CreateSubscriptionOutput;
 import org.com.smartpayments.subscription.core.domain.core.ports.out.external.dto.GetSubscriptionChargesOutput;
 import org.com.smartpayments.subscription.core.domain.core.ports.out.external.dto.NewSubscriptionClientInput;
+import org.com.smartpayments.subscription.core.domain.core.ports.out.external.paymentGateway.PaymentGatewaySubscriptionClientPort;
+import org.com.smartpayments.subscription.core.domain.core.ports.out.external.paymentGateway.PaymentGatewayUserClientPort;
 import org.com.smartpayments.subscription.core.domain.core.usecase.purchase.newSubscriptionPurchase.exception.SubscriptionChargeNotFoundException;
 import org.com.smartpayments.subscription.core.domain.core.usecase.purchase.newSubscriptionPurchase.validator.NewSubscriptionPurchaseValidator;
 import org.com.smartpayments.subscription.core.domain.core.usecase.purchaseCharge.createPurchaseCharge.CreatePurchaseChargeUsecase;

@@ -2,6 +2,10 @@ package org.com.smartpayments.authenticator.application.entrypoint.controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.com.smartpayments.authenticator.core.common.exception.UserNotFoundException;
+import org.com.smartpayments.authenticator.core.domain.model.Role;
+import org.com.smartpayments.authenticator.core.domain.model.User;
+import org.com.smartpayments.authenticator.core.domain.model.UserRole;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.activeEmail.ActiveEmailUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.authUser.AuthUserUsecase;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.changeEmail.ChangeEmailUsecase;
@@ -22,7 +26,9 @@ import org.com.smartpayments.authenticator.core.ports.in.dto.ResetPasswordInput;
 import org.com.smartpayments.authenticator.core.ports.in.dto.SendActiveEmailInput;
 import org.com.smartpayments.authenticator.core.ports.in.dto.UpdateUserProfileInput;
 import org.com.smartpayments.authenticator.core.ports.in.dto.UploadProfileImageInput;
+import org.com.smartpayments.authenticator.core.ports.out.dataProvider.UserDataProviderPort;
 import org.com.smartpayments.authenticator.core.ports.out.dto.AuthUserOutput;
+import org.com.smartpayments.authenticator.core.ports.out.dto.FindUserInternalOutput;
 import org.com.smartpayments.authenticator.core.ports.out.dto.ForgotPasswordOutput;
 import org.com.smartpayments.authenticator.core.ports.out.dto.UploadProfileImageOutput;
 import org.com.smartpayments.authenticator.core.ports.out.dto.UserProfileOutput;
@@ -34,10 +40,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import static java.util.Objects.nonNull;
 
 @RestController
 @AllArgsConstructor
@@ -54,6 +63,8 @@ public class UserController {
     private final UploadProfileImageUsecase uploadProfileImageUsecase;
     private final ChangePasswordUsecase changePasswordUsecase;
     private final ChangeEmailUsecase changeEmailUsecase;
+
+    private final UserDataProviderPort userDataProviderPort;
 
     @PostMapping("/user/register")
     public ResponseEntity<Void> registerUser(@RequestBody @Valid RegisterUserInput input) {
@@ -134,8 +145,18 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(output);
     }
 
-    /*@GetMapping("/user/internal")
-    public ResponseEntity<String> findUserForInternalServices(@RequestHeader("X-User-Id") Long userId) {
-        return ResponseEntity.status(HttpStatus.OK).body("OK:" + userId);
-    }*/
+    @GetMapping("/user/internal")
+    public ResponseEntity<FindUserInternalOutput> findUserForInternalServices(@RequestHeader("X-User-Id") Long userId) {
+        User user = userDataProviderPort.findByIdWithRoles(userId)
+            .orElseThrow(UserNotFoundException::new);
+
+        FindUserInternalOutput output = FindUserInternalOutput.builder()
+            .id(user.getId())
+            .active(user.getActive() && nonNull(user.getEmailConfirmedAt()))
+            .passwordHash(user.getPasswordHash())
+            .roles(user.getUserRoles().stream().map(UserRole::getRole).map(Role::getName).toList())
+            .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(output);
+    }
 }

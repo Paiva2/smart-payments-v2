@@ -1,4 +1,4 @@
-package org.com.smartpayments.subscription.core.domain.core.ports.out.external;
+package org.com.smartpayments.subscription.core.domain.core.ports.out.external.paymentGateway;
 
 import org.com.smartpayments.subscription.core.domain.model.User;
 

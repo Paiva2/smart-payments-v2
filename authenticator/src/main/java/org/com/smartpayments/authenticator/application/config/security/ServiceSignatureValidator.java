@@ -24,7 +24,7 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 public class ServiceSignatureValidator implements AuthorizationManager<RequestAuthorizationContext> {
     private final InternalServiceConfig config;
 
-    public final List<String> ALLOWED_SERVICES = List.of("scheduler");
+    public final List<String> ALLOWED_SERVICES = List.of("scheduler", "subscription");
 
     @Override
     public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext context) {

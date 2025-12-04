@@ -35,7 +35,14 @@ kong:
 ui:
   url: http://localhost:3000
 
+auth:
+  jwt:
+    secret: SUPER_SECRET_JWT
+
 external:
   payment-gateway:
     uri: https://api-sandbox.asaas.com/v3/
     api-key: ${ASAAS_API_KEY}
+  authenticator:
+    uri: ${kong.url}/api/authenticator/
+    external-services-key: INTERNAL_SUPER_SECRET

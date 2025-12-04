@@ -9,6 +9,7 @@ import org.com.smartpayments.subscription.core.domain.core.ports.out.dto.NewSubs
 import org.com.smartpayments.subscription.core.domain.core.usecase.purchase.newCreditsPurchase.NewCreditsPurchaseUsecase;
 import org.com.smartpayments.subscription.core.domain.core.usecase.purchase.newSubscriptionPurchase.NewSubscriptionPurchaseUsecase;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,15 +23,17 @@ public class PurchaseController {
     private final NewCreditsPurchaseUsecase newCreditsPurchaseUsecase;
 
     @PostMapping("purchase/subscription")
-    public ResponseEntity<NewSubscriptionPurchaseOutput> newSubscriptionPurchase(@RequestBody @Valid NewSubscriptionPurchaseInput input) {
-        input.setUserId(1L);//todo:
+    public ResponseEntity<NewSubscriptionPurchaseOutput> newSubscriptionPurchase(Authentication authentication, @RequestBody @Valid NewSubscriptionPurchaseInput input) {
+        Long userId = (Long) authentication.getPrincipal();
+        input.setUserId(userId);
         NewSubscriptionPurchaseOutput output = newSubscriptionPurchaseUsecase.execute(input);
         return ResponseEntity.ok().body(output);
     }
 
     @PostMapping("purchase/credits")
-    public ResponseEntity<NewCreditsPurchaseOutput> newCreditsPurchase(@RequestBody @Valid NewCreditsPurchaseInput input) {
-        input.setUserId(1L);//todo:
+    public ResponseEntity<NewCreditsPurchaseOutput> newCreditsPurchase(Authentication authentication, @RequestBody @Valid NewCreditsPurchaseInput input) {
+        Long userId = (Long) authentication.getPrincipal();
+        input.setUserId(userId);
         NewCreditsPurchaseOutput output = newCreditsPurchaseUsecase.execute(input);
         return ResponseEntity.ok().body(output);
     }

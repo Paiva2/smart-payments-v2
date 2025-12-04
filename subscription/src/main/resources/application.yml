@@ -35,7 +35,14 @@ kong:
 ui:
   url: ${UI_URL}
 
+auth:
+  jwt:
+    secret: ${JWT_SECRET}
+
 external:
   payment-gateway:
     uri: https://api.asaas.com/
     api-key: ${ASAAS_API_KEY}
+  authenticator:
+    uri: ${AUTHENTICATOR_URI}
+    external-services-key: ${EXTERNAL_SERVICES_KEY}
