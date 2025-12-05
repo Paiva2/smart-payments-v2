@@ -1,8 +1,8 @@
 package org.com.smartpayments.subscription.infra.adapters.dataProvider;
 
 import lombok.AllArgsConstructor;
-import org.com.smartpayments.subscription.core.domain.core.ports.out.dataprovider.PlanDataProviderPort;
 import org.com.smartpayments.subscription.core.domain.model.Plan;
+import org.com.smartpayments.subscription.core.ports.out.dataprovider.PlanDataProviderPort;
 import org.com.smartpayments.subscription.infra.persistence.repository.PlanRepository;
 import org.springframework.stereotype.Component;
 

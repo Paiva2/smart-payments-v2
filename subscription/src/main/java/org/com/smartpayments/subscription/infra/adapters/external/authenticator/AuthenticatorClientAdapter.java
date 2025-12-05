@@ -3,10 +3,10 @@ package org.com.smartpayments.subscription.infra.adapters.external.authenticator
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.com.smartpayments.subscription.core.domain.common.exception.AuthenticatorClientErrorException;
-import org.com.smartpayments.subscription.core.domain.common.exception.PaymentGatewayClientErrorException;
-import org.com.smartpayments.subscription.core.domain.core.ports.out.external.authenticator.AuthenticatorClientPort;
-import org.com.smartpayments.subscription.core.domain.core.ports.out.external.dto.UserAuthenticatorOutput;
+import org.com.smartpayments.subscription.core.common.exception.AuthenticatorClientErrorException;
+import org.com.smartpayments.subscription.core.common.exception.PaymentGatewayClientErrorException;
+import org.com.smartpayments.subscription.core.ports.out.external.authenticator.AuthenticatorClientPort;
+import org.com.smartpayments.subscription.core.ports.out.external.dto.UserAuthenticatorOutput;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

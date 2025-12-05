@@ -32,9 +32,6 @@ spring:
 kong:
   url: http://localhost:8000
 
-ui:
-  url: http://localhost:3000
-
 auth:
   jwt:
     secret: SUPER_SECRET_JWT

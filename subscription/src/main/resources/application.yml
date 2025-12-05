@@ -32,9 +32,6 @@ spring:
 kong:
   url: ${KONG_URL}
 
-ui:
-  url: ${UI_URL}
-
 auth:
   jwt:
     secret: ${JWT_SECRET}

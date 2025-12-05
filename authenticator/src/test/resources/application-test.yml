@@ -60,7 +60,7 @@ file:
       bucket_name: test-bucket
 
 kong:
-  url: http://localhost/0
+  url: http://localhost/8000
 
 ui:
-  url: http://localhost/0
+  url: http://localhost/3000

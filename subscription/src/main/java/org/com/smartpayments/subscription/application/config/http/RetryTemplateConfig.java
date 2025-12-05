@@ -1,6 +1,6 @@
 package org.com.smartpayments.subscription.application.config.http;
 
-import org.com.smartpayments.subscription.core.domain.common.exception.PaymentGatewayClientErrorException;
+import org.com.smartpayments.subscription.core.common.exception.PaymentGatewayClientErrorException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;

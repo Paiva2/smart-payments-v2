@@ -3,12 +3,12 @@ package org.com.smartpayments.subscription.infra.adapters.external.paymentGatewa
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.com.smartpayments.subscription.core.domain.common.exception.PaymentGatewayClientErrorException;
-import org.com.smartpayments.subscription.core.domain.core.ports.out.external.dto.CreateCreditChargeOutput;
-import org.com.smartpayments.subscription.core.domain.core.ports.out.external.dto.DeleteChargeOutput;
-import org.com.smartpayments.subscription.core.domain.core.ports.out.external.dto.NewCreditChargeClientInput;
-import org.com.smartpayments.subscription.core.domain.core.ports.out.external.paymentGateway.PaymentGatewayCreditClientPort;
+import org.com.smartpayments.subscription.core.common.exception.PaymentGatewayClientErrorException;
 import org.com.smartpayments.subscription.core.domain.model.User;
+import org.com.smartpayments.subscription.core.ports.out.external.dto.CreateCreditChargeOutput;
+import org.com.smartpayments.subscription.core.ports.out.external.dto.DeleteChargeOutput;
+import org.com.smartpayments.subscription.core.ports.out.external.dto.NewCreditChargeClientInput;
+import org.com.smartpayments.subscription.core.ports.out.external.paymentGateway.PaymentGatewayCreditClientPort;
 import org.com.smartpayments.subscription.infra.utils.PaymentGatewayUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

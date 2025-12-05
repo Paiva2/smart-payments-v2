@@ -2,12 +2,12 @@ package org.com.smartpayments.subscription.application.entrypoint.controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.com.smartpayments.subscription.core.domain.core.ports.in.dto.NewCreditsPurchaseInput;
-import org.com.smartpayments.subscription.core.domain.core.ports.in.dto.NewSubscriptionPurchaseInput;
-import org.com.smartpayments.subscription.core.domain.core.ports.out.dto.NewCreditsPurchaseOutput;
-import org.com.smartpayments.subscription.core.domain.core.ports.out.dto.NewSubscriptionPurchaseOutput;
-import org.com.smartpayments.subscription.core.domain.core.usecase.purchase.newCreditsPurchase.NewCreditsPurchaseUsecase;
-import org.com.smartpayments.subscription.core.domain.core.usecase.purchase.newSubscriptionPurchase.NewSubscriptionPurchaseUsecase;
+import org.com.smartpayments.subscription.core.domain.usecase.purchase.newCreditsPurchase.NewCreditsPurchaseUsecase;
+import org.com.smartpayments.subscription.core.domain.usecase.purchase.newSubscriptionPurchase.NewSubscriptionPurchaseUsecase;
+import org.com.smartpayments.subscription.core.ports.in.dto.NewCreditsPurchaseInput;
+import org.com.smartpayments.subscription.core.ports.in.dto.NewSubscriptionPurchaseInput;
+import org.com.smartpayments.subscription.core.ports.out.dto.NewCreditsPurchaseOutput;
+import org.com.smartpayments.subscription.core.ports.out.dto.NewSubscriptionPurchaseOutput;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;

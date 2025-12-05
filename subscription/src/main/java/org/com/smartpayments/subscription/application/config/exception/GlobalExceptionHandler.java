@@ -1,9 +1,9 @@
 package org.com.smartpayments.subscription.application.config.exception;
 
-import org.com.smartpayments.subscription.core.domain.common.base.BadRequestException;
-import org.com.smartpayments.subscription.core.domain.common.base.ConflictException;
-import org.com.smartpayments.subscription.core.domain.common.base.ForbiddenException;
-import org.com.smartpayments.subscription.core.domain.common.base.NotFoundException;
+import org.com.smartpayments.subscription.core.common.base.BadRequestException;
+import org.com.smartpayments.subscription.core.common.base.ConflictException;
+import org.com.smartpayments.subscription.core.common.base.ForbiddenException;
+import org.com.smartpayments.subscription.core.common.base.NotFoundException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
