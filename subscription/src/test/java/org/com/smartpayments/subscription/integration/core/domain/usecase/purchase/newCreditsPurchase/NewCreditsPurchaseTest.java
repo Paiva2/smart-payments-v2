@@ -149,9 +149,6 @@ public class NewCreditsPurchaseTest extends IntegrationTestBase {
     @Test
     @DisplayName("Should not create purchase if purchase items list is empty")
     public void newCreditPurchaseWithoutPurchaseItems() throws Exception {
-        String creditId = "any_credit_charge_id" + UUID.randomUUID();
-        PaymentGatewayStubs.mockCreateCreditCharge(wireMockServer, objectMapper, creditId);
-
         NewCreditsPurchaseInput input = input();
         input.setPurchaseItems(null);
 
@@ -165,9 +162,6 @@ public class NewCreditsPurchaseTest extends IntegrationTestBase {
     @Test
     @DisplayName("Should not create purchase if credit id is null")
     public void newCreditPurchaseWithoutCreditId() throws Exception {
-        String creditId = "any_credit_charge_id" + UUID.randomUUID();
-        PaymentGatewayStubs.mockCreateCreditCharge(wireMockServer, objectMapper, creditId);
-
         NewCreditsPurchaseInput input = input();
         input.getPurchaseItems().get(0).setCreditId(null);
 
@@ -181,9 +175,6 @@ public class NewCreditsPurchaseTest extends IntegrationTestBase {
     @Test
     @DisplayName("Should not create purchase if quantity is invalid")
     public void newCreditPurchaseWithoutValidQuantity() throws Exception {
-        String creditId = "any_credit_charge_id" + UUID.randomUUID();
-        PaymentGatewayStubs.mockCreateCreditCharge(wireMockServer, objectMapper, creditId);
-
         NewCreditsPurchaseInput input = input();
         input.getPurchaseItems().get(0).setQuantity(-1);
 
@@ -197,9 +188,6 @@ public class NewCreditsPurchaseTest extends IntegrationTestBase {
     @Test
     @DisplayName("Should not create purchase if credit id is repeated")
     public void newCreditPurchaseWithRepeatCreditId() throws Exception {
-        String creditId = "any_credit_charge_id" + UUID.randomUUID();
-        PaymentGatewayStubs.mockCreateCreditCharge(wireMockServer, objectMapper, creditId);
-
         NewCreditsPurchaseInput input = input();
         input.setPurchaseItems(List.of(
             NewCreditsPurchaseInput.PurchaseItemInput.builder()
