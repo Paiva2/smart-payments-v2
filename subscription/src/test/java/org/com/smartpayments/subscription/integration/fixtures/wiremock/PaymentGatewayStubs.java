@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.com.smartpayments.subscription.core.domain.enums.EPurchaseChargeStatus;
+import org.com.smartpayments.subscription.core.ports.out.external.dto.CreateCreditChargeOutput;
 import org.com.smartpayments.subscription.core.ports.out.external.dto.CreateSubscriptionOutput;
 import org.com.smartpayments.subscription.core.ports.out.external.dto.DeleteSubscriptionOutput;
 import org.com.smartpayments.subscription.core.ports.out.external.dto.GetSubscriptionChargesOutput;
@@ -20,6 +21,7 @@ public class PaymentGatewayStubs {
     private final static String createUserPath = "/v3/customers";
     private final static String deleteUserPath = "/v3/customers/.*";
     private final static String createSubscriptionPath = "/v3/subscriptions";
+    private final static String createCreditChargePath = "/v3/payments";
     private final static String deleteSubscriptionPath = "/v3/subscriptions/.*";
     private final static String listSubscriptionChargesPath = "/v3/subscriptions/.*/payments";
 
@@ -28,6 +30,18 @@ public class PaymentGatewayStubs {
             .willReturn(okJson(objectMapper.writeValueAsString(
                 CreateSubscriptionOutput.builder()
                     .id(id)
+                    .build()
+            ))));
+    }
+
+    public static void mockCreateCreditCharge(WireMockServer server, ObjectMapper objectMapper, String id) throws Exception {
+        server.stubFor(WireMock.post(urlPathEqualTo(createCreditChargePath))
+            .willReturn(okJson(objectMapper.writeValueAsString(
+                CreateCreditChargeOutput.builder()
+                    .id(id)
+                    .subscription(null)
+                    .paymentLink("any_link")
+                    .invoiceUrl("any_url")
                     .build()
             ))));
     }

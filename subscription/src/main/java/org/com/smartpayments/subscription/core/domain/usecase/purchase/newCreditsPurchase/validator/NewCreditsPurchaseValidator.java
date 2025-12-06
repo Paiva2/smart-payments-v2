@@ -9,10 +9,11 @@ import java.util.Objects;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
+import static org.springframework.util.ObjectUtils.isEmpty;
 
 public class NewCreditsPurchaseValidator {
     public static void validate(NewCreditsPurchaseInput input) {
-        if (input.getPurchaseItems().isEmpty()) {
+        if (isEmpty(input.getPurchaseItems().isEmpty())) {
             throw new PurchaseItemGenericException("Purchase items cannot be empty!");
         }
 
@@ -24,7 +25,7 @@ public class NewCreditsPurchaseValidator {
         }
 
         boolean hasPurchaseItemWithInvalidQuantity = input.getPurchaseItems()
-            .stream().anyMatch(pi -> pi.getQuantity() < 1);
+            .stream().anyMatch(pi -> isNull(pi.getQuantity()) || pi.getQuantity() < 1);
 
         if (hasPurchaseItemWithInvalidQuantity) {
             throw new PurchaseItemGenericException("Quantity can't be less than 1!");
