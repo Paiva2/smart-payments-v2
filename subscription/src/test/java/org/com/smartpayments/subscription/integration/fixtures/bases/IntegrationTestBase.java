@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.com.smartpayments.subscription.config.containers.Containers;
 import org.flywaydb.core.Flyway;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,7 +24,9 @@ public abstract class IntegrationTestBase {
     private Flyway flyway;
 
     static {
-        wireMockServer.start();
+        if (!wireMockServer.isRunning()) {
+            wireMockServer.start();
+        }
         if (!Containers.POSTGRES.isRunning()) {
             Containers.POSTGRES.start();
         }
@@ -45,10 +46,5 @@ public abstract class IntegrationTestBase {
     void setUp() {
         flyway.clean();
         flyway.migrate();
-    }
-
-    @AfterAll
-    static void afterAll() {
-        wireMockServer.stop();
     }
 }

@@ -158,6 +158,80 @@ class NewSubscriptionPurchaseTest extends IntegrationTestBase {
         assertNull(purchaseItems.get(0).getCredit());
     }
 
+    @Test
+    @DisplayName("Should not create a subscription if purchase items is empty")
+    public void newSubscriptionWithoutPurchaseItems() throws Exception {
+        NewSubscriptionPurchaseInput input = input();
+        input.setPurchaseItems(null);
+
+        mockMvc.perform(post(apiSuffix + "/purchase/subscription")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer " + authToken)
+            .content(objectMapper.writeValueAsString(input))
+        ).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Should not create a subscription if installments is invalid")
+    public void newSubscriptionWithInvalidInstallments() throws Exception {
+        NewSubscriptionPurchaseInput input = input();
+        input.setInstallments(-1);
+
+        mockMvc.perform(post(apiSuffix + "/purchase/subscription")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer " + authToken)
+            .content(objectMapper.writeValueAsString(input))
+        ).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Should not create a subscription if provided installments are not allowed")
+    public void newSubscriptionWithInvalidInstallmentsValue() throws Exception {
+        NewSubscriptionPurchaseInput input = input();
+        input.setInstallments(2000);
+
+        mockMvc.perform(post(apiSuffix + "/purchase/subscription")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + authToken)
+                .content(objectMapper.writeValueAsString(input))
+            ).andExpect(jsonPath("$.message").value("Invalid stallments. Maximum installments allowed: 0"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Should not create a subscription if plan id is not provided")
+    public void newSubscriptionWithoutPlanId() throws Exception {
+        NewSubscriptionPurchaseInput input = input();
+        input.getPurchaseItems().get(0).setPlanId(null);
+
+        mockMvc.perform(post(apiSuffix + "/purchase/subscription")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer " + authToken)
+            .content(objectMapper.writeValueAsString(input))
+        ).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Should not create a subscription if purchase items has more than one item")
+    public void newSubscriptionWithInvalidPurchaseItems() throws Exception {
+        NewSubscriptionPurchaseInput input = input();
+        input.setPurchaseItems(List.of(
+            NewSubscriptionPurchaseInput.PurchaseItemInput.builder()
+                .planId(planPurchased.getId())
+                .build(),
+            NewSubscriptionPurchaseInput.PurchaseItemInput.builder()
+                .planId(planPurchased.getId())
+                .build()
+        ));
+
+        mockMvc.perform(post(apiSuffix + "/purchase/subscription")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + authToken)
+                .content(objectMapper.writeValueAsString(input))
+            ).andExpect(jsonPath("$.message").value("Invalid purchase item. Can't insert a plan twice on purchase items!"))
+            .andExpect(status().isBadRequest());
+    }
+
     private NewSubscriptionPurchaseInput input() {
         return NewSubscriptionPurchaseInput.builder()
             .paymentMethod(EPaymentMethod.CREDIT_CARD)
