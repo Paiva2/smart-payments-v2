@@ -249,7 +249,7 @@ public class RegisterUserUsecase implements UsecaseVoidPort<RegisterUserInput> {
             .ddi(user.getDdi())
             .phone(user.getPhone())
             .birthdate(user.getBirthdate())
-            .active(false) // user didnt active e-mail yet
+            .active(true)
             .emailConfirmedAt(user.getEmailConfirmedAt())
             .createdAt(user.getCreatedAt())
             .updatedAt(user.getUpdatedAt())
