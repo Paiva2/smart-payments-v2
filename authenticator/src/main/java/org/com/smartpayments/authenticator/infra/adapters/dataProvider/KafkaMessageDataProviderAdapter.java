@@ -14,4 +14,9 @@ public class KafkaMessageDataProviderAdapter implements AsyncMessageDataProvider
     public void sendMessage(String destination, Object data) {
         kafkaTemplate.send(destination, (String) data);
     }
+
+    @Override
+    public void sendMessage(String destination, String key, Object data) {
+        kafkaTemplate.send(destination, (String) data);
+    }
 }

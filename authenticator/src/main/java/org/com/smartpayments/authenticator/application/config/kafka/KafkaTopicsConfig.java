@@ -27,6 +27,12 @@ public class KafkaTopicsConfig {
     @Value("${spring.kafka.topics.mail-sender-dlt}")
     private String mailSenderDltTopic;
 
+    @Value("${spring.kafka.topics.new-user}")
+    private String newUserTopic;
+
+    @Value("${spring.kafka.topics.new-user-dlt}")
+    private String newUserTopicDlt;
+
     @Bean
     public KafkaAdmin admin() {
         Map<String, Object> configs = new HashMap<>();
@@ -41,7 +47,7 @@ public class KafkaTopicsConfig {
             put(TopicConfig.RETENTION_MS_CONFIG, MESSAGES_RETENTION_DEFAULT_MILLIS_THREE_DAYS);
         }};
 
-        return mountTopic(mailSenderTopic, topicConfigs);
+        return mountTopic(mailSenderTopic, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
     }
 
     @Bean
@@ -50,14 +56,32 @@ public class KafkaTopicsConfig {
             put(TopicConfig.RETENTION_MS_CONFIG, "-1");
         }};
 
-        return mountTopic(mailSenderDltTopic, topicConfigs);
+        return mountTopic(mailSenderDltTopic, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
     }
 
-    private NewTopic mountTopic(String topicName, Map<String, String> config) {
+    @Bean
+    public NewTopic newUserTopic() {
+        Map<String, String> topicConfigs = new HashMap<>() {{
+            put(TopicConfig.RETENTION_MS_CONFIG, "-1");
+        }};
+
+        return mountTopic(newUserTopic, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
+    }
+
+    @Bean
+    public NewTopic newUserTopicDlt() {
+        Map<String, String> topicConfigs = new HashMap<>() {{
+            put(TopicConfig.RETENTION_MS_CONFIG, "-1");
+        }};
+
+        return mountTopic(newUserTopicDlt, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
+    }
+
+    private NewTopic mountTopic(String topicName, int partitions, int replicas, Map<String, String> config) {
         return TopicBuilder
             .name(topicName)
-            .partitions(DEFAULT_PARTITION_COUNT)
-            .replicas(DEFAULT_REPLICAS_COUNT)
+            .partitions(partitions)
+            .replicas(replicas)
             .configs(config)
             .build();
     }

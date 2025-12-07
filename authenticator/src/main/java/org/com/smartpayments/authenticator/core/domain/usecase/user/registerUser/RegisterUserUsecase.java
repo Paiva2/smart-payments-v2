@@ -23,6 +23,9 @@ import org.com.smartpayments.authenticator.core.ports.out.dataProvider.AsyncMess
 import org.com.smartpayments.authenticator.core.ports.out.dataProvider.RoleDataProviderPort;
 import org.com.smartpayments.authenticator.core.ports.out.dataProvider.UserDataProviderPort;
 import org.com.smartpayments.authenticator.core.ports.out.dto.AsyncEmailOutput;
+import org.com.smartpayments.authenticator.core.ports.out.dto.AsyncMessageOutput;
+import org.com.smartpayments.authenticator.core.ports.out.dto.AsyncNewUserOutput;
+import org.com.smartpayments.authenticator.core.ports.out.utils.MessageUtilsPort;
 import org.com.smartpayments.authenticator.core.ports.out.utils.PasswordUtilsPort;
 import org.com.smartpayments.authenticator.core.ports.out.utils.PersonalDocumentUtilsPort;
 import org.com.smartpayments.authenticator.core.ports.out.utils.TokenUtilsPort;
@@ -58,9 +61,13 @@ public class RegisterUserUsecase implements UsecaseVoidPort<RegisterUserInput> {
     private final PersonalDocumentUtilsPort personalDocumentUtilsPort;
     private final PasswordUtilsPort passwordUtilsPort;
     private final TokenUtilsPort tokenUtilsPort;
+    private final MessageUtilsPort messageUtilsPort;
 
     @Value("${spring.kafka.topics.mail-sender}")
     private String SEND_EMAIL_TOPIC;
+
+    @Value("${spring.kafka.topics.new-user}")
+    private String NEW_USER_TOPIC;
 
     @Value("${kong.url}")
     private String GATEWAY_URL;
@@ -80,6 +87,7 @@ public class RegisterUserUsecase implements UsecaseVoidPort<RegisterUserInput> {
         persistUser(user);
 
         sendEmailActivationEmail(user);
+        sendAsyncNewUserMessage(user);
     }
 
     private void checkEmailUsed(String email) {
@@ -225,6 +233,47 @@ public class RegisterUserUsecase implements UsecaseVoidPort<RegisterUserInput> {
             asyncMessageDataProviderPort.sendMessage(SEND_EMAIL_TOPIC, mapper.writeValueAsString(email));
         } catch (JsonProcessingException e) {
             String message = "Error while sending email!";
+            log.error(message, e);
+            throw new GenericException(message);
+        }
+    }
+
+    private void sendAsyncNewUserMessage(User user) {
+        final AsyncNewUserOutput userOutput = AsyncNewUserOutput.builder()
+            .id(user.getId())
+            .firstName(user.getFirstName())
+            .lastName(user.getLastName())
+            .email(user.getEmail())
+            .cpfCnpj(user.getCpfCnpj())
+            .type(user.getType())
+            .ddi(user.getDdi())
+            .phone(user.getPhone())
+            .birthdate(user.getBirthdate())
+            .active(false) // user didnt active e-mail yet
+            .emailConfirmedAt(user.getEmailConfirmedAt())
+            .createdAt(user.getCreatedAt())
+            .updatedAt(user.getUpdatedAt())
+            .address(AsyncNewUserOutput.AsyncAddressOutput.builder()
+                .street(user.getAddress().getStreet())
+                .neighborhood(user.getAddress().getNeighborhood())
+                .number(user.getAddress().getNumber())
+                .zipcode(user.getAddress().getZipcode())
+                .complement(user.getAddress().getComplement())
+                .city(user.getAddress().getCity())
+                .state(user.getAddress().getState())
+                .country(user.getAddress().getCountry())
+                .build()
+            ).build();
+
+        final String messageIssuer = "AUTHENTICATOR";
+
+        AsyncMessageOutput<AsyncNewUserOutput> output =
+            new AsyncMessageOutput<>(messageUtilsPort.generateMessageHash(messageIssuer), new Date(), messageIssuer, userOutput);
+
+        try {
+            asyncMessageDataProviderPort.sendMessage(NEW_USER_TOPIC, user.getId().toString(), mapper.writeValueAsString(output));
+        } catch (JsonProcessingException e) {
+            String message = "Error while sending new user message!";
             log.error(message, e);
             throw new GenericException(message);
         }

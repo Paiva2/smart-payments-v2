@@ -19,6 +19,11 @@ public class UserDataProviderAdapter implements UserDataProviderPort {
     }
 
     @Override
+    public Optional<User> findById(Long id) {
+        return repository.findById(id);
+    }
+
+    @Override
     public User persist(User user) {
         return repository.save(user);
     }

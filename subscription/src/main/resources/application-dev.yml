@@ -1,33 +1,18 @@
-server:
-  port: 8082
-  api-suffix: api/subscription
-
 spring:
-  application:
-    name: subscription
-
   datasource:
     url: jdbc:postgresql://localhost:5433/subscription
     username: pg
     password: 123
 
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
-
-  jpa:
-    hibernate:
-      ddl-auto: none
-    show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: false
-
-  flyway:
-    placeholder-prefix: '#{'
-    placeholder-suffix: '}'
+  kafka:
+    enable: true
+    bootstrap-servers: localhost:9092
+    topics:
+      new-user: user.new-user-register
+      new-user-dlt: user.new-user-register.dlt
+    consumer:
+      auto-offset-reset: latest
+      group-id: subscription_group
 
 kong:
   url: http://localhost:8000
