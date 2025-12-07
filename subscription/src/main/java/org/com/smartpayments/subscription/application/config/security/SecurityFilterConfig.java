@@ -58,6 +58,11 @@ public class SecurityFilterConfig extends OncePerRequestFilter {
 
             UserAuthenticatorOutput authenticatorOutput = authenticatorClientPort.findUser(user.get().getId());
 
+            if (!authenticatorOutput.getActive()) {
+                response.sendError(HttpStatus.UNAUTHORIZED.value(), "User not active.");
+                return;
+            }
+
             UserDetailsImpl userDetails = UserDetailsImpl.builder()
                 .id(user.get().getId())
                 .userRoles(authenticatorOutput.getRoles())
