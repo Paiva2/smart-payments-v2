@@ -22,6 +22,7 @@ public class NewUserConsumer {
     private final NewUserUsecase newUserUsecase;
 
     @KafkaListener(
+        id = "newUserConsumer",
         topics = "${spring.kafka.topics.new-user}",
         groupId = "${spring.kafka.consumer.group-id}",
         containerFactory = "newUserTopicContainerFactory"

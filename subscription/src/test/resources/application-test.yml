@@ -13,6 +13,17 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+  kafka:
+    enable: true
+    topics:
+      new-user: user.new-user-register
+      new-user-dlt: user.new-user-register.dlt
+    consumer:
+      auto-offset-reset: latest
+      group-id: subscription_group
+    listener:
+      auto-startup: true
+
   flyway:
     enabled: true
     locations: classpath:db/migration

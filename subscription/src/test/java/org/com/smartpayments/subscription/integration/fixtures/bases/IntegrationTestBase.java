@@ -30,6 +30,9 @@ public abstract class IntegrationTestBase {
         if (!Containers.POSTGRES.isRunning()) {
             Containers.POSTGRES.start();
         }
+        if (!Containers.KAFKA.isRunning()) {
+            Containers.KAFKA.start();
+        }
     }
 
     @DynamicPropertySource
@@ -37,6 +40,8 @@ public abstract class IntegrationTestBase {
         registry.add("spring.datasource.url", Containers.POSTGRES::getJdbcUrl);
         registry.add("spring.datasource.username", Containers.POSTGRES::getUsername);
         registry.add("spring.datasource.password", Containers.POSTGRES::getPassword);
+
+        registry.add("spring.kafka.bootstrap-servers", Containers.KAFKA::getBootstrapServers);
 
         registry.add("external.payment-gateway.uri", () -> wireMockServer.baseUrl() + "/v3/");
         registry.add("external.authenticator.uri", () -> wireMockServer.baseUrl() + "/api/authenticator/");
