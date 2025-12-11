@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 @Slf4j
 @Service
@@ -50,7 +49,7 @@ public class CreatePurchaseChargeUsecase implements UsecaseVoidPort<CreatePurcha
             .paymentDate(input.getPaymentDate())
             .dueDate(input.getDueDate())
             .paymentUrl(isNull(input.getInvoiceUrl()) ? input.getBankSlipUrl() : input.getInvoiceUrl())
-            .purchase(isNull(input.getPurchase()) && isNull(input.getPurchaseId()) ? null : handlePurchase(input))
+            .purchase(handlePurchase(input))
             .paymentDate(input.getPaymentDate())
             .build();
     }
@@ -60,9 +59,7 @@ public class CreatePurchaseChargeUsecase implements UsecaseVoidPort<CreatePurcha
     }
 
     private Purchase handlePurchase(CreatePurchaseChargeInput input) {
-        if (nonNull(input.getPurchase())) return input.getPurchase();
-
-        return purchaseDataProviderPort.findByExternalId(input.getExternalChargeId())
+        return purchaseDataProviderPort.findByExternalId(input.getExternalPurchaseId())
             .orElseThrow(() -> new PurchaseNotFoundException("Purchase provided not found!"));
     }
 }

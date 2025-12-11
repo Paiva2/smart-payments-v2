@@ -10,6 +10,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -21,6 +23,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(req -> {
             req.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll();
+            req.requestMatchers(publicEndpoints()).permitAll();
             req.anyRequest().hasAnyRole("MEMBER", "ADMIN");
         });
 
@@ -36,4 +39,9 @@ public class SecurityConfig {
         return http.build();
     }
 
+    private RequestMatcher publicEndpoints() {
+        return new OrRequestMatcher(
+            securityFilterConfig.NON_FILTERABLE_ENDPOINTS.getFirst()
+        );
+    }
 }

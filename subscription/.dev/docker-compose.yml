@@ -13,6 +13,22 @@ services:
     networks:
       - smart-payments
 
+  subscription-cache:
+    container_name: "subscription-cache"
+    image: redis:6.2-alpine
+    restart: always
+    command: redis-server --save 20 1 --loglevel debug --requirepass admin
+    volumes:
+      - cache:/data
+    ports:
+      - "6380:6379"
+    networks:
+      - smart-payments
+
 networks:
   smart-payments:
     external: true
+
+volumes:
+  cache:
+    driver: local

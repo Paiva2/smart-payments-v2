@@ -29,7 +29,9 @@ import static java.util.Objects.isNull;
 @Component
 @RequiredArgsConstructor
 public class SecurityFilterConfig extends OncePerRequestFilter {
-    public final List<AntPathRequestMatcher> NON_FILTERABLE_ENDPOINTS = List.of();
+    public final List<AntPathRequestMatcher> NON_FILTERABLE_ENDPOINTS = List.of(
+        new AntPathRequestMatcher("/api/subscription/purchase/webhook")
+    );
     public final List<AntPathRequestMatcher> NON_FILTERABLE_ENDPOINTS_INTERNAL = List.of();
 
     private final UserDataProviderPort userDataProviderPort;

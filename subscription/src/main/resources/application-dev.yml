@@ -10,9 +10,20 @@ spring:
     topics:
       new-user: user.new-user-register
       new-user-dlt: user.new-user-register.dlt
+      new-purchase-charge: purchase-charge.new-charge
+      new-purchase-charge-dlt: purchase-charge.new-charge.dlt
     consumer:
       auto-offset-reset: latest
       group-id: subscription_group
+
+  cache:
+    enabled: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6380
+      password: admin
 
 kong:
   url: http://localhost:8000
@@ -25,6 +36,8 @@ external:
   payment-gateway:
     uri: https://api-sandbox.asaas.com/v3/
     api-key: ${ASAAS_API_KEY}
+    webhook:
+      api-key: SUPER_SECRET_KEY
   authenticator:
     uri: ${kong.url}/api/authenticator/
     external-services-key: INTERNAL_SUPER_SECRET

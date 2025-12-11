@@ -6,6 +6,9 @@ spring:
   application:
     name: subscription
 
+  cache:
+    enabled: false
+
   jpa:
     hibernate:
       ddl-auto: none

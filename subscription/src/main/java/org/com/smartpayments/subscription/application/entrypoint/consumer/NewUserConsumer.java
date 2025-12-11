@@ -25,7 +25,7 @@ public class NewUserConsumer {
         id = "newUserConsumer",
         topics = "${spring.kafka.topics.new-user}",
         groupId = "${spring.kafka.consumer.group-id}",
-        containerFactory = "newUserTopicContainerFactory"
+        containerFactory = "topicWithDltContainerFactory"
     )
     public void execute(String message) {
         try {

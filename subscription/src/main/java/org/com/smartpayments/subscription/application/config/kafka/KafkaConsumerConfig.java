@@ -13,6 +13,7 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.util.backoff.FixedBackOff;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,9 +26,6 @@ public class KafkaConsumerConfig {
 
     @Value("${spring.kafka.consumer.group-id}")
     private String groupId;
-
-    @Value("${spring.kafka.topics.new-user-dlt}")
-    private String newUserTopicDlt;
 
     @Bean
     public ConsumerFactory<String, String> defaultConsumerFactory() {
@@ -49,15 +47,44 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, String> newUserTopicContainerFactory(
+    public ConcurrentKafkaListenerContainerFactory<String, String> topicWithDltContainerFactory(
         ConsumerFactory<String, String> defaultConsumerFactory,
         KafkaTemplate<String, String> kafkaTemplate
     ) {
-        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate, (record, exception) ->
-            new TopicPartition(newUserTopicDlt, record.partition())
-        );
+        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate, (record, exception) -> {
+            String originalTopic = record.topic();
+            String topicDlt = originalTopic.concat(".dlt");
+            return new TopicPartition(topicDlt, record.partition());
+        });
 
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer);
+
+        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+
+        factory.setCommonErrorHandler(errorHandler);
+        factory.setConsumerFactory(defaultConsumerFactory);
+
+        return factory;
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, String> topicWithDltFixedRetryContainerFactory(
+        ConsumerFactory<String, String> defaultConsumerFactory,
+        KafkaTemplate<String, String> kafkaTemplate
+    ) {
+        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate, (record, exception) -> {
+            String originalTopic = record.topic();
+            String topicDlt = originalTopic.concat(".dlt");
+            return new TopicPartition(topicDlt, record.partition());
+        });
+
+        final int maxAttempts = 5;
+        final long interval = 5000L;
+
+        DefaultErrorHandler errorHandler = new DefaultErrorHandler(
+            recoverer,
+            new FixedBackOff(interval, maxAttempts)
+        );
 
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
