@@ -21,6 +21,8 @@ spring:
     topics:
       new-user: user.new-user-register
       new-user-dlt: user.new-user-register.dlt
+      new-purchase-charge: purchase-charge.new-charge
+      new-purchase-charge-dlt: purchase-charge.new-charge.dlt
     consumer:
       auto-offset-reset: latest
       group-id: subscription_group
@@ -45,6 +47,8 @@ external:
   payment-gateway:
     uri: https://api-sandbox.asaas.com/v3/
     api-key: test-key
+    webhook:
+      api-key: test-key
   authenticator:
     uri: ${kong.url}/api/authenticator
     external-services-key: test-key
