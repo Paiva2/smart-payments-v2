@@ -4,12 +4,16 @@ import com.github.javafaker.Faker;
 import lombok.SneakyThrows;
 import org.com.smartpayments.subscription.core.domain.enums.EBrState;
 import org.com.smartpayments.subscription.core.domain.enums.ECountry;
+import org.com.smartpayments.subscription.core.domain.enums.EPlan;
+import org.com.smartpayments.subscription.core.domain.enums.ESubscriptionStatus;
 import org.com.smartpayments.subscription.core.domain.enums.EUserType;
 import org.com.smartpayments.subscription.core.domain.model.User;
+import org.com.smartpayments.subscription.core.domain.model.UserSubscription;
 import org.com.smartpayments.subscription.core.domain.usecase.user.newUser.NewUserUsecase;
 import org.com.smartpayments.subscription.core.ports.in.dto.AsyncMessageInput;
 import org.com.smartpayments.subscription.core.ports.in.dto.AsyncNewUserInput;
 import org.com.smartpayments.subscription.infra.persistence.repository.UserRepository;
+import org.com.smartpayments.subscription.infra.persistence.repository.UserSubscriptionRepository;
 import org.com.smartpayments.subscription.integration.fixtures.bases.IntegrationTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +23,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -44,6 +49,9 @@ public class NewUserTest extends IntegrationTestBase {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private UserSubscriptionRepository userSubscriptionRepository;
+
     @Value("${spring.kafka.topics.new-user}")
     private String newUserTopic;
 
@@ -68,6 +76,13 @@ public class NewUserTest extends IntegrationTestBase {
                 Optional<User> userCreated = userRepository.findById(USER_ID);
                 assertTrue(userCreated.isPresent());
                 assertEquals(userCreated.get().getEmail(), input.getData().getEmail());
+
+                Optional<UserSubscription> userSubscription = userSubscriptionRepository.findByUserIdWithPlan(userCreated.get().getId());
+
+                assertTrue(userSubscription.isPresent());
+                assertEquals(ESubscriptionStatus.ACTIVE, userSubscription.get().getStatus());
+                assertEquals(new BigDecimal("0.00"), userSubscription.get().getValue());
+                assertEquals(EPlan.FREE, userSubscription.get().getPlan().getType());
             });
     }
 

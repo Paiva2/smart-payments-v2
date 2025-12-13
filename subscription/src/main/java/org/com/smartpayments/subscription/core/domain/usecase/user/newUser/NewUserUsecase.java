@@ -2,14 +2,22 @@ package org.com.smartpayments.subscription.core.domain.usecase.user.newUser;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.com.smartpayments.subscription.core.common.exception.PlanNotFoundException;
 import org.com.smartpayments.subscription.core.domain.enums.ECountry;
+import org.com.smartpayments.subscription.core.domain.enums.EPlan;
+import org.com.smartpayments.subscription.core.domain.enums.ESubscriptionStatus;
 import org.com.smartpayments.subscription.core.domain.model.Address;
+import org.com.smartpayments.subscription.core.domain.model.Plan;
 import org.com.smartpayments.subscription.core.domain.model.User;
+import org.com.smartpayments.subscription.core.domain.model.UserSubscription;
 import org.com.smartpayments.subscription.core.ports.in.UsecaseVoidPort;
 import org.com.smartpayments.subscription.core.ports.in.dto.AsyncNewUserInput;
+import org.com.smartpayments.subscription.core.ports.out.dataprovider.PlanDataProviderPort;
 import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserDataProviderPort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Slf4j
@@ -17,7 +25,9 @@ import java.util.Optional;
 @AllArgsConstructor
 public class NewUserUsecase implements UsecaseVoidPort<AsyncNewUserInput> {
     private final UserDataProviderPort userDataProviderPort;
+    private final PlanDataProviderPort planDataProviderPort;
 
+    @Transactional
     public void execute(AsyncNewUserInput input) {
         Optional<User> userExists = userDataProviderPort.findById(input.getId());
 
@@ -49,6 +59,9 @@ public class NewUserUsecase implements UsecaseVoidPort<AsyncNewUserInput> {
         Address address = fillAddress(input, user);
         user.setAddress(address);
 
+        UserSubscription userSubscription = fillUserSubscription(user);
+        user.setSubscription(userSubscription);
+
         return user;
     }
 
@@ -64,5 +77,20 @@ public class NewUserUsecase implements UsecaseVoidPort<AsyncNewUserInput> {
             .country(ECountry.BR)
             .user(user)
             .build();
+    }
+
+    private UserSubscription fillUserSubscription(User user) {
+        return UserSubscription.builder()
+            .value(BigDecimal.valueOf(0))
+            .status(ESubscriptionStatus.ACTIVE)
+            .nextPaymentDate(null)
+            .recurrence(null)
+            .user(user)
+            .plan(findFreePlan())
+            .build();
+    }
+
+    private Plan findFreePlan() {
+        return planDataProviderPort.findByType(EPlan.FREE).orElseThrow(() -> new PlanNotFoundException("FREE plan not found!"));
     }
 }

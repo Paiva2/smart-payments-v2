@@ -2,15 +2,19 @@ package org.com.smartpayments.authenticator.integration.core.domain.usecase.user
 
 import com.github.javafaker.Faker;
 import org.com.smartpayments.authenticator.core.domain.enums.EBrState;
+import org.com.smartpayments.authenticator.core.domain.enums.EPlan;
 import org.com.smartpayments.authenticator.core.domain.enums.ERole;
+import org.com.smartpayments.authenticator.core.domain.enums.ESubscriptionStatus;
 import org.com.smartpayments.authenticator.core.domain.enums.EUserType;
 import org.com.smartpayments.authenticator.core.domain.model.Address;
 import org.com.smartpayments.authenticator.core.domain.model.User;
 import org.com.smartpayments.authenticator.core.domain.model.UserRole;
+import org.com.smartpayments.authenticator.core.domain.model.UserSubscription;
 import org.com.smartpayments.authenticator.core.ports.in.dto.RegisterUserInput;
 import org.com.smartpayments.authenticator.infra.persistence.repository.AddressRepository;
 import org.com.smartpayments.authenticator.infra.persistence.repository.UserRepository;
 import org.com.smartpayments.authenticator.infra.persistence.repository.UserRoleRepository;
+import org.com.smartpayments.authenticator.infra.persistence.repository.UserSubscriptionRepository;
 import org.com.smartpayments.authenticator.integration.fixtures.bases.IntegrationTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,6 +49,9 @@ class RegisterUserIntegrationTest extends IntegrationTestBase {
 
     @Autowired
     private AddressRepository addressRepository;
+
+    @Autowired
+    private UserSubscriptionRepository userSubscriptionRepository;
 
     @Autowired
     private UserRoleRepository userRoleRepository;
@@ -86,6 +93,12 @@ class RegisterUserIntegrationTest extends IntegrationTestBase {
         assertFalse(userRoles.isEmpty());
         assertNotNull(userRoles.getFirst());
         assertEquals(ERole.MEMBER, userRoles.getFirst().getRole().getName());
+
+        Optional<UserSubscription> userSubscription = userSubscriptionRepository.findByUserId(user.get().getId());
+        assertTrue(userSubscription.isPresent());
+        assertNotNull(userSubscription.get().getId());
+        assertEquals(EPlan.FREE, userSubscription.get().getPlan());
+        assertEquals(ESubscriptionStatus.ACTIVE, userSubscription.get().getStatus());
 
         verify(kafkaTemplate, times(1)).send(eq(SEND_EMAIL_TOPIC), anyString());
     }
