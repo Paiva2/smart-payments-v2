@@ -66,6 +66,9 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Address address;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private UserSubscription subscription;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     private List<Purchase> purchases;
 }

@@ -46,6 +46,24 @@ public class Plan {
     @Column(name = "active", nullable = false)
     private Boolean active;
 
+    @Column(name = "unlimited_email_credits", nullable = false)
+    private Boolean unlimitedEmailCredits;
+
+    @Column(name = "email_credits_quantity", nullable = false)
+    private Integer emailCreditsQuantity;
+
+    @Column(name = "unlimited_whats_app_credits", nullable = false)
+    private Boolean unlimitedWhatsAppCredits;
+
+    @Column(name = "whats_app_credits_quantity", nullable = false)
+    private Integer whatsAppCreditsQuantity;
+
+    @Column(name = "unlimited_sms_credits", nullable = false)
+    private Boolean unlimitedSmsCredits;
+
+    @Column(name = "sms_credits_quantity", nullable = false)
+    private Integer smsCreditsQuantity;
+
     @Column(name = "description")
     private String description;
 
@@ -59,4 +77,7 @@ public class Plan {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "plan")
     private List<PurchaseItem> purchaseItems;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "plan")
+    private List<UserSubscription> subscriptions;
 }
