@@ -30,7 +30,7 @@ public class PurchaseUtils {
         Purchase purchase = Purchase.builder()
             .externalId("pay_id")
             .paymentMethod(EPaymentMethod.CREDIT_CARD)
-            .totalValue(BigDecimal.valueOf(20))
+            .totalValue(new BigDecimal("20.00"))
             .status(EPurchaseStatus.PENDING)
             .purchaseType(type)
             .installments(0)
