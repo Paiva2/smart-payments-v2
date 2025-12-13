@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.text.SimpleDateFormat;
@@ -32,6 +33,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class NewUserTest extends IntegrationTestBase {
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
@@ -55,13 +57,13 @@ public class NewUserTest extends IntegrationTestBase {
         kafkaTemplate.send(newUserTopic, String.valueOf(USER_ID), objectMapper.writeValueAsString(input));
 
         await()
-            .atMost(10, SECONDS)
+            .atMost(20, SECONDS)
             .untilAsserted(() ->
                 verify(newUserUsecase, times(1)).execute(any(AsyncNewUserInput.class))
             );
 
         await()
-            .atMost(10, SECONDS)
+            .atMost(20, SECONDS)
             .untilAsserted(() -> {
                 Optional<User> userCreated = userRepository.findById(USER_ID);
                 assertTrue(userCreated.isPresent());

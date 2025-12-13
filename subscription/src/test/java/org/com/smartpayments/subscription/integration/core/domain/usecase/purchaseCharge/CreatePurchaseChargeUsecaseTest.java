@@ -12,7 +12,6 @@ import org.com.smartpayments.subscription.core.domain.model.PurchaseCharge;
 import org.com.smartpayments.subscription.core.domain.model.User;
 import org.com.smartpayments.subscription.core.ports.in.dto.AsyncMessageInput;
 import org.com.smartpayments.subscription.core.ports.in.dto.CreatePurchaseChargeInput;
-import org.com.smartpayments.subscription.core.ports.out.dataprovider.CacheDataProviderPort;
 import org.com.smartpayments.subscription.infra.persistence.repository.CreditRepository;
 import org.com.smartpayments.subscription.infra.persistence.repository.PlanRepository;
 import org.com.smartpayments.subscription.infra.persistence.repository.PurchaseChargeRepository;
@@ -25,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.Date;
 import java.util.List;
@@ -34,11 +33,8 @@ import java.util.Optional;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
 
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class CreatePurchaseChargeUsecaseTest extends IntegrationTestBase {
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
@@ -54,9 +50,6 @@ public class CreatePurchaseChargeUsecaseTest extends IntegrationTestBase {
 
     @Autowired
     private PurchaseChargeRepository purchaseChargeRepository;
-
-    @MockitoBean
-    private CacheDataProviderPort cacheDataProviderPort;
 
     @Autowired
     private UserUtils userUtils;
@@ -81,8 +74,7 @@ public class CreatePurchaseChargeUsecaseTest extends IntegrationTestBase {
 
     @BeforeEach
     public void beforeEach() {
-        when(cacheDataProviderPort.existsByKey(anyString())).thenReturn(false);
-        doNothing().when(cacheDataProviderPort).persist(anyString(), anyString(), any());
+
     }
 
     @Test
