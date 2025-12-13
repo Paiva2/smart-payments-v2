@@ -9,12 +9,15 @@ import org.com.smartpayments.authenticator.core.common.exception.GenericExceptio
 import org.com.smartpayments.authenticator.core.common.exception.GenericPasswordInvalidException;
 import org.com.smartpayments.authenticator.core.common.exception.RoleNotFoundException;
 import org.com.smartpayments.authenticator.core.domain.enums.ECountry;
+import org.com.smartpayments.authenticator.core.domain.enums.EPlan;
 import org.com.smartpayments.authenticator.core.domain.enums.ERole;
+import org.com.smartpayments.authenticator.core.domain.enums.ESubscriptionStatus;
 import org.com.smartpayments.authenticator.core.domain.enums.EUserType;
 import org.com.smartpayments.authenticator.core.domain.model.Address;
 import org.com.smartpayments.authenticator.core.domain.model.Role;
 import org.com.smartpayments.authenticator.core.domain.model.User;
 import org.com.smartpayments.authenticator.core.domain.model.UserRole;
+import org.com.smartpayments.authenticator.core.domain.model.UserSubscription;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.registerUser.exception.DocumentAlreadyUsedException;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.registerUser.exception.EmailAlreadyUsedException;
 import org.com.smartpayments.authenticator.core.ports.in.UsecaseVoidPort;
@@ -33,6 +36,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -153,6 +157,23 @@ public class RegisterUserUsecase implements UsecaseVoidPort<RegisterUserInput> {
             .build();
     }
 
+    private UserSubscription fillUserSubscription(User user) {
+        return UserSubscription.builder()
+            .value(BigDecimal.valueOf(0))
+            .nextPaymentDate(null)
+            .status(ESubscriptionStatus.ACTIVE)
+            .recurrence(null)
+            .plan(EPlan.FREE)
+            .unlimitedEmailCredits(false)
+            .unlimitedWhatsAppCredits(false)
+            .unlimitedSmsCredits(false)
+            .emailCredits(5)
+            .whatsAppCredits(5)
+            .smsCredits(5)
+            .user(user)
+            .build();
+    }
+
     private String generateEmailToken() {
         final int MAX_GENERATED_TOKEN_ATTEMPTS = 10;
         final int TOKEN_BYTES = 32;
@@ -197,9 +218,11 @@ public class RegisterUserUsecase implements UsecaseVoidPort<RegisterUserInput> {
 
         final Address address = fillAddress(input, newUser);
         final UserRole userRole = fillUserRole(newUser);
+        final UserSubscription userSubscription = fillUserSubscription(newUser);
 
         newUser.setAddress(address);
         newUser.getUserRoles().add(userRole);
+        newUser.setUserSubscription(userSubscription);
 
         return newUser;
     }
