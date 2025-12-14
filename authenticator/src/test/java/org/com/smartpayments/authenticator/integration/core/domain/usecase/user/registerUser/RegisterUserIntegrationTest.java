@@ -94,11 +94,19 @@ class RegisterUserIntegrationTest extends IntegrationTestBase {
         assertNotNull(userRoles.getFirst());
         assertEquals(ERole.MEMBER, userRoles.getFirst().getRole().getName());
 
+        final int DEFAULT_SAMPLE_CREDITS_QUANTITY = 5;
+
         Optional<UserSubscription> userSubscription = userSubscriptionRepository.findByUserId(user.get().getId());
         assertTrue(userSubscription.isPresent());
         assertNotNull(userSubscription.get().getId());
         assertEquals(EPlan.FREE, userSubscription.get().getPlan());
         assertEquals(ESubscriptionStatus.ACTIVE, userSubscription.get().getStatus());
+        assertEquals(DEFAULT_SAMPLE_CREDITS_QUANTITY, userSubscription.get().getEmailCredits());
+        assertEquals(DEFAULT_SAMPLE_CREDITS_QUANTITY, userSubscription.get().getSmsCredits());
+        assertEquals(DEFAULT_SAMPLE_CREDITS_QUANTITY, userSubscription.get().getWhatsAppCredits());
+        assertFalse(userSubscription.get().getUnlimitedEmailCredits());
+        assertFalse(userSubscription.get().getUnlimitedSmsCredits());
+        assertFalse(userSubscription.get().getUnlimitedWhatsAppCredits());
 
         verify(kafkaTemplate, times(1)).send(eq(SEND_EMAIL_TOPIC), anyString());
     }

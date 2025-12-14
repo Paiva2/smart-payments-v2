@@ -6,12 +6,15 @@ import lombok.SneakyThrows;
 import org.com.smartpayments.authenticator.core.common.exception.RoleNotFoundException;
 import org.com.smartpayments.authenticator.core.domain.enums.EBrState;
 import org.com.smartpayments.authenticator.core.domain.enums.ECountry;
+import org.com.smartpayments.authenticator.core.domain.enums.EPlan;
 import org.com.smartpayments.authenticator.core.domain.enums.ERole;
+import org.com.smartpayments.authenticator.core.domain.enums.ESubscriptionStatus;
 import org.com.smartpayments.authenticator.core.domain.enums.EUserType;
 import org.com.smartpayments.authenticator.core.domain.model.Address;
 import org.com.smartpayments.authenticator.core.domain.model.Role;
 import org.com.smartpayments.authenticator.core.domain.model.User;
 import org.com.smartpayments.authenticator.core.domain.model.UserRole;
+import org.com.smartpayments.authenticator.core.domain.model.UserSubscription;
 import org.com.smartpayments.authenticator.core.ports.out.dataProvider.RoleDataProviderPort;
 import org.com.smartpayments.authenticator.core.ports.out.dataProvider.UserDataProviderPort;
 import org.com.smartpayments.authenticator.core.ports.out.utils.JwtUtilsPort;
@@ -19,6 +22,7 @@ import org.com.smartpayments.authenticator.core.ports.out.utils.PasswordUtilsPor
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -58,9 +62,11 @@ public class UserUtils {
 
         final Address address = fillAddress(newUser);
         final UserRole userRole = fillUserRole(role, newUser);
+        final UserSubscription userSubscription = fillUserSubscription(newUser);
 
         newUser.setAddress(address);
         newUser.getUserRoles().add(userRole);
+        newUser.setUserSubscription(userSubscription);
 
         return userDataProviderPort.persist(newUser);
     }
@@ -90,6 +96,23 @@ public class UserUtils {
             .state(EBrState.SP)
             .complement("test_complement")
             .country(ECountry.BR)
+            .user(user)
+            .build();
+    }
+
+    private UserSubscription fillUserSubscription(User user) {
+        return UserSubscription.builder()
+            .value(new BigDecimal(0))
+            .nextPaymentDate(null)
+            .status(ESubscriptionStatus.ACTIVE)
+            .recurrence(null)
+            .plan(EPlan.FREE)
+            .unlimitedEmailCredits(false)
+            .emailCredits(5)
+            .unlimitedWhatsAppCredits(false)
+            .whatsAppCredits(5)
+            .unlimitedSmsCredits(false)
+            .smsCredits(5)
             .user(user)
             .build();
     }

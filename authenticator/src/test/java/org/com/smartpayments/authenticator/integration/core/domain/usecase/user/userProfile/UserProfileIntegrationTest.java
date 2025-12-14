@@ -1,6 +1,8 @@
 package org.com.smartpayments.authenticator.integration.core.domain.usecase.user.userProfile;
 
+import org.com.smartpayments.authenticator.core.domain.enums.EPlan;
 import org.com.smartpayments.authenticator.core.domain.enums.ERole;
+import org.com.smartpayments.authenticator.core.domain.enums.ESubscriptionStatus;
 import org.com.smartpayments.authenticator.core.domain.model.User;
 import org.com.smartpayments.authenticator.core.ports.out.dataProvider.ImageUploadDataProviderPort;
 import org.com.smartpayments.authenticator.integration.fixtures.bases.IntegrationTestBase;
@@ -62,6 +64,12 @@ public class UserProfileIntegrationTest extends IntegrationTestBase {
             .andExpect(jsonPath("$.active").isNotEmpty())
             .andExpect(jsonPath("$.emailConfirmedAt").isNotEmpty())
             .andExpect(jsonPath("$.address").isNotEmpty())
+            .andExpect(jsonPath("$.subscription").isNotEmpty())
+            .andExpect(jsonPath("$.subscription.status").value(ESubscriptionStatus.ACTIVE.name()))
+            .andExpect(jsonPath("$.subscription.plan").value(EPlan.FREE.name()))
+            .andExpect(jsonPath("$.subscription.emailCredits").value(5))
+            .andExpect(jsonPath("$.subscription.whatsAppCredits").value(5))
+            .andExpect(jsonPath("$.subscription.smsCredits").value(5))
             .andExpect(jsonPath("$.roles").isNotEmpty());
     }
 

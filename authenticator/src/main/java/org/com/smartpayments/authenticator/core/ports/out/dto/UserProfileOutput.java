@@ -32,5 +32,6 @@ public class UserProfileOutput implements Serializable {
     private Date updatedAt;
     private Date emailConfirmedAt;
     private AddressOutput address;
+    private UserSubscriptionOutput subscription;
     private List<RoleOutput> roles;
 }

@@ -54,6 +54,7 @@ import static java.util.Objects.isNull;
 @RequiredArgsConstructor
 public class RegisterUserUsecase implements UsecaseVoidPort<RegisterUserInput> {
     private final static ObjectMapper mapper = new ObjectMapper();
+    private final static Integer DEFAULT_SAMPLE_CREDITS_QUANTITY = 5;
     private final static Integer LINK_EXPIRATION_IN_DAYS = 1;
     private final static String MAIL_ACTIVATION_TEMPLATE = "user-email-activation";
     private final static String MAIL_ACTIVATION_SUBJECT = "Welcome to smart payments!";
@@ -167,9 +168,9 @@ public class RegisterUserUsecase implements UsecaseVoidPort<RegisterUserInput> {
             .unlimitedEmailCredits(false)
             .unlimitedWhatsAppCredits(false)
             .unlimitedSmsCredits(false)
-            .emailCredits(5)
-            .whatsAppCredits(5)
-            .smsCredits(5)
+            .emailCredits(DEFAULT_SAMPLE_CREDITS_QUANTITY)
+            .whatsAppCredits(DEFAULT_SAMPLE_CREDITS_QUANTITY)
+            .smsCredits(DEFAULT_SAMPLE_CREDITS_QUANTITY)
             .user(user)
             .build();
     }

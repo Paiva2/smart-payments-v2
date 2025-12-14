@@ -168,6 +168,7 @@ public class User {
             .active(this.active)
             .createdAt(this.createdAt)
             .updatedAt(this.updatedAt)
+            .subscription(isEmpty(this.userSubscription) ? null : this.userSubscription.toUserSubscriptionOutput())
             .address(isEmpty(this.address) ? null : this.address.toAddressOutput())
             .roles(isEmpty(this.userRoles) ? null : this.userRoles.stream().map(UserRole::getRole).map(Role::toRoleOutput).toList())
             .emailConfirmedAt(this.emailConfirmedAt)

@@ -20,6 +20,7 @@ import lombok.Setter;
 import org.com.smartpayments.authenticator.core.domain.enums.EPlan;
 import org.com.smartpayments.authenticator.core.domain.enums.ESubscriptionRecurrence;
 import org.com.smartpayments.authenticator.core.domain.enums.ESubscriptionStatus;
+import org.com.smartpayments.authenticator.core.ports.out.dto.UserSubscriptionOutput;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -76,4 +77,20 @@ public class UserSubscription {
     @JoinColumn(name = "user_id")
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private User user;
+
+    public UserSubscriptionOutput toUserSubscriptionOutput() {
+        return UserSubscriptionOutput.builder()
+            .value(this.value)
+            .nextPaymentDate(this.nextPaymentDate)
+            .status(this.status)
+            .recurrence(this.recurrence)
+            .plan(this.plan)
+            .unlimitedEmailCredits(this.unlimitedEmailCredits)
+            .emailCredits(this.emailCredits)
+            .unlimitedWhatsAppCredits(this.unlimitedWhatsAppCredits)
+            .whatsAppCredits(this.whatsAppCredits)
+            .unlimitedSmsCredits(this.unlimitedSmsCredits)
+            .smsCredits(this.smsCredits)
+            .build();
+    }
 }
