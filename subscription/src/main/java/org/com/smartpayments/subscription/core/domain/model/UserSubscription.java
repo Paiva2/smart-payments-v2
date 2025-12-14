@@ -69,6 +69,9 @@ public class UserSubscription {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "userSubscription")
     private List<UserSubscriptionCreditRecurrence> creditRecurrences;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "userSubscription")
+    private List<UserSubscriptionCreditHistory> creditHistory;
+
     @JoinColumn(name = "user_id", nullable = false)
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private User user;

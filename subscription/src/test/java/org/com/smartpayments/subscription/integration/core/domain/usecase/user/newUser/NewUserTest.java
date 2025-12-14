@@ -4,15 +4,19 @@ import com.github.javafaker.Faker;
 import lombok.SneakyThrows;
 import org.com.smartpayments.subscription.core.domain.enums.EBrState;
 import org.com.smartpayments.subscription.core.domain.enums.ECountry;
+import org.com.smartpayments.subscription.core.domain.enums.ECredit;
+import org.com.smartpayments.subscription.core.domain.enums.ECreditTransactionType;
 import org.com.smartpayments.subscription.core.domain.enums.EPlan;
 import org.com.smartpayments.subscription.core.domain.enums.ESubscriptionStatus;
 import org.com.smartpayments.subscription.core.domain.enums.EUserType;
 import org.com.smartpayments.subscription.core.domain.model.User;
 import org.com.smartpayments.subscription.core.domain.model.UserSubscription;
+import org.com.smartpayments.subscription.core.domain.model.UserSubscriptionCreditHistory;
 import org.com.smartpayments.subscription.core.domain.usecase.user.newUser.NewUserUsecase;
 import org.com.smartpayments.subscription.core.ports.in.dto.AsyncMessageInput;
 import org.com.smartpayments.subscription.core.ports.in.dto.AsyncNewUserInput;
 import org.com.smartpayments.subscription.infra.persistence.repository.UserRepository;
+import org.com.smartpayments.subscription.infra.persistence.repository.UserSubscriptionCreditHistoryRepository;
 import org.com.smartpayments.subscription.infra.persistence.repository.UserSubscriptionRepository;
 import org.com.smartpayments.subscription.integration.fixtures.bases.IntegrationTestBase;
 import org.junit.jupiter.api.DisplayName;
@@ -26,14 +30,15 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.com.smartpayments.subscription.integration.constants.TestConstants.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -48,6 +53,9 @@ public class NewUserTest extends IntegrationTestBase {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserSubscriptionCreditHistoryRepository userSubscriptionCreditHistoryRepository;
 
     @Autowired
     private UserSubscriptionRepository userSubscriptionRepository;
@@ -83,6 +91,17 @@ public class NewUserTest extends IntegrationTestBase {
                 assertEquals(ESubscriptionStatus.ACTIVE, userSubscription.get().getStatus());
                 assertEquals(new BigDecimal("0.00"), userSubscription.get().getValue());
                 assertEquals(EPlan.FREE, userSubscription.get().getPlan().getType());
+
+                List<UserSubscriptionCreditHistory> creditsList = userSubscriptionCreditHistoryRepository.findAllByUserSubscriptionId(userSubscription.get().getId());
+                assertFalse(creditsList.isEmpty());
+                assertTrue(creditsList.stream().anyMatch(creditHistory ->
+                        creditHistory.getCreditType().equals(ECredit.EMAIL)
+                            && creditHistory.getAmount() == 5
+                            && creditHistory.getTransactionType().equals(ECreditTransactionType.SAMPLE_GRANT)
+                            && Objects.isNull(creditHistory.getValidFrom())
+                            && Objects.isNull(creditHistory.getExpiresAt())
+                    )
+                );
             });
     }
 

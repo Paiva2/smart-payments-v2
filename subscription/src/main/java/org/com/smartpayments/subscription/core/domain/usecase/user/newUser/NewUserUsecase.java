@@ -4,28 +4,38 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.com.smartpayments.subscription.core.common.exception.PlanNotFoundException;
 import org.com.smartpayments.subscription.core.domain.enums.ECountry;
+import org.com.smartpayments.subscription.core.domain.enums.ECredit;
 import org.com.smartpayments.subscription.core.domain.enums.EPlan;
 import org.com.smartpayments.subscription.core.domain.enums.ESubscriptionStatus;
 import org.com.smartpayments.subscription.core.domain.model.Address;
 import org.com.smartpayments.subscription.core.domain.model.Plan;
 import org.com.smartpayments.subscription.core.domain.model.User;
 import org.com.smartpayments.subscription.core.domain.model.UserSubscription;
+import org.com.smartpayments.subscription.core.domain.model.UserSubscriptionCreditHistory;
 import org.com.smartpayments.subscription.core.ports.in.UsecaseVoidPort;
 import org.com.smartpayments.subscription.core.ports.in.dto.AsyncNewUserInput;
 import org.com.smartpayments.subscription.core.ports.out.dataprovider.PlanDataProviderPort;
 import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserDataProviderPort;
+import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserSubscriptionCreditHistoryDataProviderPort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+
+import static org.com.smartpayments.subscription.core.domain.enums.ECreditTransactionType.SAMPLE_GRANT;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class NewUserUsecase implements UsecaseVoidPort<AsyncNewUserInput> {
+    private final int DEFAULT_GIVEN_CREDITS_QUANTITY = 5;
+
     private final UserDataProviderPort userDataProviderPort;
     private final PlanDataProviderPort planDataProviderPort;
+    private final UserSubscriptionCreditHistoryDataProviderPort userSubscriptionCreditHistoryDataProviderPort;
 
     @Transactional
     public void execute(AsyncNewUserInput input) {
@@ -38,6 +48,7 @@ public class NewUserUsecase implements UsecaseVoidPort<AsyncNewUserInput> {
 
         User user = fillUser(input);
         user = userDataProviderPort.persist(user);
+        persistSampleCredits(user.getSubscription());
         log.info("[NewUserUsecase#execute] - New user created: {}", user);
     }
 
@@ -92,5 +103,22 @@ public class NewUserUsecase implements UsecaseVoidPort<AsyncNewUserInput> {
 
     private Plan findFreePlan() {
         return planDataProviderPort.findByType(EPlan.FREE).orElseThrow(() -> new PlanNotFoundException("FREE plan not found!"));
+    }
+
+    private void persistSampleCredits(UserSubscription userSubscription) {
+        List<UserSubscriptionCreditHistory> creditsGiven = new ArrayList<>() {{
+            add(fillCreditHistory(ECredit.EMAIL, userSubscription));
+        }};
+
+        userSubscriptionCreditHistoryDataProviderPort.persistAll(creditsGiven);
+    }
+
+    private UserSubscriptionCreditHistory fillCreditHistory(ECredit credit, UserSubscription userSubscription) {
+        return UserSubscriptionCreditHistory.builder()
+            .amount(DEFAULT_GIVEN_CREDITS_QUANTITY)
+            .creditType(credit)
+            .transactionType(SAMPLE_GRANT)
+            .userSubscription(userSubscription)
+            .build();
     }
 }
