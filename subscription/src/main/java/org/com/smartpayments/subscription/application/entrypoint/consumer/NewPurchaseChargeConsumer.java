@@ -45,16 +45,16 @@ public class NewPurchaseChargeConsumer {
             }
 
             final String cacheKey = CACHE_KEY + input.getMessageHash();
-            
+
             if (cacheDataProviderPort.existsByKey(cacheKey)) {
                 log.warn("[NewPurchaseChargeConsumer#execute] - Message already processed: {}", message);
                 return;
-            } else {
-                cacheDataProviderPort.persist(cacheKey, "true", Duration.ofDays(5));
             }
 
             CreatePurchaseChargeInput newPurchaseChargeInput = input.getData();
             createPurchaseChargeUsecase.execute(newPurchaseChargeInput);
+
+            cacheDataProviderPort.persist(cacheKey, "true", Duration.ofDays(5));
         } catch (Exception e) {
             log.error("[NewPurchaseChargeConsumer#execute] - Error while consuming message: {}", message, e);
             throw e;

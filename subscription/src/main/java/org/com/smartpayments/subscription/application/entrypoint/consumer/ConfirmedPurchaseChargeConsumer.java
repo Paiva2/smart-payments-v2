@@ -71,13 +71,13 @@ public class ConfirmedPurchaseChargeConsumer {
             if (cacheDataProviderPort.existsByKey(cacheKey)) {
                 log.warn("[ConfirmedPurchaseChargeConsumer#execute] - Message already processed: {}", message);
                 return;
-            } else {
-                cacheDataProviderPort.persist(cacheKey, "true", Duration.ofDays(5));
             }
 
             PurchaseChargeConfirmedInput inputData = input.getData();
             confirmPurchaseChargeUsecase.execute(inputData);
             sendUserSubscriptionUpdateMessage(inputData);
+            
+            cacheDataProviderPort.persist(cacheKey, "true", Duration.ofDays(5));
         } catch (Exception e) {
             log.error("[ConfirmedPurchaseChargeConsumer#execute] - Error while consuming message: {}", message, e);
             throw e;
