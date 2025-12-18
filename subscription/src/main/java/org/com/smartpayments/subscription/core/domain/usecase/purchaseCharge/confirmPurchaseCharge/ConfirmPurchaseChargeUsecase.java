@@ -205,7 +205,9 @@ public class ConfirmPurchaseChargeUsecase implements UsecaseVoidPort<PurchaseCha
         userSubscriptionCreditHistoryDataProviderPort.revokeSampleCredits(userSubscription.getId());
     }
 
-    private void addSubscriptionCreditsAndRecurrences(Plan planPurchased, UserSubscription userSubscription, Date creditExp) {
+    private void addSubscriptionCreditsAndRecurrences(Plan planPurchased, UserSubscription userSubscription, Date nextPaymentDate) {
+        Date creditExp = defineSubscriptionCreditsExp(nextPaymentDate);
+
         List<UserSubscriptionCreditHistory> credits = new ArrayList<>();
         List<UserSubscriptionCreditRecurrence> recurrences = new ArrayList<>();
 
@@ -226,6 +228,16 @@ public class ConfirmPurchaseChargeUsecase implements UsecaseVoidPort<PurchaseCha
 
         userSubscriptionCreditHistoryDataProviderPort.persistAll(credits);
         userSubscriptionCreditRecurrenceDataProviderPort.persistAll(recurrences);
+    }
+
+    private Date defineSubscriptionCreditsExp(Date nextPaymentDate) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(nextPaymentDate);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
     }
 
     private UserSubscriptionCreditRecurrence fillCreditRecurrence(int quantity, UserSubscription userSubscription, ECredit credit) {
