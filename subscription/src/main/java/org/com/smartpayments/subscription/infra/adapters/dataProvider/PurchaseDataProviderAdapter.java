@@ -22,4 +22,9 @@ public class PurchaseDataProviderAdapter implements PurchaseDataProviderPort {
     public Optional<Purchase> findByExternalId(String externalId) {
         return repository.findByExternalId(externalId);
     }
+
+    @Override
+    public Optional<Purchase> findByExternalIdLocking(String externalId) {
+        return repository.findByExternalIdForUpdate(externalId);
+    }
 }

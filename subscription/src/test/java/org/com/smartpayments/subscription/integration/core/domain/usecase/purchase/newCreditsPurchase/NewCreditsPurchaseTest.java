@@ -67,7 +67,7 @@ public class NewCreditsPurchaseTest extends IntegrationTestBase {
 
     @BeforeEach
     public void setUp() throws Exception {
-        creditPurchased = creditRepository.findByType(ECredit.EMAIL).get();
+        creditPurchased = creditRepository.findByTypeAndActiveIsTrue(ECredit.EMAIL).get();
 
         User user = userUtils.createUser(true, true);
         authToken = userUtils.generateAuthToken(user.getId());

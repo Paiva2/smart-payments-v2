@@ -10,6 +10,7 @@ import org.com.smartpayments.subscription.core.domain.enums.EPurchaseChargeStatu
 import org.com.smartpayments.subscription.core.ports.in.dto.AsyncMessageInput;
 import org.com.smartpayments.subscription.core.ports.in.dto.CreatePurchaseChargeInput;
 import org.com.smartpayments.subscription.core.ports.in.dto.PaymentGatewayWebhookInput;
+import org.com.smartpayments.subscription.core.ports.in.dto.PurchaseChargeConfirmedInput;
 import org.com.smartpayments.subscription.core.ports.in.utils.MessageUtilsPort;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
@@ -42,6 +45,9 @@ public class PaymentGatewayWebhookController {
 
     @Value("${spring.kafka.topics.new-purchase-charge}")
     private String purchaseChargeCreatedTopic;
+
+    @Value("${spring.kafka.topics.confirmed-purchase-charge}")
+    private String purchaseChargeConfirmedTopic;
 
     @PostMapping("purchase/webhook")
     public ResponseEntity<Void> handle(
@@ -91,6 +97,12 @@ public class PaymentGatewayWebhookController {
                 messageInput.setData(createPurchaseChargeInput);
                 sendMessage(purchaseChargeCreatedTopic, messageKey, messageInput);
             }
+            case PAYMENT_RECEIVED,
+                 PAYMENT_CONFIRMED -> {
+                PurchaseChargeConfirmedInput purchaseChargeConfirmedInput = mountPurchaseChargeConfirmedInput(input);
+                messageInput.setData(purchaseChargeConfirmedInput);
+                sendMessage(purchaseChargeConfirmedTopic, messageKey, messageInput);
+            }
             default ->
                 log.warn("[PaymentGatewayWebhookController#handle] - Received an request with unmapped event: {}, message will be discarded!", input.getEvent());
         }
@@ -114,15 +126,35 @@ public class PaymentGatewayWebhookController {
             .billingType(input.getPayment().getBillingType())
             .pixTransaction(input.getPayment().getPixTransaction())
             .status(EPurchaseChargeStatus.PENDING)
-            .dueDate(dateWithLastHours(input.getPayment().getDueDate()))
+            .dueDate(handleDueDate(input.getPayment().getDueDate()))
             .invoiceUrl(input.getPayment().getInvoiceUrl())
             .bankSlipUrl(input.getPayment().getBankSlipUrl())
             .build();
     }
 
-    private Date dateWithLastHours(Date date) {
+    private PurchaseChargeConfirmedInput mountPurchaseChargeConfirmedInput(PaymentGatewayWebhookInput input) {
+        return PurchaseChargeConfirmedInput.builder()
+            .customerId(input.getPayment().getCustomer())
+            .isFromSubscription(input.isFromSubscription())
+            .externalPurchaseId(input.isFromSubscription() ? input.getPayment().getSubscription() : input.getPayment().getId())
+            .externalChargeId(input.getPayment().getId())
+            .paymentDate(parseDate(input.getPayment().getClientPaymentDate()))
+            .dueDate(handleDueDate(input.getPayment().getDueDate()))
+            .build();
+    }
+
+    private Date parseDate(String date) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            return sdf.parse(date);
+        } catch (ParseException e) {
+            throw new RuntimeException("Invalid date format: " + date, e);
+        }
+    }
+
+    private Date handleDueDate(String dueDate) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
+        calendar.setTime(parseDate(dueDate));
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);

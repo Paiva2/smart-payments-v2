@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
 import static org.springframework.util.ObjectUtils.isEmpty;
 
@@ -36,8 +35,9 @@ public class PaymentGatewayWebhookInput {
         private String billingType;
         private String confirmedDate;
         private String status;
-        private Date dueDate;
-        private Date paymentDate;
+        private String dueDate;
+        private String paymentDate;
+        private String clientPaymentDate;
         private String pixTransaction;
         private String pixQrCode;
         private String invoiceUrl;

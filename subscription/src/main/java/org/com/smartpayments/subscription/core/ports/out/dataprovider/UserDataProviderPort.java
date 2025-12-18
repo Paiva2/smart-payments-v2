@@ -9,5 +9,7 @@ public interface UserDataProviderPort {
 
     Optional<User> findById(Long id);
 
+    Optional<User> findByPaymentGatewayId(String paymentGatewayId);
+
     User persist(User user);
 }

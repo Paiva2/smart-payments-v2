@@ -27,6 +27,18 @@ public class KafkaTopicsConfig {
     @Value("${spring.kafka.topics.new-purchase-charge-dlt}")
     private String purchaseChargeCreatedTopicDlt;
 
+    @Value("${spring.kafka.topics.confirmed-purchase-charge}")
+    private String confirmedPurchaseChargeTopic;
+
+    @Value("${spring.kafka.topics.confirmed-purchase-charge-dlt}")
+    private String confirmedPurchaseChargeTopicDlt;
+
+    @Value("${spring.kafka.topics.user-subscription-update}")
+    private String userSubscriptionUpdateTopic;
+
+    @Value("${spring.kafka.topics.user-subscription-update-dlt}")
+    private String userSubscriptionUpdateTopicDlt;
+
     @Bean
     public KafkaAdmin admin() {
         Map<String, Object> configs = new HashMap<>();
@@ -51,6 +63,42 @@ public class KafkaTopicsConfig {
         }};
 
         return mountTopic(purchaseChargeCreatedTopicDlt, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
+    }
+
+    @Bean
+    public NewTopic purchaseChargeConfirmedTopic() {
+        Map<String, String> topicConfigs = new HashMap<>() {{
+            put(TopicConfig.RETENTION_MS_CONFIG, MESSAGES_RETENTION_DEFAULT_MILLIS_THREE_DAYS);
+        }};
+
+        return mountTopic(confirmedPurchaseChargeTopic, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
+    }
+
+    @Bean
+    public NewTopic purchaseChargeConfirmedTopicDlt() {
+        Map<String, String> topicConfigs = new HashMap<>() {{
+            put(TopicConfig.RETENTION_MS_CONFIG, "-1");
+        }};
+
+        return mountTopic(confirmedPurchaseChargeTopicDlt, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
+    }
+
+    @Bean
+    public NewTopic userSubscriptionUpdateTopic() {
+        Map<String, String> topicConfigs = new HashMap<>() {{
+            put(TopicConfig.RETENTION_MS_CONFIG, MESSAGES_RETENTION_DEFAULT_MILLIS_THREE_DAYS);
+        }};
+
+        return mountTopic(userSubscriptionUpdateTopic, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
+    }
+
+    @Bean
+    public NewTopic userSubscriptionUpdateTopicDlt() {
+        Map<String, String> topicConfigs = new HashMap<>() {{
+            put(TopicConfig.RETENTION_MS_CONFIG, "-1");
+        }};
+
+        return mountTopic(userSubscriptionUpdateTopicDlt, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
     }
 
     private NewTopic mountTopic(String topicName, int partitions, int replicas, Map<String, String> config) {

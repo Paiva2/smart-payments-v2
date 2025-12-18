@@ -66,7 +66,7 @@ public class CreatePurchaseChargeTest extends IntegrationTestBase {
 
     @BeforeEach
     public void setup() {
-        this.creditPurchased = creditRepository.findByType(ECredit.EMAIL).get();
+        this.creditPurchased = creditRepository.findByTypeAndActiveIsTrue(ECredit.EMAIL).get();
 
         this.user = userUtils.createUser(true, true);
     }

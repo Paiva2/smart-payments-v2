@@ -24,6 +24,11 @@ public class UserDataProviderAdapter implements UserDataProviderPort {
     }
 
     @Override
+    public Optional<User> findByPaymentGatewayId(String paymentGatewayId) {
+        return repository.findByUserPaymentGatewayExternalId(paymentGatewayId);
+    }
+
+    @Override
     public User persist(User user) {
         return repository.save(user);
     }

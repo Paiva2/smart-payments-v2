@@ -58,6 +58,15 @@ public class UserSubscription {
     @Column(name = "recurrence", nullable = true)
     private ESubscriptionRecurrence recurrence;
 
+    @Column(name = "unlimited_email_credits")
+    private Boolean unlimitedEmailCredits;
+
+    @Column(name = "unlimited_whatsapp_credits")
+    private Boolean unlimitedWhatsAppCredits;
+
+    @Column(name = "unlimited_sms_credits")
+    private Boolean unlimitedSmsCredits;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Date createdAt;

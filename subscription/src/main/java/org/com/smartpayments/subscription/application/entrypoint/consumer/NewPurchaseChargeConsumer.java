@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.com.smartpayments.subscription.core.common.exception.PurchaseNotFoundException;
 import org.com.smartpayments.subscription.core.domain.usecase.purchaseCharge.createPurchaseCharge.CreatePurchaseChargeUsecase;
 import org.com.smartpayments.subscription.core.ports.in.dto.AsyncMessageInput;
 import org.com.smartpayments.subscription.core.ports.in.dto.CreatePurchaseChargeInput;
@@ -56,8 +55,6 @@ public class NewPurchaseChargeConsumer {
 
             CreatePurchaseChargeInput newPurchaseChargeInput = input.getData();
             createPurchaseChargeUsecase.execute(newPurchaseChargeInput);
-        } catch (PurchaseNotFoundException e) {
-            log.error("[NewPurchaseChargeConsumer#execute] - Purchase not found! Message discarded: {}", message, e);
         } catch (Exception e) {
             log.error("[NewPurchaseChargeConsumer#execute] - Error while consuming message: {}", message, e);
             throw e;

@@ -3,6 +3,9 @@ package org.com.smartpayments.subscription.application.config.kafka;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.com.smartpayments.subscription.core.domain.usecase.purchaseCharge.confirmPurchaseCharge.exception.InvalidPurchaseException;
+import org.com.smartpayments.subscription.core.domain.usecase.purchaseCharge.confirmPurchaseCharge.exception.MissingCreditPurchaseItemException;
+import org.com.smartpayments.subscription.core.domain.usecase.purchaseCharge.confirmPurchaseCharge.exception.UserAlreadyHasActivePlanException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -84,6 +87,12 @@ public class KafkaConsumerConfig {
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(
             recoverer,
             new FixedBackOff(interval, maxAttempts)
+        );
+
+        errorHandler.addNotRetryableExceptions(
+            MissingCreditPurchaseItemException.class,
+            InvalidPurchaseException.class,
+            UserAlreadyHasActivePlanException.class
         );
 
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();

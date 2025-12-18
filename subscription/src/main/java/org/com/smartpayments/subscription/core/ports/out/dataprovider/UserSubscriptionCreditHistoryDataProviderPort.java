@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface UserSubscriptionCreditHistoryDataProviderPort {
     List<UserSubscriptionCreditHistory> persistAll(List<UserSubscriptionCreditHistory> userSubscriptionCreditHistories);
+
+    void revokeSampleCredits(Long userSubscriptionId);
 }

@@ -17,4 +17,9 @@ public class UserSubscriptionCreditHistoryDataProviderAdapter implements UserSub
     public List<UserSubscriptionCreditHistory> persistAll(List<UserSubscriptionCreditHistory> userSubscriptionCreditHistories) {
         return repository.saveAll(userSubscriptionCreditHistories);
     }
+
+    @Override
+    public void revokeSampleCredits(Long userSubscriptionId) {
+        repository.revokeSampleCreditsByUserSubscriptionId(userSubscriptionId);
+    }
 }

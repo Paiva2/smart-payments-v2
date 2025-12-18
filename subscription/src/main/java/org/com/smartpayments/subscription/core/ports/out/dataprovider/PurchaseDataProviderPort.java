@@ -8,4 +8,6 @@ public interface PurchaseDataProviderPort {
     Purchase persist(Purchase purchase);
 
     Optional<Purchase> findByExternalId(String externalId);
+
+    Optional<Purchase> findByExternalIdLocking(String externalId);
 }

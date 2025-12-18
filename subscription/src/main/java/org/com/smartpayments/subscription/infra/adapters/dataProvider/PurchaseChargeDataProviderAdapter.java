@@ -6,6 +6,7 @@ import org.com.smartpayments.subscription.core.ports.out.dataprovider.PurchaseCh
 import org.com.smartpayments.subscription.infra.persistence.repository.PurchaseChargeRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -21,5 +22,15 @@ public class PurchaseChargeDataProviderAdapter implements PurchaseChargeDataProv
     @Override
     public PurchaseCharge persist(PurchaseCharge purchaseCharge) {
         return repository.save(purchaseCharge);
+    }
+
+    @Override
+    public void confirmPurchaseChargePayment(String externalChargeId, Date paymentDate) {
+        repository.confirmChargePaymentByExternalId(externalChargeId, paymentDate);
+    }
+
+    @Override
+    public boolean isConfirmedByExternalId(String externalId) {
+        return repository.existsConfirmedByExternalId(externalId);
     }
 }
