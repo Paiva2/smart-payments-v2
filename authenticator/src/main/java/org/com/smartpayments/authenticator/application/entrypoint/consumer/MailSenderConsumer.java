@@ -24,6 +24,7 @@ public class MailSenderConsumer {
     @Value("${spring.kafka.topics.mail-sender-dlt}")
     private String mailSenderDlt;
 
+    // must do: create a service to this
     @KafkaListener(
         topics = "${spring.kafka.topics.mail-sender}",
         groupId = "${spring.kafka.consumer.group-id}"
