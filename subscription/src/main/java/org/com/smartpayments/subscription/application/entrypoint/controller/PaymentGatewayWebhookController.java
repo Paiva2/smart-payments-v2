@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.com.smartpayments.subscription.core.common.base.ForbiddenException;
+import org.com.smartpayments.subscription.core.common.exception.base.ForbiddenException;
 import org.com.smartpayments.subscription.core.domain.enums.EPaymentGatewayEvent;
 import org.com.smartpayments.subscription.core.domain.enums.EPurchaseChargeStatus;
 import org.com.smartpayments.subscription.core.ports.in.dto.AsyncMessageInput;

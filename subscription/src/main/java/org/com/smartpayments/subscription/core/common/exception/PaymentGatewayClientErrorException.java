@@ -1,6 +1,6 @@
 package org.com.smartpayments.subscription.core.common.exception;
 
-import org.com.smartpayments.subscription.core.common.base.BadRequestException;
+import org.com.smartpayments.subscription.core.common.exception.base.BadRequestException;
 
 public class PaymentGatewayClientErrorException extends BadRequestException {
     public PaymentGatewayClientErrorException(String message) {

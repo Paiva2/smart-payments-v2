@@ -1,6 +1,6 @@
 package org.com.smartpayments.subscription.core.domain.usecase.purchase.newSubscriptionPurchase.exception;
 
-import org.com.smartpayments.subscription.core.common.base.NotFoundException;
+import org.com.smartpayments.subscription.core.common.exception.base.NotFoundException;
 
 public class SubscriptionChargeNotFoundException extends NotFoundException {
     public SubscriptionChargeNotFoundException() {

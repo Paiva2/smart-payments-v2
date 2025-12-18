@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.com.smartpayments.subscription.core.common.exception.InvalidSubscriptionException;
 import org.com.smartpayments.subscription.core.common.exception.PlanNotFoundException;
 import org.com.smartpayments.subscription.core.common.exception.UserNotFoundException;
+import org.com.smartpayments.subscription.core.common.exception.UserSubscriptionNotFoundException;
 import org.com.smartpayments.subscription.core.domain.enums.EPlan;
 import org.com.smartpayments.subscription.core.domain.enums.EPurchaseStatus;
 import org.com.smartpayments.subscription.core.domain.enums.EPurchaseType;
@@ -12,13 +13,16 @@ import org.com.smartpayments.subscription.core.domain.model.Plan;
 import org.com.smartpayments.subscription.core.domain.model.Purchase;
 import org.com.smartpayments.subscription.core.domain.model.PurchaseItem;
 import org.com.smartpayments.subscription.core.domain.model.User;
+import org.com.smartpayments.subscription.core.domain.model.UserSubscription;
 import org.com.smartpayments.subscription.core.domain.usecase.purchase.newSubscriptionPurchase.exception.SubscriptionChargeNotFoundException;
 import org.com.smartpayments.subscription.core.domain.usecase.purchase.newSubscriptionPurchase.validator.NewSubscriptionPurchaseValidator;
+import org.com.smartpayments.subscription.core.domain.usecase.purchaseCharge.confirmPurchaseCharge.exception.InvalidPurchaseException;
 import org.com.smartpayments.subscription.core.ports.in.UsecasePort;
 import org.com.smartpayments.subscription.core.ports.in.dto.NewSubscriptionPurchaseInput;
 import org.com.smartpayments.subscription.core.ports.out.dataprovider.PlanDataProviderPort;
 import org.com.smartpayments.subscription.core.ports.out.dataprovider.PurchaseDataProviderPort;
 import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserDataProviderPort;
+import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserSubscriptionDataProviderPort;
 import org.com.smartpayments.subscription.core.ports.out.dto.NewSubscriptionPurchaseOutput;
 import org.com.smartpayments.subscription.core.ports.out.external.dto.CreateSubscriptionOutput;
 import org.com.smartpayments.subscription.core.ports.out.external.dto.GetSubscriptionChargesOutput;
@@ -48,6 +52,7 @@ public class NewSubscriptionPurchaseUsecase implements UsecasePort<NewSubscripti
     private final UserDataProviderPort userDataProviderPort;
     private final PurchaseDataProviderPort purchaseDataProviderPort;
     private final PlanDataProviderPort planDataProviderPort;
+    private final UserSubscriptionDataProviderPort userSubscriptionDataProviderPort;
 
     private final PaymentGatewaySubscriptionClientPort paymentGatewaySubscriptionClientPort;
     private final PaymentGatewayUserClientPort paymentGatewayUserClientPort;
@@ -58,6 +63,9 @@ public class NewSubscriptionPurchaseUsecase implements UsecasePort<NewSubscripti
         NewSubscriptionPurchaseValidator.validate(input);
 
         User user = findUser(input.getUserId());
+
+        checkUserHasSubscriptionActive(user);
+
         boolean willCreateUserExternal = isEmpty(user.getUserPaymentGatewayExternalId());
 
         user = ensureUserExistsPaymentGateway(user, willCreateUserExternal);
@@ -88,6 +96,15 @@ public class NewSubscriptionPurchaseUsecase implements UsecasePort<NewSubscripti
 
     private User findUser(Long id) {
         return userDataProviderPort.findActiveById(id).orElseThrow(UserNotFoundException::new);
+    }
+
+    private void checkUserHasSubscriptionActive(User user) {
+        UserSubscription userSubscription = userSubscriptionDataProviderPort.findByUserWithPlan(user.getId())
+            .orElseThrow(UserSubscriptionNotFoundException::new);
+
+        if (!userSubscription.getPlan().getType().equals(EPlan.FREE)) {
+            throw new InvalidPurchaseException("Invalid Purchase. Can't purchase an subscription with an active subscription!");
+        }
     }
 
     private User ensureUserExistsPaymentGateway(User user, boolean willCreateUserExternal) {
@@ -127,7 +144,6 @@ public class NewSubscriptionPurchaseUsecase implements UsecasePort<NewSubscripti
     private void fillPurchaseItems(Purchase purchase, NewSubscriptionPurchaseInput input) {
         input.getPurchaseItems().stream().filter(pi -> nonNull(pi.getPlanId()))
             .findFirst().ifPresent(purchaseItemInput -> {
-                //todo: validate if user has active plan
                 handlePlanPurchased(purchase, purchase.getItems(), purchaseItemInput);
             });
     }

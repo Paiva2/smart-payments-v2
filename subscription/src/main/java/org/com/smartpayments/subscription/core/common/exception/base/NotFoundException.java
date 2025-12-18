@@ -1,4 +1,4 @@
-package org.com.smartpayments.subscription.core.common.base;
+package org.com.smartpayments.subscription.core.common.exception.base;
 
 public class NotFoundException extends RuntimeException {
     public NotFoundException(String message) {

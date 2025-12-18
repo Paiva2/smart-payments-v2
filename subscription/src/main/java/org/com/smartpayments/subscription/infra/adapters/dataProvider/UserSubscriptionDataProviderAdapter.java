@@ -6,6 +6,8 @@ import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserSubscr
 import org.com.smartpayments.subscription.infra.persistence.repository.UserSubscriptionRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 public class UserSubscriptionDataProviderAdapter implements UserSubscriptionDataProviderPort {
@@ -14,5 +16,10 @@ public class UserSubscriptionDataProviderAdapter implements UserSubscriptionData
     @Override
     public UserSubscription persist(UserSubscription userSubscription) {
         return repository.save(userSubscription);
+    }
+
+    @Override
+    public Optional<UserSubscription> findByUserWithPlan(Long userId) {
+        return repository.findByUserIdWithPlan(userId);
     }
 }
