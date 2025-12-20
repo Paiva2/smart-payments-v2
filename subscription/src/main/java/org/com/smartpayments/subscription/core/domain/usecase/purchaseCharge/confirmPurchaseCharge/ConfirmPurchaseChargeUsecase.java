@@ -317,7 +317,7 @@ public class ConfirmPurchaseChargeUsecase implements UsecaseVoidPort<PurchaseCha
 
     private AsyncEmailOutput mountAsyncEmail(User user, String items, boolean isSubscription) {
         return AsyncEmailOutput.builder()
-            .to("joaovitor.paiva145@hotmail.com")
+            .to(user.getEmail())
             .templateName(PURCHASE_CONFIRMED_TEMPLATE)
             .subject(PURCHASE_CONFIRMED_SUBJECT)
             .cc(new ArrayList<>())
