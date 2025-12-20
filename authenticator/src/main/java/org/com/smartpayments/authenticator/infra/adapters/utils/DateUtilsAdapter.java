@@ -11,7 +11,7 @@ import java.util.Date;
 public class DateUtilsAdapter implements DateUtilsPort {
     @Override
     public Date convertDate(String date, String pattern) throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        SimpleDateFormat sdf = new SimpleDateFormat(pattern);
         return sdf.parse(date);
     }
 }
