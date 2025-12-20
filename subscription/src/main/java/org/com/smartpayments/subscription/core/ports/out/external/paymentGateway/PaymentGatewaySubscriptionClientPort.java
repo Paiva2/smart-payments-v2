@@ -12,4 +12,6 @@ public interface PaymentGatewaySubscriptionClientPort {
     GetSubscriptionChargesOutput getSubscriptionCharges(User user, String subscriptionId);
 
     DeleteSubscriptionOutput deleteSubscription(User user, String subscriptionId);
+
+    DeleteSubscriptionOutput deleteSubscription(String subscriptionId);
 }

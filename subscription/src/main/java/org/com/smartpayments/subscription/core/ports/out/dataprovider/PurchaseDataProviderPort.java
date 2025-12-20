@@ -10,4 +10,6 @@ public interface PurchaseDataProviderPort {
     Optional<Purchase> findByExternalId(String externalId);
 
     Optional<Purchase> findByExternalIdLocking(String externalId);
+
+    void expirePurchase(String externalId);
 }

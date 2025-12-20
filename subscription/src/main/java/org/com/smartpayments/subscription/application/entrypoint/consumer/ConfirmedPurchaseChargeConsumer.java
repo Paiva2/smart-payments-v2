@@ -10,6 +10,7 @@ import org.com.smartpayments.subscription.core.common.exception.UserNotFoundExce
 import org.com.smartpayments.subscription.core.common.exception.UserSubscriptionResumeViewNotFoundException;
 import org.com.smartpayments.subscription.core.domain.enums.EPlan;
 import org.com.smartpayments.subscription.core.domain.enums.ESubscriptionRecurrence;
+import org.com.smartpayments.subscription.core.domain.enums.ESubscriptionStatus;
 import org.com.smartpayments.subscription.core.domain.model.User;
 import org.com.smartpayments.subscription.core.domain.model.views.UserSubscriptionResumeView;
 import org.com.smartpayments.subscription.core.domain.usecase.purchaseCharge.confirmPurchaseCharge.ConfirmPurchaseChargeUsecase;
@@ -76,7 +77,7 @@ public class ConfirmedPurchaseChargeConsumer {
             PurchaseChargeConfirmedInput inputData = input.getData();
             confirmPurchaseChargeUsecase.execute(inputData);
             sendUserSubscriptionUpdateMessage(inputData);
-            
+
             cacheDataProviderPort.persist(cacheKey, "true", Duration.ofDays(5));
         } catch (Exception e) {
             log.error("[ConfirmedPurchaseChargeConsumer#execute] - Error while consuming message: {}", message, e);
@@ -108,9 +109,10 @@ public class ConfirmedPurchaseChargeConsumer {
 
             AsyncUserSubscriptionUpdateOutput message = AsyncUserSubscriptionUpdateOutput.builder()
                 .userId(userSubscriptionResumeView.getUserId())
-                .plan(EPlan.valueOf(userSubscriptionResumeView.getPlan()))
-                .nextPaymentDate(userSubscriptionResumeView.getNextPaymentDate().toString())
-                .recurrence(ESubscriptionRecurrence.valueOf(userSubscriptionResumeView.getRecurrence()))
+                .plan(isEmpty(userSubscriptionResumeView.getPlan()) ? null : EPlan.valueOf(userSubscriptionResumeView.getPlan()))
+                .status(isEmpty(userSubscriptionResumeView.getStatus()) ? null : ESubscriptionStatus.valueOf(userSubscriptionResumeView.getStatus()))
+                .nextPaymentDate(isEmpty(userSubscriptionResumeView.getNextPaymentDate()) ? null : userSubscriptionResumeView.getNextPaymentDate().toString())
+                .recurrence(isEmpty(userSubscriptionResumeView.getRecurrence()) ? null : ESubscriptionRecurrence.valueOf(userSubscriptionResumeView.getRecurrence()))
                 .value(userSubscriptionResumeView.getValue())
                 .unlimitedEmailCredits(userSubscriptionResumeView.getUnlimitedEmailCredits())
                 .emailCredits(userSubscriptionResumeView.getEmailCredits())

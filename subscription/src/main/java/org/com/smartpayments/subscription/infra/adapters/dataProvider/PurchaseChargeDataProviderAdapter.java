@@ -30,6 +30,11 @@ public class PurchaseChargeDataProviderAdapter implements PurchaseChargeDataProv
     }
 
     @Override
+    public void overduePurchaseChargePayment(String externalChargeId) {
+        repository.overdueChargePaymentByExternalId(externalChargeId);
+    }
+
+    @Override
     public boolean isConfirmedByExternalId(String externalId) {
         return repository.existsConfirmedByExternalId(externalId);
     }

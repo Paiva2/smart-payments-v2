@@ -11,6 +11,7 @@ import org.com.smartpayments.subscription.core.ports.in.dto.AsyncMessageInput;
 import org.com.smartpayments.subscription.core.ports.in.dto.CreatePurchaseChargeInput;
 import org.com.smartpayments.subscription.core.ports.in.dto.PaymentGatewayWebhookInput;
 import org.com.smartpayments.subscription.core.ports.in.dto.PurchaseChargeConfirmedInput;
+import org.com.smartpayments.subscription.core.ports.in.dto.PurchaseChargeOverdueInput;
 import org.com.smartpayments.subscription.core.ports.in.utils.MessageUtilsPort;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +49,9 @@ public class PaymentGatewayWebhookController {
 
     @Value("${spring.kafka.topics.confirmed-purchase-charge}")
     private String purchaseChargeConfirmedTopic;
+
+    @Value("${spring.kafka.topics.overdue-purchase-charge}")
+    private String purchaseChargeOverdueTopic;
 
     @PostMapping("purchase/webhook")
     public ResponseEntity<Void> handle(
@@ -103,6 +107,11 @@ public class PaymentGatewayWebhookController {
                 messageInput.setData(purchaseChargeConfirmedInput);
                 sendMessage(purchaseChargeConfirmedTopic, messageKey, messageInput);
             }
+            case PAYMENT_OVERDUE -> {
+                PurchaseChargeOverdueInput purchaseChargeOverdueInput = mountPurchaseChargeOverdueInput(input);
+                messageInput.setData(purchaseChargeOverdueInput);
+                sendMessage(purchaseChargeOverdueTopic, messageKey, messageInput);
+            }
             default ->
                 log.warn("[PaymentGatewayWebhookController#handle] - Received an request with unmapped event: {}, message will be discarded!", input.getEvent());
         }
@@ -139,6 +148,16 @@ public class PaymentGatewayWebhookController {
             .externalPurchaseId(input.isFromSubscription() ? input.getPayment().getSubscription() : input.getPayment().getId())
             .externalChargeId(input.getPayment().getId())
             .paymentDate(parseDate(input.getPayment().getClientPaymentDate()))
+            .dueDate(handleDueDate(input.getPayment().getDueDate()))
+            .build();
+    }
+
+    private PurchaseChargeOverdueInput mountPurchaseChargeOverdueInput(PaymentGatewayWebhookInput input) {
+        return PurchaseChargeOverdueInput.builder()
+            .customerId(input.getPayment().getCustomer())
+            .isFromSubscription(input.isFromSubscription())
+            .externalPurchaseId(input.isFromSubscription() ? input.getPayment().getSubscription() : input.getPayment().getId())
+            .externalChargeId(input.getPayment().getId())
             .dueDate(handleDueDate(input.getPayment().getDueDate()))
             .build();
     }

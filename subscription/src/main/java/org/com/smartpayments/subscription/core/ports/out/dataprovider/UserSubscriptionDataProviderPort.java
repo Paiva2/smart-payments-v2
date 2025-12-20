@@ -10,5 +10,7 @@ public interface UserSubscriptionDataProviderPort {
 
     Optional<UserSubscription> findByUserWithPlan(Long userId);
 
+    Optional<UserSubscription> findByExternalSubscriptionId(String externalId);
+
     List<UserSubscription> findAllMonthlyToRenew();
 }

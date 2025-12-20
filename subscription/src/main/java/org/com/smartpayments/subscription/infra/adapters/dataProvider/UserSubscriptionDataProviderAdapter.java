@@ -25,6 +25,11 @@ public class UserSubscriptionDataProviderAdapter implements UserSubscriptionData
     }
 
     @Override
+    public Optional<UserSubscription> findByExternalSubscriptionId(String externalId) {
+        return repository.findByExternalSubscriptionId(externalId);
+    }
+
+    @Override
     public List<UserSubscription> findAllMonthlyToRenew() {
         return repository.findAllMonthlyToRenewNextPaymentDate();
     }

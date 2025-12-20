@@ -54,6 +54,9 @@ public class UserSubscription {
     @Column(name = "next_payment_date", nullable = true)
     private Date nextPaymentDate;
 
+    @Column(name = "expired_at", nullable = true)
+    private Date expiredAt;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "recurrence", nullable = true)
     private ESubscriptionRecurrence recurrence;

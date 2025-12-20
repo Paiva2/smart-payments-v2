@@ -33,6 +33,12 @@ public class KafkaTopicsConfig {
     @Value("${spring.kafka.topics.confirmed-purchase-charge-dlt}")
     private String confirmedPurchaseChargeTopicDlt;
 
+    @Value("${spring.kafka.topics.overdue-purchase-charge}")
+    private String overduePurchaseChargeTopic;
+
+    @Value("${spring.kafka.topics.overdue-purchase-charge-dlt}")
+    private String overduePurchaseChargeTopicDlt;
+
     @Value("${spring.kafka.topics.user-subscription-update}")
     private String userSubscriptionUpdateTopic;
 
@@ -87,6 +93,24 @@ public class KafkaTopicsConfig {
         }};
 
         return mountTopic(confirmedPurchaseChargeTopicDlt, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
+    }
+
+    @Bean
+    public NewTopic purchaseChargeOverdueTopic() {
+        Map<String, String> topicConfigs = new HashMap<>() {{
+            put(TopicConfig.RETENTION_MS_CONFIG, MESSAGES_RETENTION_DEFAULT_MILLIS_THREE_DAYS);
+        }};
+
+        return mountTopic(overduePurchaseChargeTopic, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
+    }
+
+    @Bean
+    public NewTopic purchaseChargeOverdueTopicDlt() {
+        Map<String, String> topicConfigs = new HashMap<>() {{
+            put(TopicConfig.RETENTION_MS_CONFIG, "-1");
+        }};
+
+        return mountTopic(overduePurchaseChargeTopicDlt, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
     }
 
     @Bean

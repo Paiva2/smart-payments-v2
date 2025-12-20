@@ -1,0 +1,1 @@
+ALTER TABLE users_subscriptions ADD COLUMN expired_at TIMESTAMP DEFAULT NULL;

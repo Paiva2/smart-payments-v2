@@ -25,8 +25,13 @@ spring:
       new-purchase-charge-dlt: purchase-charge.new-charge.dlt
       confirmed-purchase-charge: purchase-charge.confirmed-charge
       confirmed-purchase-charge-dlt: purchase-charge.confirmed-charge.dlt
+      overdue-purchase-charge: purchase-charge.overdue-charge
+      overdue-purchase-charge-dlt: purchase-charge.overdue-charge
+      mail-sender: mail.sender
       user-subscription-update: user.user-subscription-update
       user-subscription-update-dlt: user.user-subscription-update.dlt
+      user-subscription-states: user.user-subscription-states.dlt
+      user-subscription-states-dlt: user.user-subscription-states.dlt
     consumer:
       auto-offset-reset: latest
       group-id: subscription_group

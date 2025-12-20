@@ -27,4 +27,9 @@ public class PurchaseDataProviderAdapter implements PurchaseDataProviderPort {
     public Optional<Purchase> findByExternalIdLocking(String externalId) {
         return repository.findByExternalIdForUpdate(externalId);
     }
+
+    @Override
+    public void expirePurchase(String externalId) {
+        repository.expirePurchase(externalId);
+    }
 }

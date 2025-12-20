@@ -13,14 +13,14 @@ import org.com.smartpayments.subscription.core.domain.enums.ESubscriptionRecurre
 import org.com.smartpayments.subscription.core.domain.enums.ESubscriptionStatus;
 import org.com.smartpayments.subscription.core.domain.model.User;
 import org.com.smartpayments.subscription.core.domain.model.views.UserSubscriptionResumeView;
-import org.com.smartpayments.subscription.core.domain.usecase.userSubscription.renewUserSubscription.RenewUserSubscriptionUsecase;
+import org.com.smartpayments.subscription.core.domain.usecase.purchaseCharge.overduePurchaseCharge.OverduePurchaseChargeUsecase;
 import org.com.smartpayments.subscription.core.ports.in.dto.AsyncMessageInput;
+import org.com.smartpayments.subscription.core.ports.in.dto.PurchaseChargeOverdueInput;
 import org.com.smartpayments.subscription.core.ports.in.utils.MessageUtilsPort;
 import org.com.smartpayments.subscription.core.ports.out.dataprovider.CacheDataProviderPort;
 import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserDataProviderPort;
 import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserSubscriptionResumeViewDataProviderPort;
 import org.com.smartpayments.subscription.core.ports.out.dto.AsyncMessageOutput;
-import org.com.smartpayments.subscription.core.ports.out.dto.AsyncSubscriptionPlanStateInput;
 import org.com.smartpayments.subscription.core.ports.out.dto.AsyncUserSubscriptionUpdateOutput;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -36,11 +36,11 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserSubscriptionStatesConsumer {
-    private final static String CACHE_KEY = "user-subscription:state:message:";
+public class OverduePurchaseChargeConsumer {
+    private final static String CACHE_KEY = "purchase:confirmed-charge:message:";
     private final static ObjectMapper mapper = new ObjectMapper();
 
-    private final RenewUserSubscriptionUsecase renewUserSubscriptionUsecase;
+    private final OverduePurchaseChargeUsecase overduePurchaseChargeUsecase;
     private final UserSubscriptionResumeViewDataProviderPort userSubscriptionResumeViewDataProviderPort;
     private final CacheDataProviderPort cacheDataProviderPort;
     private final UserDataProviderPort userDataProviderPort;
@@ -52,62 +52,56 @@ public class UserSubscriptionStatesConsumer {
     private String UPDATE_USER_SUBSCRIPTION_TOPIC;
 
     @KafkaListener(
-        topics = "${spring.kafka.topics.user-subscription-states}",
+        topics = "${spring.kafka.topics.overdue-purchase-charge}",
         groupId = "${spring.kafka.consumer.group-id}",
         containerFactory = "topicWithDltFixedRetryContainerFactory"
     )
     public void execute(String message) {
         try {
-            AsyncMessageInput<AsyncSubscriptionPlanStateInput> input = convertBody(message);
+            AsyncMessageInput<PurchaseChargeOverdueInput> input = convertBody(message);
 
-            log.info("[UserSubscriptionStatesConsumer#execute] - New message on consumer: {}", message);
+            log.info("[OverduePurchaseChargeConsumer#execute] - New message on consumer: {}", message);
 
             if (isNull(input) || isEmpty(input.getMessageHash()) || isNull(input.getData())) {
-                log.error("[UserSubscriptionStatesConsumer#execute] - Message with invalid data will be discarded: {}", message);
+                log.error("[OverduePurchaseChargeConsumer#execute] - Message with invalid data will be discarded: {}", message);
                 return;
             }
 
             final String cacheKey = CACHE_KEY + input.getMessageHash();
 
             if (cacheDataProviderPort.existsByKey(cacheKey)) {
-                log.warn("[UserSubscriptionStatesConsumer#execute] - Message already processed: {}", message);
+                log.warn("[OverduePurchaseChargeConsumer#execute] - Message already processed: {}", message);
                 return;
             }
 
-            AsyncSubscriptionPlanStateInput inputData = input.getData();
+            PurchaseChargeOverdueInput inputData = input.getData();
+            Boolean shouldSendUpdateAfterOverdue = overduePurchaseChargeUsecase.execute(inputData);
 
-            switch (inputData.getState()) {
-                case ACTIVE_RENEWED -> {
-                    renewUserSubscriptionUsecase.execute(inputData);
-                }
-                default -> {
-                    log.warn("[UserSubscriptionStatesConsumer#execute] - Invalid message status: {}", message);
-                }
+            if (shouldSendUpdateAfterOverdue) {
+                sendUserSubscriptionUpdateMessage(inputData);
             }
-
-            sendUserSubscriptionUpdateMessage(inputData);
 
             cacheDataProviderPort.persist(cacheKey, "true", Duration.ofDays(5));
         } catch (Exception e) {
-            log.error("[UserSubscriptionStatesConsumer#execute] - Error while consuming message: {}", message, e);
+            log.error("[OverduePurchaseChargeConsumer#execute] - Error while consuming message: {}", message, e);
             throw e;
         }
     }
 
-    private AsyncMessageInput<AsyncSubscriptionPlanStateInput> convertBody(String message) {
+    private AsyncMessageInput<PurchaseChargeOverdueInput> convertBody(String message) {
         try {
             return mapper.readValue(message,
-                new TypeReference<AsyncMessageInput<AsyncSubscriptionPlanStateInput>>() {
+                new TypeReference<AsyncMessageInput<PurchaseChargeOverdueInput>>() {
                 }
             );
         } catch (JsonProcessingException e) {
-            log.error("[UserSubscriptionStatesConsumer#convertBody] - Error while converting message: {}", e.getMessage());
+            log.error("[OverduePurchaseChargeConsumer#convertBody] - Error while converting message: {}", e.getMessage());
             return null;
         }
     }
 
-    private void sendUserSubscriptionUpdateMessage(AsyncSubscriptionPlanStateInput input) {
-        User user = userDataProviderPort.findActiveById(input.getUserId())
+    private void sendUserSubscriptionUpdateMessage(PurchaseChargeOverdueInput input) {
+        User user = userDataProviderPort.findByPaymentGatewayId(input.getCustomerId())
             .orElseThrow(UserNotFoundException::new);
 
         UserSubscriptionResumeView userSubscriptionResumeView = userSubscriptionResumeViewDataProviderPort
@@ -118,8 +112,8 @@ public class UserSubscriptionStatesConsumer {
 
             AsyncUserSubscriptionUpdateOutput message = AsyncUserSubscriptionUpdateOutput.builder()
                 .userId(userSubscriptionResumeView.getUserId())
-                .plan(isEmpty(userSubscriptionResumeView.getPlan()) ? null : EPlan.valueOf(userSubscriptionResumeView.getPlan()))
-                .status(isEmpty(userSubscriptionResumeView.getStatus()) ? null : ESubscriptionStatus.valueOf(userSubscriptionResumeView.getStatus()))
+                .plan(EPlan.valueOf(userSubscriptionResumeView.getPlan()))
+                .status(ESubscriptionStatus.valueOf(userSubscriptionResumeView.getStatus()))
                 .nextPaymentDate(isEmpty(userSubscriptionResumeView.getNextPaymentDate()) ? null : userSubscriptionResumeView.getNextPaymentDate().toString())
                 .recurrence(isEmpty(userSubscriptionResumeView.getRecurrence()) ? null : ESubscriptionRecurrence.valueOf(userSubscriptionResumeView.getRecurrence()))
                 .value(userSubscriptionResumeView.getValue())

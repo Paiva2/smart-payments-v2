@@ -12,5 +12,7 @@ public interface PurchaseChargeDataProviderPort {
 
     void confirmPurchaseChargePayment(String externalChargeId, Date paymentDate);
 
+    void overduePurchaseChargePayment(String externalChargeId);
+
     boolean isConfirmedByExternalId(String externalId);
 }

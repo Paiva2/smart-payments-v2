@@ -133,6 +133,39 @@ public class PaymentGatewaySubscriptionClientAdapter implements PaymentGatewaySu
         });
     }
 
+    @Override
+    public DeleteSubscriptionOutput deleteSubscription(String subscriptionId) {
+        String url = String.format("%s%s/%s", utils.getApiUrl(), SUBSCRIPTION_PATH, subscriptionId);
+
+        return generalRetryTemplatePaymentGateway.execute(ctx -> {
+            log.info("[PaymentGatewaySubscriptionClientAdapter#deleteSubscription]: subscription_id: {}, retry_attempt: {}", subscriptionId, ctx.getRetryCount());
+
+            try {
+                HttpEntity<String> request = new HttpEntity<>(authHeader());
+
+                ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, request, String.class);
+
+                return ((DeleteSubscriptionOutput) convertResponseOutput(response.getBody(), DeleteSubscriptionOutput.class));
+            } catch (HttpStatusCodeException e) {
+                log.error("[PaymentGatewaySubscriptionClientAdapter#deleteSubscription]: subscription_id: {}, status: {}, body: {}",
+                    subscriptionId,
+                    e.getStatusCode(),
+                    e.getResponseBodyAsString()
+                );
+
+                if (e.getStatusCode().is4xxClientError()) {
+                    if (e.getStatusCode().equals(HttpStatus.TOO_MANY_REQUESTS)) {
+                        throw e;
+                    }
+
+                    throw new PaymentGatewayClientErrorException("Client error while deleting subscription on payment gateway!");
+                }
+
+                throw e;
+            }
+        });
+    }
+
     private String convertInputToString(User user, Object input) {
         try {
             return objectMapper.writeValueAsString(input);

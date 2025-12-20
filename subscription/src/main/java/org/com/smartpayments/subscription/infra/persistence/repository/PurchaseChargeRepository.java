@@ -23,6 +23,13 @@ public interface PurchaseChargeRepository extends JpaRepository<PurchaseCharge, 
     )
     void confirmChargePaymentByExternalId(@Param("externalId") String externalId, @Param("paymentDate") Date paymentDate);
 
+    @Modifying
+    @Query("update PurchaseCharge " +
+        "set status = 'OVERDUE' " +
+        "where externalId = :externalId"
+    )
+    void overdueChargePaymentByExternalId(@Param("externalId") String externalId);
+
     @Query("select exists(select puc from PurchaseCharge puc where puc.externalId = :externalId and puc.status = 'CONFIRMED')")
     boolean existsConfirmedByExternalId(@Param("externalId") String externalId);
 }

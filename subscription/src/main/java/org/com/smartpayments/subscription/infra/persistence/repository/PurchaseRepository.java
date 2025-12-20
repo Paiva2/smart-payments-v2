@@ -4,6 +4,7 @@ import jakarta.persistence.LockModeType;
 import org.com.smartpayments.subscription.core.domain.model.Purchase;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -28,5 +29,9 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
         "left join fetch itm.credit cdt " +
         "where pur.externalId = :externalId")
     Optional<Purchase> findByExternalIdForUpdate(@Param("externalId") String externalId);
+
+    @Modifying
+    @Query("update Purchase set status = 'EXPIRED' where externalId = :externalId and status = 'PENDING'")
+    void expirePurchase(@Param("externalId") String externalId);
 
 }

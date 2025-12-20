@@ -23,4 +23,7 @@ public interface UserSubscriptionRepository extends JpaRepository<UserSubscripti
             and pln.type <> 'FREE'
         """, nativeQuery = true)
     List<UserSubscription> findAllMonthlyToRenewNextPaymentDate();
+
+    @Query("select usu from UserSubscription usu join fetch usu.user usr where usu.externalSubscriptionId = :externalSubscriptionId")
+    Optional<UserSubscription> findByExternalSubscriptionId(String externalSubscriptionId);
 }

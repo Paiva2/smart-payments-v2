@@ -25,6 +25,9 @@ public class UserSubscriptionResumeView {
     @Column(name = "next_payment_date")
     private Date nextPaymentDate;
 
+    @Column(name = "status")
+    private String status;
+
     @Column(name = "plan")
     private String plan;
 

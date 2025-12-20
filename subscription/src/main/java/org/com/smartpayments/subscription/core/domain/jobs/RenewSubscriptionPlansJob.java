@@ -32,7 +32,7 @@ public class RenewSubscriptionPlansJob {
     @Value("${spring.kafka.topics.user-subscription-states}")
     private String userSubscriptionStatesTopic;
 
-    @Scheduled(cron = "0 30 0 * * *") // Runs everyday at midnight (00:30)
+    @Scheduled(cron = "0 0 0 * * *") // Runs everyday at midnight (00:00)
     public void run() {
         List<UserSubscription> subscriptionsList = userSubscriptionDataProviderPort.findAllMonthlyToRenew();
 

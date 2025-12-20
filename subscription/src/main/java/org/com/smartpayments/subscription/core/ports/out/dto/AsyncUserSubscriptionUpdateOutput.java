@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.com.smartpayments.subscription.core.domain.enums.EPlan;
 import org.com.smartpayments.subscription.core.domain.enums.ESubscriptionRecurrence;
+import org.com.smartpayments.subscription.core.domain.enums.ESubscriptionStatus;
 
 import java.math.BigDecimal;
 
@@ -16,6 +17,7 @@ import java.math.BigDecimal;
 public class AsyncUserSubscriptionUpdateOutput {
     private Long userId;
     private EPlan plan;
+    private ESubscriptionStatus status;
     private String nextPaymentDate;
     private ESubscriptionRecurrence recurrence;
     private BigDecimal value;
