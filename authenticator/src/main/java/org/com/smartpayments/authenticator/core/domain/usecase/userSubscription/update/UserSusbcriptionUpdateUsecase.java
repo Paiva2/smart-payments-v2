@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
+import static java.util.Objects.isNull;
 import static org.com.smartpayments.authenticator.core.common.constants.Constants.USER_PROFILE_CACHE_LABEL;
 
 @Slf4j
@@ -39,6 +40,7 @@ public class UserSusbcriptionUpdateUsecase implements UsecaseVoidPort<UserSubscr
     private void updateUserSubscription(UserSubscription userSubscription, UserSubscriptionUpdateInput input) {
         userSubscription.setPlan(input.getPlan());
         userSubscription.setNextPaymentDate(convertPaymentDate(input.getNextPaymentDate()));
+        userSubscription.setStatus(input.getStatus());
         userSubscription.setRecurrence(input.getRecurrence());
         userSubscription.setValue(input.getValue());
         userSubscription.setUnlimitedEmailCredits(input.getUnlimitedEmailCredits());
@@ -54,6 +56,8 @@ public class UserSusbcriptionUpdateUsecase implements UsecaseVoidPort<UserSubscr
     }
 
     private Date convertPaymentDate(String date) {
+        if (isNull(date)) return null;
+
         try {
             return dateUtilsPort.convertDate(date, "yyyy-MM-dd HH:mm:ss.SSS");
         } catch (Exception e) {
