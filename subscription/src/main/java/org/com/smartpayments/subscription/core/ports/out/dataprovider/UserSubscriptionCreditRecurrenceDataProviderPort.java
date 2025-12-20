@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface UserSubscriptionCreditRecurrenceDataProviderPort {
     List<UserSubscriptionCreditRecurrence> persistAll(List<UserSubscriptionCreditRecurrence> userSubscriptionCreditRecurrences);
+
+    List<UserSubscriptionCreditRecurrence> findAllByUserSubscription(Long userSubscriptionId);
 }

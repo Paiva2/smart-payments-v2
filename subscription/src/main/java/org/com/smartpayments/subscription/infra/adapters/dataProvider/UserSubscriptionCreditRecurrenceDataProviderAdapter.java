@@ -17,4 +17,9 @@ public class UserSubscriptionCreditRecurrenceDataProviderAdapter implements User
     public List<UserSubscriptionCreditRecurrence> persistAll(List<UserSubscriptionCreditRecurrence> userSubscriptionCreditRecurrences) {
         return repository.saveAll(userSubscriptionCreditRecurrences);
     }
+
+    @Override
+    public List<UserSubscriptionCreditRecurrence> findAllByUserSubscription(Long userSubscriptionId) {
+        return repository.findAllByUserSubscriptionId(userSubscriptionId);
+    }
 }

@@ -37,14 +37,13 @@ spring:
       new-user-dlt: user.new-user-register.dlt
       new-purchase-charge: purchase-charge.new-charge
       new-purchase-charge-dlt: purchase-charge.new-charge.dlt
-
       confirmed-purchase-charge: purchase-charge.confirmed-charge
       confirmed-purchase-charge-dlt: purchase-charge.confirmed-charge.dlt
-
       mail-sender: mail.sender
-
       user-subscription-update: user.user-subscription-update
       user-subscription-update-dlt: user.user-subscription-update.dlt
+      user-subscription-renew: user.user-subscription-renew.dlt
+      user-subscription-renew-dlt: user.user-subscription-renew.dlt
     consumer:
       auto-offset-reset: latest
       group-id: subscription_group

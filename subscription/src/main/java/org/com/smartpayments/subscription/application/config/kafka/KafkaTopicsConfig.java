@@ -39,6 +39,12 @@ public class KafkaTopicsConfig {
     @Value("${spring.kafka.topics.user-subscription-update-dlt}")
     private String userSubscriptionUpdateTopicDlt;
 
+    @Value("${spring.kafka.topics.user-subscription-renew}")
+    private String userSubscriptionRenewTopic;
+
+    @Value("${spring.kafka.topics.user-subscription-renew}")
+    private String userSubscriptionRenewTopicDlt;
+
     @Bean
     public KafkaAdmin admin() {
         Map<String, Object> configs = new HashMap<>();
@@ -99,6 +105,24 @@ public class KafkaTopicsConfig {
         }};
 
         return mountTopic(userSubscriptionUpdateTopicDlt, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
+    }
+
+    @Bean
+    public NewTopic userSubscriptionRenewTopic() {
+        Map<String, String> topicConfigs = new HashMap<>() {{
+            put(TopicConfig.RETENTION_MS_CONFIG, MESSAGES_RETENTION_DEFAULT_MILLIS_THREE_DAYS);
+        }};
+
+        return mountTopic(userSubscriptionRenewTopic, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
+    }
+
+    @Bean
+    public NewTopic userSubscriptionRenewTopicDlt() {
+        Map<String, String> topicConfigs = new HashMap<>() {{
+            put(TopicConfig.RETENTION_MS_CONFIG, "-1");
+        }};
+
+        return mountTopic(userSubscriptionRenewTopicDlt, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
     }
 
     private NewTopic mountTopic(String topicName, int partitions, int replicas, Map<String, String> config) {
