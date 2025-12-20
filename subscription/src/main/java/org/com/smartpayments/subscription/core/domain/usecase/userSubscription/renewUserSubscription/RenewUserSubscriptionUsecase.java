@@ -14,7 +14,7 @@ import org.com.smartpayments.subscription.core.ports.in.UsecaseVoidPort;
 import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserSubscriptionCreditHistoryDataProviderPort;
 import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserSubscriptionCreditRecurrenceDataProviderPort;
 import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserSubscriptionDataProviderPort;
-import org.com.smartpayments.subscription.core.ports.out.dto.AsyncRenewSubscriptionPlanInput;
+import org.com.smartpayments.subscription.core.ports.out.dto.AsyncSubscriptionPlanStateInput;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,14 +26,14 @@ import java.util.List;
 @Slf4j
 @Service
 @AllArgsConstructor
-public class RenewUserSubscriptionUsecase implements UsecaseVoidPort<AsyncRenewSubscriptionPlanInput> {
+public class RenewUserSubscriptionUsecase implements UsecaseVoidPort<AsyncSubscriptionPlanStateInput> {
     private final UserSubscriptionDataProviderPort userSubscriptionDataProviderPort;
     private final UserSubscriptionCreditRecurrenceDataProviderPort userSubscriptionCreditRecurrenceDataProviderPort;
     private final UserSubscriptionCreditHistoryDataProviderPort userSubscriptionCreditHistoryDataProviderPort;
 
     @Override
     @Transactional
-    public void execute(AsyncRenewSubscriptionPlanInput input) {
+    public void execute(AsyncSubscriptionPlanStateInput input) {
         UserSubscription userSubscription = findUserSubscription(input);
 
         userSubscription.setNextPaymentDate(setNextPaymentDate(userSubscription));
@@ -50,7 +50,7 @@ public class RenewUserSubscriptionUsecase implements UsecaseVoidPort<AsyncRenewS
         }
     }
 
-    private UserSubscription findUserSubscription(AsyncRenewSubscriptionPlanInput input) {
+    private UserSubscription findUserSubscription(AsyncSubscriptionPlanStateInput input) {
         return userSubscriptionDataProviderPort.findByUserWithPlan(input.getUserId())
             .orElseThrow(UserSubscriptionNotFoundException::new);
     }

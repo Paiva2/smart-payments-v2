@@ -17,8 +17,8 @@ spring:
       mail-sender: mail.sender
       user-subscription-update: user.user-subscription-update
       user-subscription-update-dlt: user.user-subscription-update.dlt
-      user-subscription-renew: user.user-subscription-renew.dlt
-      user-subscription-renew-dlt: user.user-subscription-renew.dlt
+      user-subscription-states: user.user-subscription-states.dlt
+      user-subscription-states-dlt: user.user-subscription-states.dlt
     consumer:
       auto-offset-reset: latest
       group-id: subscription_group

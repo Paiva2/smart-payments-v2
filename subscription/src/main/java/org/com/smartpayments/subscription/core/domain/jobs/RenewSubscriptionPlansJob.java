@@ -3,11 +3,12 @@ package org.com.smartpayments.subscription.core.domain.jobs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.com.smartpayments.subscription.core.domain.enums.EUserSubscriptionState;
 import org.com.smartpayments.subscription.core.domain.model.UserSubscription;
 import org.com.smartpayments.subscription.core.ports.in.utils.MessageUtilsPort;
 import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserSubscriptionDataProviderPort;
 import org.com.smartpayments.subscription.core.ports.out.dto.AsyncMessageOutput;
-import org.com.smartpayments.subscription.core.ports.out.dto.AsyncRenewSubscriptionPlanInput;
+import org.com.smartpayments.subscription.core.ports.out.dto.AsyncSubscriptionPlanStateInput;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,23 +29,23 @@ public class RenewSubscriptionPlansJob {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    @Value("${spring.kafka.topics.user-subscription-renew}")
-    private String renewUserSubscriptionTopic;
+    @Value("${spring.kafka.topics.user-subscription-states}")
+    private String userSubscriptionStatesTopic;
 
-    @Scheduled(cron = "0 01 0 * * *") // Runs everyday at midnight (00:01)
-    public void runForMonthly() {
+    @Scheduled(cron = "0 30 0 * * *") // Runs everyday at midnight (00:30)
+    public void run() {
         List<UserSubscription> subscriptionsList = userSubscriptionDataProviderPort.findAllMonthlyToRenew();
 
-        log.info("[RenewSubscriptionPlansJob#runForMonthly - Starting subscription renewals]");
+        log.info("[RenewSubscriptionPlansJob#run - Starting subscription renewals]");
 
         subscriptionsList.forEach(this::sendMessageToRenew);
 
-        log.info("[RenewSubscriptionPlansJob#runForMonthly - End subscription renewals. Total: {}", subscriptionsList.size());
+        log.info("[RenewSubscriptionPlansJob#run - End subscription renewals. Total: {}", subscriptionsList.size());
     }
 
     private void sendMessageToRenew(UserSubscription userSubscription) {
         try {
-            kafkaTemplate.send(renewUserSubscriptionTopic, mapper.writeValueAsString(input(userSubscription)));
+            kafkaTemplate.send(userSubscriptionStatesTopic, mapper.writeValueAsString(input(userSubscription)));
         } catch (Exception e) {
             log.info("[RenewSubscriptionPlansJob#sendMessageToRenew - Error while sending message to renew subscription. Error: {}", e.getMessage());
         }
@@ -53,7 +54,8 @@ public class RenewSubscriptionPlansJob {
     private AsyncMessageOutput<Object> input(UserSubscription userSubscription) {
         final String issuer = "SUBSCRIPTION";
 
-        final AsyncRenewSubscriptionPlanInput renewSubscriptionInput = AsyncRenewSubscriptionPlanInput.builder()
+        final AsyncSubscriptionPlanStateInput renewSubscriptionInput = AsyncSubscriptionPlanStateInput.builder()
+            .state(EUserSubscriptionState.ACTIVE_RENEWED)
             .userSubscriptionId(userSubscription.getId())
             .userId(userSubscription.getUser().getId())
             .build();

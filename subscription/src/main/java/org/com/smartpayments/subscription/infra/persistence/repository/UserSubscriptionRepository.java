@@ -16,7 +16,7 @@ public interface UserSubscriptionRepository extends JpaRepository<UserSubscripti
             join users usr on usr.id = usb.user_id
             join plans pln on pln.id = usb.plan_id
         where usb.next_payment_date is not null
-            and DATE_TRUNC('day', usb.next_payment_date) <= current_date
+            and DATE_TRUNC('day', usb.next_payment_date) = current_date
             and usb.recurrence = 'MONTHLY'
             and usb.external_subscription_id is not null
             and usb.status = 'ACTIVE'
