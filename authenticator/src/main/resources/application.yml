@@ -6,6 +6,9 @@ spring:
   application:
     name: authenticator
 
+  jackson:
+    time-zone: America/Sao_Paulo
+
   cache:
     type: redis
     redis:

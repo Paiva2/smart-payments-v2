@@ -39,7 +39,7 @@ public class UserSusbcriptionUpdateUsecase implements UsecaseVoidPort<UserSubscr
 
     private void updateUserSubscription(UserSubscription userSubscription, UserSubscriptionUpdateInput input) {
         userSubscription.setPlan(input.getPlan());
-        userSubscription.setNextPaymentDate(convertPaymentDate(input.getNextPaymentDate()));
+        userSubscription.setNextPaymentDate(convertNextPaymentDate(input.getNextPaymentDate()));
         userSubscription.setStatus(input.getStatus());
         userSubscription.setRecurrence(input.getRecurrence());
         userSubscription.setValue(input.getValue());
@@ -55,13 +55,13 @@ public class UserSusbcriptionUpdateUsecase implements UsecaseVoidPort<UserSubscr
         userSubscriptionDataProviderPort.persist(userSubscription);
     }
 
-    private Date convertPaymentDate(String date) {
+    private Date convertNextPaymentDate(String date) {
         if (isNull(date)) return null;
 
         try {
             return dateUtilsPort.convertDate(date, "yyyy-MM-dd HH:mm:ss.SSS");
         } catch (Exception e) {
-            log.error("[UserSusbcriptionUpdateUsecase#convertPaymentDate] - Error while converting next payment date. Error: {}", e.getMessage());
+            log.error("[UserSusbcriptionUpdateUsecase#convertNextPaymentDate] - Error while converting next payment date. Error: {}", e.getMessage());
             return null;
         }
     }
