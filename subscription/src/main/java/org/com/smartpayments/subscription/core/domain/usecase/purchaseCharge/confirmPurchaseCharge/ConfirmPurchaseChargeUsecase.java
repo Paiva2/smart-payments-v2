@@ -162,8 +162,6 @@ public class ConfirmPurchaseChargeUsecase implements UsecaseVoidPort<PurchaseCha
             throw new UserAlreadyHasActivePlanException("User already has an active subscription. Can't active another while having one active!");
         }
 
-        Date nextPaymentDate = defineNextPaymentDate(chargeDueDate);
-
         // First Activation
         if (hasNoNextPaymentDate && isNull(userSubscription.getExternalSubscriptionId())) {
             log.info("[ConfirmPurchaseChargeUsecase#execute] Activating plan for user. UserId: {}, PlanType: {}, ExternalSubId: {}",
@@ -174,6 +172,8 @@ public class ConfirmPurchaseChargeUsecase implements UsecaseVoidPort<PurchaseCha
 
             Plan planPurchased = purchasedItem.getPlan();
 
+            Date nextPaymentDate = defineNextPaymentDate(chargeDueDate);
+            
             userSubscription.setPlan(planPurchased);
             userSubscription.setExternalSubscriptionId(purchase.getExternalId());
             userSubscription.setRecurrence(ESubscriptionRecurrence.MONTHLY);
@@ -181,6 +181,7 @@ public class ConfirmPurchaseChargeUsecase implements UsecaseVoidPort<PurchaseCha
             userSubscription.setUnlimitedSmsCredits(planPurchased.getUnlimitedSmsCredits());
             userSubscription.setUnlimitedWhatsAppCredits(planPurchased.getUnlimitedWhatsAppCredits());
             userSubscription.setValue(planPurchased.getValue());
+            userSubscription.setNextPaymentDate(nextPaymentDate);
 
             removeSampleCreditsFromHistory(userSubscription);
             addSubscriptionCreditsAndRecurrences(planPurchased, userSubscription, nextPaymentDate);
@@ -189,13 +190,9 @@ public class ConfirmPurchaseChargeUsecase implements UsecaseVoidPort<PurchaseCha
         } else if (!Objects.equals(userSubscription.getExternalSubscriptionId(), purchase.getExternalId())) {
             throw new UserAlreadyHasActivePlanException("Can't confirm a payment of another subscription with an subscription already active!");
         } else {
-            log.info("[ConfirmPurchaseChargeUsecase#execute] Renewing subscription. UserId: {}, NextPayment: {}",
-                userSubscription.getUser().getId(),
-                userSubscription.getNextPaymentDate()
-            );
+            log.info("[ConfirmPurchaseChargeUsecase#execute] Renewing subscription. UserId: {}", userSubscription.getUser().getId());
         }
 
-        userSubscription.setNextPaymentDate(nextPaymentDate);
         userSubscription.setExpiredAt(null);
         userSubscription.setStatus(ESubscriptionStatus.ACTIVE);
 
@@ -266,6 +263,10 @@ public class ConfirmPurchaseChargeUsecase implements UsecaseVoidPort<PurchaseCha
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(dueDate);
         calendar.add(Calendar.MONTH, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 59);
         return calendar.getTime();
     }
 

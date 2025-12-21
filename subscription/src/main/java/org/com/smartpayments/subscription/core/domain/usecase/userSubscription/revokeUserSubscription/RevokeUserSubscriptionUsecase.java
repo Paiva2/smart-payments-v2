@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
+import static java.util.Objects.nonNull;
+
 @Slf4j
 @Service
 @AllArgsConstructor
@@ -43,8 +45,11 @@ public class RevokeUserSubscriptionUsecase implements UsecaseVoidPort<AsyncSubsc
         setUserSubscriptionPlanFree(userSubscription);
         deleteCreditRecurrences(userSubscription);
         invalidateCurrentCredits(userSubscription);
-        deleteSubscriptionPaymentGateway(userSubscription.getUser(), subscriptionExternalId);
 
+        if (nonNull(subscriptionExternalId)) {
+            deleteSubscriptionPaymentGateway(userSubscription.getUser(), subscriptionExternalId);
+        }
+        
         log.info("[RevokeUserSubscriptionUsecase#execute] - Subscription revoked. User Subscription Id: {}", userSubscription.getId());
     }
 
