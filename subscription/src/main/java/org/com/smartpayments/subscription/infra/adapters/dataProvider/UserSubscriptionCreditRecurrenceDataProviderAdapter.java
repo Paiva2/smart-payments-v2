@@ -22,4 +22,9 @@ public class UserSubscriptionCreditRecurrenceDataProviderAdapter implements User
     public List<UserSubscriptionCreditRecurrence> findAllByUserSubscription(Long userSubscriptionId) {
         return repository.findAllByUserSubscriptionId(userSubscriptionId);
     }
+
+    @Override
+    public void deleteAllByUserSubscription(Long userSubscriptionId) {
+        repository.deleteAllByUserSubscriptionId(userSubscriptionId);
+    }
 }

@@ -196,6 +196,7 @@ public class ConfirmPurchaseChargeUsecase implements UsecaseVoidPort<PurchaseCha
         }
 
         userSubscription.setNextPaymentDate(nextPaymentDate);
+        userSubscription.setExpiredAt(null);
         userSubscription.setStatus(ESubscriptionStatus.ACTIVE);
 
         persistUserSubscription(userSubscription);

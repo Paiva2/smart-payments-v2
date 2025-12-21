@@ -14,6 +14,7 @@ import org.com.smartpayments.subscription.core.domain.enums.ESubscriptionStatus;
 import org.com.smartpayments.subscription.core.domain.model.User;
 import org.com.smartpayments.subscription.core.domain.model.views.UserSubscriptionResumeView;
 import org.com.smartpayments.subscription.core.domain.usecase.userSubscription.renewUserSubscription.RenewUserSubscriptionUsecase;
+import org.com.smartpayments.subscription.core.domain.usecase.userSubscription.revokeUserSubscription.RevokeUserSubscriptionUsecase;
 import org.com.smartpayments.subscription.core.ports.in.dto.AsyncMessageInput;
 import org.com.smartpayments.subscription.core.ports.in.utils.MessageUtilsPort;
 import org.com.smartpayments.subscription.core.ports.out.dataprovider.CacheDataProviderPort;
@@ -41,6 +42,8 @@ public class UserSubscriptionStatesConsumer {
     private final static ObjectMapper mapper = new ObjectMapper();
 
     private final RenewUserSubscriptionUsecase renewUserSubscriptionUsecase;
+    private final RevokeUserSubscriptionUsecase revokeUserSubscriptionUsecase;
+
     private final UserSubscriptionResumeViewDataProviderPort userSubscriptionResumeViewDataProviderPort;
     private final CacheDataProviderPort cacheDataProviderPort;
     private final UserDataProviderPort userDataProviderPort;
@@ -79,6 +82,9 @@ public class UserSubscriptionStatesConsumer {
             switch (inputData.getState()) {
                 case ACTIVE_RENEWED -> {
                     renewUserSubscriptionUsecase.execute(inputData);
+                }
+                case EXPIRED -> {
+                    revokeUserSubscriptionUsecase.execute(inputData);
                 }
                 default -> {
                     log.warn("[UserSubscriptionStatesConsumer#execute] - Invalid message status: {}", message);

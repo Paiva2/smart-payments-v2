@@ -18,4 +18,12 @@ public interface UserSubscriptionCreditHistoryRepository extends JpaRepository<U
         "and userSubscription.id = :userSubscriptionId " +
         "and expiresAt is null")
     void revokeSampleCreditsByUserSubscriptionId(@Param("userSubscriptionId") Long userSubscriptionId);
+
+    @Modifying
+    @Query("update UserSubscriptionCreditHistory " +
+        "set expiresAt = current_timestamp " +
+        "where transactionType = 'GRANT' " +
+        "and userSubscription.id = :userSubscriptionId " +
+        "and (expiresAt is not null and expiresAt >= current_date)")
+    void revokeNonExpiredCreditsByUserSubscriptionId(@Param("userSubscriptionId") Long userSubscriptionId);
 }

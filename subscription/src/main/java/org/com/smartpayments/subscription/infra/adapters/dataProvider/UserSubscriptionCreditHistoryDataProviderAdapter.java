@@ -22,4 +22,9 @@ public class UserSubscriptionCreditHistoryDataProviderAdapter implements UserSub
     public void revokeSampleCredits(Long userSubscriptionId) {
         repository.revokeSampleCreditsByUserSubscriptionId(userSubscriptionId);
     }
+
+    @Override
+    public void revokeNonExpiredCredits(Long userSubscriptionId) {
+        repository.revokeNonExpiredCreditsByUserSubscriptionId(userSubscriptionId);
+    }
 }

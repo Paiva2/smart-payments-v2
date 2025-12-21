@@ -26,4 +26,17 @@ public interface UserSubscriptionRepository extends JpaRepository<UserSubscripti
 
     @Query("select usu from UserSubscription usu join fetch usu.user usr where usu.externalSubscriptionId = :externalSubscriptionId")
     Optional<UserSubscription> findByExternalSubscriptionId(String externalSubscriptionId);
+
+    @Query(value = """
+        select usb.* from users_subscriptions usb
+            join users usr on usr.id = usb.user_id
+            join plans pln on pln.id = usb.plan_id
+        where usb.next_payment_date is not null
+            and usb.expired_at + interval '2 days' < now()
+            and usb.recurrence = 'MONTHLY'
+            and usb.external_subscription_id is not null
+            and usb.status = 'EXPIRED'
+            and pln.type <> 'FREE'
+        """, nativeQuery = true)
+    List<UserSubscription> findAllMonthlyToRevoke();
 }

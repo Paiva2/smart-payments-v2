@@ -20,7 +20,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RenewSubscriptionPlansJob {
+public class RevokeSubscriptionPlansJob {
     private final static ObjectMapper mapper = new ObjectMapper();
 
     private final UserSubscriptionDataProviderPort userSubscriptionDataProviderPort;
@@ -32,22 +32,22 @@ public class RenewSubscriptionPlansJob {
     @Value("${spring.kafka.topics.user-subscription-states}")
     private String userSubscriptionStatesTopic;
 
-    @Scheduled(cron = "0 30 0 * * *") // Runs everyday at midnight (00:30)
+    @Scheduled(cron = "0 0 0 * * *") // Runs everyday at midnight (00:00)
     public void run() {
-        List<UserSubscription> subscriptionsList = userSubscriptionDataProviderPort.findAllMonthlyToRenew();
+        List<UserSubscription> subscriptionsList = userSubscriptionDataProviderPort.findAllMonthlyToRevoke();
 
-        log.info("[RenewSubscriptionPlansJob#run - Starting subscription renewals]");
+        log.info("[RevokeSubscriptionPlansJob#run - Starting subscription expirations]");
 
-        subscriptionsList.forEach(this::sendMessageToRenew);
+        subscriptionsList.forEach(this::sendMessageToRevoke);
 
-        log.info("[RenewSubscriptionPlansJob#run - End subscription renewals. Total: {}", subscriptionsList.size());
+        log.info("[RevokeSubscriptionPlansJob#run - End subscription expirations. Total: {}", subscriptionsList.size());
     }
 
-    private void sendMessageToRenew(UserSubscription userSubscription) {
+    private void sendMessageToRevoke(UserSubscription userSubscription) {
         try {
             kafkaTemplate.send(userSubscriptionStatesTopic, mapper.writeValueAsString(input(userSubscription)));
         } catch (Exception e) {
-            log.info("[RenewSubscriptionPlansJob#sendMessageToRenew - Error while sending message to renew subscription. Error: {}", e.getMessage());
+            log.info("[RevokeSubscriptionPlansJob#sendMessageToRevoke - Error while sending message to expire subscription. Error: {}", e.getMessage());
         }
     }
 
@@ -55,7 +55,7 @@ public class RenewSubscriptionPlansJob {
         final String issuer = "SUBSCRIPTION";
 
         final AsyncSubscriptionPlanStateInput renewSubscriptionInput = AsyncSubscriptionPlanStateInput.builder()
-            .state(EUserSubscriptionState.ACTIVE_RENEWED)
+            .state(EUserSubscriptionState.EXPIRED)
             .userSubscriptionId(userSubscription.getId())
             .userId(userSubscription.getUser().getId())
             .build();

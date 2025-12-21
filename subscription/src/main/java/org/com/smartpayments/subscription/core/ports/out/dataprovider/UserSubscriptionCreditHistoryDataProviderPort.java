@@ -8,4 +8,6 @@ public interface UserSubscriptionCreditHistoryDataProviderPort {
     List<UserSubscriptionCreditHistory> persistAll(List<UserSubscriptionCreditHistory> userSubscriptionCreditHistories);
 
     void revokeSampleCredits(Long userSubscriptionId);
+
+    void revokeNonExpiredCredits(Long userSubscriptionId);
 }

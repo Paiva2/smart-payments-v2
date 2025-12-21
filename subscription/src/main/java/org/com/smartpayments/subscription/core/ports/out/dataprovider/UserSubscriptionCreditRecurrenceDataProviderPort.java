@@ -8,4 +8,6 @@ public interface UserSubscriptionCreditRecurrenceDataProviderPort {
     List<UserSubscriptionCreditRecurrence> persistAll(List<UserSubscriptionCreditRecurrence> userSubscriptionCreditRecurrences);
 
     List<UserSubscriptionCreditRecurrence> findAllByUserSubscription(Long userSubscriptionId);
+
+    void deleteAllByUserSubscription(Long userSubscriptionId);
 }
