@@ -11,6 +11,9 @@ public interface UserSubscriptionRepository extends JpaRepository<UserSubscripti
     @Query("select usu from UserSubscription usu join fetch usu.plan pla where usu.user.id = :userId")
     Optional<UserSubscription> findByUserIdWithPlan(Long userId);
 
+    @Query("select usu from UserSubscription usu join fetch usu.user usr where usu.id = :id")
+    Optional<UserSubscription> findByIdWithUser(Long id);
+
     @Query(value = """
         select usb.* from users_subscriptions usb
             join users usr on usr.id = usb.user_id
@@ -39,4 +42,17 @@ public interface UserSubscriptionRepository extends JpaRepository<UserSubscripti
             and pln.type <> 'FREE'
         """, nativeQuery = true)
     List<UserSubscription> findAllMonthlyToRevoke();
+
+    @Query(value = """
+        select usb.* from users_subscriptions usb
+            join users usr on usr.id = usb.user_id
+            join plans pln on pln.id = usb.plan_id
+        where usb.next_payment_date is not null
+            and usb.next_payment_date < now()
+            and usb.recurrence = 'MONTHLY'
+            and usb.external_subscription_id is not null
+            and usb.status = 'CANCELLED'
+            and pln.type <> 'FREE'
+        """, nativeQuery = true)
+    List<UserSubscription> findAllMonthlyToCancel();
 }

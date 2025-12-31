@@ -26,7 +26,7 @@ public class UserSubscriptionDataProviderAdapter implements UserSubscriptionData
 
     @Override
     public Optional<UserSubscription> findById(Long id) {
-        return repository.findById(id);
+        return repository.findByIdWithUser(id);
     }
 
     @Override
@@ -42,5 +42,10 @@ public class UserSubscriptionDataProviderAdapter implements UserSubscriptionData
     @Override
     public List<UserSubscription> findAllMonthlyToRevoke() {
         return repository.findAllMonthlyToRevoke();
+    }
+
+    @Override
+    public List<UserSubscription> findAllMonthlyToCancel() {
+        return repository.findAllMonthlyToCancel();
     }
 }

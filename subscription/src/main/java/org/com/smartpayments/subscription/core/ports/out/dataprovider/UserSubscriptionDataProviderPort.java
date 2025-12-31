@@ -17,4 +17,6 @@ public interface UserSubscriptionDataProviderPort {
     List<UserSubscription> findAllMonthlyToRenew();
 
     List<UserSubscription> findAllMonthlyToRevoke();
+
+    List<UserSubscription> findAllMonthlyToCancel();
 }

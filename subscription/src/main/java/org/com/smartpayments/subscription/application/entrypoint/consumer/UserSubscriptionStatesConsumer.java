@@ -83,7 +83,7 @@ public class UserSubscriptionStatesConsumer {
                 case ACTIVE_RENEWED -> {
                     renewUserSubscriptionUsecase.execute(inputData);
                 }
-                case EXPIRED -> {
+                case EXPIRED, CANCELLED -> {
                     revokeUserSubscriptionUsecase.execute(inputData);
                 }
                 default -> {
