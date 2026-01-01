@@ -7,11 +7,7 @@ import org.com.smartpayments.subscription.core.domain.enums.ECountry;
 import org.com.smartpayments.subscription.core.domain.enums.ECredit;
 import org.com.smartpayments.subscription.core.domain.enums.EPlan;
 import org.com.smartpayments.subscription.core.domain.enums.ESubscriptionStatus;
-import org.com.smartpayments.subscription.core.domain.model.Address;
-import org.com.smartpayments.subscription.core.domain.model.Plan;
-import org.com.smartpayments.subscription.core.domain.model.User;
-import org.com.smartpayments.subscription.core.domain.model.UserSubscription;
-import org.com.smartpayments.subscription.core.domain.model.UserSubscriptionCreditHistory;
+import org.com.smartpayments.subscription.core.domain.model.*;
 import org.com.smartpayments.subscription.core.ports.in.UsecaseVoidPort;
 import org.com.smartpayments.subscription.core.ports.in.dto.AsyncNewUserInput;
 import org.com.smartpayments.subscription.core.ports.out.dataprovider.PlanDataProviderPort;
@@ -97,7 +93,12 @@ public class NewUserUsecase implements UsecaseVoidPort<AsyncNewUserInput> {
             .nextPaymentDate(null)
             .recurrence(null)
             .user(user)
+            .expiredAt(null)
+            .externalSubscriptionId(null)
             .plan(findFreePlan())
+            .unlimitedEmailCredits(false)
+            .unlimitedWhatsAppCredits(false)
+            .unlimitedSmsCredits(false)
             .build();
     }
 
