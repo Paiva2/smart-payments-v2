@@ -1,2 +1,6 @@
 .idea
 .env
+.dev/data
+
+/authenticator/.dev/data/
+/subscription/.dev/data/

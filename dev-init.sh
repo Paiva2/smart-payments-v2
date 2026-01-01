@@ -86,6 +86,7 @@ check_containers "authenticator"
 wait_for_health "authenticator"
 
 cd ..
+cd ..
 
 # =====================
 # SUBSCRIPTION
@@ -102,6 +103,7 @@ echo -e "${GREEN}✔ Subscription started.${RESET}"
 check_containers "subscription"
 wait_for_health "subscription"
 
+cd ..
 cd ..
 
 echo ""
