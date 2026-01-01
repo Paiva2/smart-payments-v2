@@ -4,3 +4,4 @@
 
 /authenticator/.dev/data/
 /subscription/.dev/data/
+docker-compose.yml
