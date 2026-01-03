@@ -20,11 +20,7 @@ import org.com.smartpayments.subscription.core.domain.usecase.userSubscription.c
 import org.com.smartpayments.subscription.core.domain.usecase.userSubscription.cancelSubscription.exception.SubscriptionAlreadyCancelledException;
 import org.com.smartpayments.subscription.core.ports.in.UsecaseVoidPort;
 import org.com.smartpayments.subscription.core.ports.in.utils.MessageUtilsPort;
-import org.com.smartpayments.subscription.core.ports.out.dataprovider.PlanDataProviderPort;
-import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserSubscriptionCreditHistoryDataProviderPort;
-import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserSubscriptionCreditRecurrenceDataProviderPort;
-import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserSubscriptionDataProviderPort;
-import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserSubscriptionResumeViewDataProviderPort;
+import org.com.smartpayments.subscription.core.ports.out.dataprovider.*;
 import org.com.smartpayments.subscription.core.ports.out.dto.AsyncEmailOutput;
 import org.com.smartpayments.subscription.core.ports.out.dto.AsyncMessageOutput;
 import org.com.smartpayments.subscription.core.ports.out.dto.AsyncUserSubscriptionUpdateOutput;
@@ -38,11 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.springframework.util.ObjectUtils.isEmpty;
 
@@ -84,10 +76,12 @@ public class CancelSubscriptionUsecase implements UsecaseVoidPort<Long> {
 
         if (willBeCancelledNow) {
             Plan freePlan = findFreePlan();
-
-            deleteSubscriptionExternal(userSubscription);
-            setUserSubscriptionFree(freePlan, userSubscription);
             emailToNotifyCancelling.add(mountAsyncEmail(userSubscription.getUser()));
+
+            String externalSubscriptionId = userSubscription.getExternalSubscriptionId();
+
+            setUserSubscriptionFree(freePlan, userSubscription);
+            deleteSubscriptionExternal(externalSubscriptionId);
         } else {
             userSubscription.setStatus(ESubscriptionStatus.CANCELLED);
         }
@@ -125,10 +119,10 @@ public class CancelSubscriptionUsecase implements UsecaseVoidPort<Long> {
             .orElseThrow(() -> new PlanNotFoundException("Plan not found!"));
     }
 
-    private void deleteSubscriptionExternal(UserSubscription userSubscription) {
-        if (isEmpty(userSubscription.getExternalSubscriptionId())) return;
+    private void deleteSubscriptionExternal(String externalSubscriptionId) {
+        if (isEmpty(externalSubscriptionId)) return;
 
-        DeleteSubscriptionOutput output = paymentGatewaySubscriptionClientPort.deleteSubscription(userSubscription.getExternalSubscriptionId());
+        DeleteSubscriptionOutput output = paymentGatewaySubscriptionClientPort.deleteSubscription(externalSubscriptionId);
 
         if (!output.isDeleted()) {
             log.error("[CancelSubscriptionUsecase#deleteSubscriptionExternal] - Error while removing subscription external!");
@@ -141,6 +135,9 @@ public class CancelSubscriptionUsecase implements UsecaseVoidPort<Long> {
         userSubscription.setExternalSubscriptionId(null);
         userSubscription.setRecurrence(null);
         userSubscription.setExpiredAt(null);
+        userSubscription.setStatus(ESubscriptionStatus.ACTIVE);
+        userSubscription.setValue(freePlan.getValue());
+        userSubscription.setPlan(freePlan);
 
         userSubscription.setUnlimitedSmsCredits(freePlan.getUnlimitedSmsCredits());
         userSubscription.setUnlimitedWhatsAppCredits(freePlan.getUnlimitedWhatsAppCredits());
