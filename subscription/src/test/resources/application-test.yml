@@ -24,7 +24,7 @@ spring:
       mail-sender: mail.sender
       user-subscription-update: user.user-subscription-update
       user-subscription-update-dlt: user.user-subscription-update.dlt
-      user-subscription-states: user.user-subscription-states.dlt
+      user-subscription-states: user.user-subscription-states
       user-subscription-states-dlt: user.user-subscription-states.dlt
       payment-events: purchase-charge.events
       payment-events-dlt: purchase-charge.events.dlt
