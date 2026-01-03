@@ -6,18 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.com.smartpayments.subscription.core.domain.enums.EPaymentGatewayEvent;
 
-import java.util.Date;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PurchaseChargeConfirmedInput {
+public class PaymentEventInput<D> {
     private String customerId;
-    private boolean isFromSubscription;
-    private String externalPurchaseId;
-    private String externalChargeId;
-    private Date paymentDate;
-    private Date dueDate;
     private EPaymentGatewayEvent event;
+    private D data;
 }

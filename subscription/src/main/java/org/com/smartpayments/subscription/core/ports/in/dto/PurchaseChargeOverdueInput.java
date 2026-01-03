@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.com.smartpayments.subscription.core.domain.enums.EPaymentGatewayEvent;
 
 import java.util.Date;
 
@@ -17,4 +18,5 @@ public class PurchaseChargeOverdueInput {
     private String externalPurchaseId;
     private String externalChargeId;
     private Date dueDate;
+    private EPaymentGatewayEvent event;
 }

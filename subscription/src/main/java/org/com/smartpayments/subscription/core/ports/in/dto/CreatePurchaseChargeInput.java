@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.com.smartpayments.subscription.core.domain.enums.EPaymentGatewayEvent;
 import org.com.smartpayments.subscription.core.domain.enums.EPurchaseChargeStatus;
 
 import java.math.BigDecimal;
@@ -14,6 +15,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreatePurchaseChargeInput {
+    private EPaymentGatewayEvent event;
     private String externalPurchaseId;
     private String externalChargeId;
     private BigDecimal value;

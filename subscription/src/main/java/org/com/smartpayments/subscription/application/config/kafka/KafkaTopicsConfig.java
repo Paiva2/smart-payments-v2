@@ -21,24 +21,6 @@ public class KafkaTopicsConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapAddress;
 
-    @Value("${spring.kafka.topics.new-purchase-charge}")
-    private String purchaseChargeCreatedTopic;
-
-    @Value("${spring.kafka.topics.new-purchase-charge-dlt}")
-    private String purchaseChargeCreatedTopicDlt;
-
-    @Value("${spring.kafka.topics.confirmed-purchase-charge}")
-    private String confirmedPurchaseChargeTopic;
-
-    @Value("${spring.kafka.topics.confirmed-purchase-charge-dlt}")
-    private String confirmedPurchaseChargeTopicDlt;
-
-    @Value("${spring.kafka.topics.overdue-purchase-charge}")
-    private String overduePurchaseChargeTopic;
-
-    @Value("${spring.kafka.topics.overdue-purchase-charge-dlt}")
-    private String overduePurchaseChargeTopicDlt;
-
     @Value("${spring.kafka.topics.user-subscription-update}")
     private String userSubscriptionUpdateTopic;
 
@@ -51,66 +33,18 @@ public class KafkaTopicsConfig {
     @Value("${spring.kafka.topics.user-subscription-states-dlt}")
     private String userSubscriptionStatesTopicDlt;
 
+    @Value("${spring.kafka.topics.payment-events}")
+    private String purchaseChargeEventsTopic;
+
+    @Value("${spring.kafka.topics.payment-events-dlt}")
+    private String purchaseChargeEventsTopicDlt;
+
     @Bean
     public KafkaAdmin admin() {
         Map<String, Object> configs = new HashMap<>();
         configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
 
         return new KafkaAdmin(configs);
-    }
-
-    @Bean
-    public NewTopic purchaseChargeCreatedTopic() {
-        Map<String, String> topicConfigs = new HashMap<>() {{
-            put(TopicConfig.RETENTION_MS_CONFIG, MESSAGES_RETENTION_DEFAULT_MILLIS_THREE_DAYS);
-        }};
-
-        return mountTopic(purchaseChargeCreatedTopic, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
-    }
-
-    @Bean
-    public NewTopic purchaseChargeCreatedDltTopic() {
-        Map<String, String> topicConfigs = new HashMap<>() {{
-            put(TopicConfig.RETENTION_MS_CONFIG, "-1");
-        }};
-
-        return mountTopic(purchaseChargeCreatedTopicDlt, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
-    }
-
-    @Bean
-    public NewTopic purchaseChargeConfirmedTopic() {
-        Map<String, String> topicConfigs = new HashMap<>() {{
-            put(TopicConfig.RETENTION_MS_CONFIG, MESSAGES_RETENTION_DEFAULT_MILLIS_THREE_DAYS);
-        }};
-
-        return mountTopic(confirmedPurchaseChargeTopic, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
-    }
-
-    @Bean
-    public NewTopic purchaseChargeConfirmedTopicDlt() {
-        Map<String, String> topicConfigs = new HashMap<>() {{
-            put(TopicConfig.RETENTION_MS_CONFIG, "-1");
-        }};
-
-        return mountTopic(confirmedPurchaseChargeTopicDlt, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
-    }
-
-    @Bean
-    public NewTopic purchaseChargeOverdueTopic() {
-        Map<String, String> topicConfigs = new HashMap<>() {{
-            put(TopicConfig.RETENTION_MS_CONFIG, MESSAGES_RETENTION_DEFAULT_MILLIS_THREE_DAYS);
-        }};
-
-        return mountTopic(overduePurchaseChargeTopic, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
-    }
-
-    @Bean
-    public NewTopic purchaseChargeOverdueTopicDlt() {
-        Map<String, String> topicConfigs = new HashMap<>() {{
-            put(TopicConfig.RETENTION_MS_CONFIG, "-1");
-        }};
-
-        return mountTopic(overduePurchaseChargeTopicDlt, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
     }
 
     @Bean
@@ -147,6 +81,24 @@ public class KafkaTopicsConfig {
         }};
 
         return mountTopic(userSubscriptionStatesTopicDlt, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
+    }
+
+    @Bean
+    public NewTopic purchaseChargeEventsTopic() {
+        Map<String, String> topicConfigs = new HashMap<>() {{
+            put(TopicConfig.RETENTION_MS_CONFIG, MESSAGES_RETENTION_DEFAULT_MILLIS_THREE_DAYS);
+        }};
+
+        return mountTopic(purchaseChargeEventsTopic, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
+    }
+
+    @Bean
+    public NewTopic purchaseChargeEventsTopicDlt() {
+        Map<String, String> topicConfigs = new HashMap<>() {{
+            put(TopicConfig.RETENTION_MS_CONFIG, "-1");
+        }};
+
+        return mountTopic(purchaseChargeEventsTopicDlt, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
     }
 
     private NewTopic mountTopic(String topicName, int partitions, int replicas, Map<String, String> config) {

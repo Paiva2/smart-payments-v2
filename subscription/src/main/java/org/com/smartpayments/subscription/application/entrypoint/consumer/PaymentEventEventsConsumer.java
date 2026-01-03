@@ -13,9 +13,11 @@ import org.com.smartpayments.subscription.core.domain.enums.ESubscriptionRecurre
 import org.com.smartpayments.subscription.core.domain.enums.ESubscriptionStatus;
 import org.com.smartpayments.subscription.core.domain.model.User;
 import org.com.smartpayments.subscription.core.domain.model.views.UserSubscriptionResumeView;
+import org.com.smartpayments.subscription.core.domain.usecase.purchaseCharge.confirmPurchaseCharge.ConfirmPurchaseChargeUsecase;
+import org.com.smartpayments.subscription.core.domain.usecase.purchaseCharge.createPurchaseCharge.CreatePurchaseChargeUsecase;
 import org.com.smartpayments.subscription.core.domain.usecase.purchaseCharge.overduePurchaseCharge.OverduePurchaseChargeUsecase;
-import org.com.smartpayments.subscription.core.ports.in.dto.AsyncMessageInput;
-import org.com.smartpayments.subscription.core.ports.in.dto.PurchaseChargeOverdueInput;
+import org.com.smartpayments.subscription.core.domain.usecase.purchaseCharge.refundedPurchaseCharge.RefundedPurchaseChargeUsecase;
+import org.com.smartpayments.subscription.core.ports.in.dto.*;
 import org.com.smartpayments.subscription.core.ports.in.utils.MessageUtilsPort;
 import org.com.smartpayments.subscription.core.ports.out.dataprovider.CacheDataProviderPort;
 import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserDataProviderPort;
@@ -36,72 +38,102 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class OverduePurchaseChargeConsumer {
-    private final static String CACHE_KEY = "purchase:confirmed-charge:message:";
+public class PaymentEventEventsConsumer {
+    private final static String CACHE_KEY = "purchase-charge:message-event:";
     private final static ObjectMapper mapper = new ObjectMapper();
 
+    private final CreatePurchaseChargeUsecase createPurchaseChargeUsecase;
     private final OverduePurchaseChargeUsecase overduePurchaseChargeUsecase;
+    private final ConfirmPurchaseChargeUsecase confirmPurchaseChargeUsecase;
+    private final RefundedPurchaseChargeUsecase refundedPurchaseChargeUsecase;
+
     private final UserSubscriptionResumeViewDataProviderPort userSubscriptionResumeViewDataProviderPort;
     private final CacheDataProviderPort cacheDataProviderPort;
     private final UserDataProviderPort userDataProviderPort;
 
-    private final MessageUtilsPort messageUtilsPort;
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final MessageUtilsPort messageUtilsPort;
 
     @Value("${spring.kafka.topics.user-subscription-update}")
     private String UPDATE_USER_SUBSCRIPTION_TOPIC;
 
     @KafkaListener(
-        topics = "${spring.kafka.topics.overdue-purchase-charge}",
+        topics = "${spring.kafka.topics.payment-events}",
         groupId = "${spring.kafka.consumer.group-id}",
         containerFactory = "topicWithDltFixedRetryContainerFactory"
     )
     public void execute(String message) {
         try {
-            AsyncMessageInput<PurchaseChargeOverdueInput> input = convertBody(message);
+            AsyncMessageInput<PaymentEventInput> messageInput = convertMessageBody(message);
 
-            log.info("[OverduePurchaseChargeConsumer#execute] - New message on consumer: {}", message);
+            log.info("[PaymentEventEventsConsumer#execute] - New message on consumer: {}", message);
 
-            if (isNull(input) || isEmpty(input.getMessageHash()) || isNull(input.getData())) {
-                log.error("[OverduePurchaseChargeConsumer#execute] - Message with invalid data will be discarded: {}", message);
+            if (isNull(messageInput) || isEmpty(messageInput.getMessageHash()) || isNull(messageInput.getData())) {
+                log.error("[PaymentEventEventsConsumer#execute] - Message with invalid data will be discarded: {}", message);
                 return;
             }
 
-            final String cacheKey = CACHE_KEY + input.getMessageHash();
+            final String cacheKey = CACHE_KEY + messageInput.getMessageHash();
 
             if (cacheDataProviderPort.existsByKey(cacheKey)) {
-                log.warn("[OverduePurchaseChargeConsumer#execute] - Message already processed: {}", message);
+                log.warn("[PaymentEventEventsConsumer#execute] - Message already processed: {}", message);
                 return;
             }
 
-            PurchaseChargeOverdueInput inputData = input.getData();
-            Boolean shouldSendUpdateAfterOverdue = overduePurchaseChargeUsecase.execute(inputData);
+            Boolean shouldSendUpdate = false;
+            String customerId = messageInput.getData().getCustomerId();
+            PaymentEventInput<Object> paymentEvent = messageInput.getData();
 
-            if (shouldSendUpdateAfterOverdue) {
-                sendUserSubscriptionUpdateMessage(inputData);
+            switch (messageInput.getData().getEvent()) {
+                case PAYMENT_CREATED -> {
+                    CreatePurchaseChargeInput inputData = (CreatePurchaseChargeInput) convertPaymentGatewayEventData(paymentEvent.getData(), CreatePurchaseChargeInput.class);
+                    createPurchaseChargeUsecase.execute(inputData);
+                }
+                case PAYMENT_CONFIRMED,
+                     PAYMENT_RECEIVED -> {
+                    PurchaseChargeConfirmedInput inputData = (PurchaseChargeConfirmedInput) convertPaymentGatewayEventData(paymentEvent.getData(), PurchaseChargeConfirmedInput.class);
+                    confirmPurchaseChargeUsecase.execute(inputData);
+                    shouldSendUpdate = true;
+                }
+                case PAYMENT_OVERDUE -> {
+                    PurchaseChargeOverdueInput inputData = (PurchaseChargeOverdueInput) convertPaymentGatewayEventData(paymentEvent.getData(), PurchaseChargeOverdueInput.class);
+                    shouldSendUpdate = overduePurchaseChargeUsecase.execute(inputData);
+                }
+                case PAYMENT_REFUNDED -> {
+                    //refundedPurchaseChargeUsecase.execute(paymentEvent.getData());
+                    shouldSendUpdate = true;
+                }
+            }
+
+            if (shouldSendUpdate) {
+                sendUserSubscriptionUpdateMessage(customerId);
             }
 
             cacheDataProviderPort.persist(cacheKey, "true", Duration.ofDays(5));
         } catch (Exception e) {
-            log.error("[OverduePurchaseChargeConsumer#execute] - Error while consuming message: {}", message, e);
+            log.error("[PaymentEventEventsConsumer#execute] - Error while consuming message: {}", message, e);
             throw e;
         }
     }
 
-    private AsyncMessageInput<PurchaseChargeOverdueInput> convertBody(String message) {
+    private AsyncMessageInput<PaymentEventInput> convertMessageBody(String message) {
         try {
             return mapper.readValue(message,
-                new TypeReference<AsyncMessageInput<PurchaseChargeOverdueInput>>() {
+                new TypeReference<AsyncMessageInput<PaymentEventInput>>() {
                 }
             );
         } catch (JsonProcessingException e) {
-            log.error("[OverduePurchaseChargeConsumer#convertBody] - Error while converting message: {}", e.getMessage());
+            log.error("[PaymentEventEventsConsumer#convertMessageBody] - Error while converting message: {}", e.getMessage());
             return null;
         }
     }
 
-    private void sendUserSubscriptionUpdateMessage(PurchaseChargeOverdueInput input) {
-        User user = userDataProviderPort.findByPaymentGatewayId(input.getCustomerId())
+    private Object convertPaymentGatewayEventData(Object message, Class inputClass) {
+        return mapper.convertValue(message, inputClass);
+    }
+
+    private void sendUserSubscriptionUpdateMessage(String customerId) {
+        User user = userDataProviderPort.findByPaymentGatewayId(customerId)
             .orElseThrow(UserNotFoundException::new);
 
         UserSubscriptionResumeView userSubscriptionResumeView = userSubscriptionResumeViewDataProviderPort
