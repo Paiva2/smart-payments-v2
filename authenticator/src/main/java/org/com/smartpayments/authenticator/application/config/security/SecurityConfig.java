@@ -50,8 +50,7 @@ public class SecurityConfig {
             securityFilterConfig.NON_FILTERABLE_ENDPOINTS.get(2),
             securityFilterConfig.NON_FILTERABLE_ENDPOINTS.get(3),
             securityFilterConfig.NON_FILTERABLE_ENDPOINTS.get(4),
-            securityFilterConfig.NON_FILTERABLE_ENDPOINTS.get(5),
-            securityFilterConfig.NON_FILTERABLE_ENDPOINTS.get(6)
+            securityFilterConfig.NON_FILTERABLE_ENDPOINTS.get(5)
         );
     }
 
