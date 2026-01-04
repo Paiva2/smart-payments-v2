@@ -33,6 +33,12 @@ public class KafkaTopicsConfig {
     @Value("${spring.kafka.topics.new-user-dlt}")
     private String newUserTopicDlt;
 
+    @Value("${spring.kafka.topics.update-user}")
+    private String updateUserTopic;
+
+    @Value("${spring.kafka.topics.update-user-dlt}")
+    private String updateUserTopicDlt;
+
     @Bean
     public KafkaAdmin admin() {
         Map<String, Object> configs = new HashMap<>();
@@ -75,6 +81,24 @@ public class KafkaTopicsConfig {
         }};
 
         return mountTopic(newUserTopicDlt, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
+    }
+
+    @Bean
+    public NewTopic updateUserTopic() {
+        Map<String, String> topicConfigs = new HashMap<>() {{
+            put(TopicConfig.RETENTION_MS_CONFIG, "-1");
+        }};
+
+        return mountTopic(updateUserTopic, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
+    }
+
+    @Bean
+    public NewTopic updateUserTopicDlt() {
+        Map<String, String> topicConfigs = new HashMap<>() {{
+            put(TopicConfig.RETENTION_MS_CONFIG, "-1");
+        }};
+
+        return mountTopic(updateUserTopicDlt, DEFAULT_PARTITION_COUNT, DEFAULT_REPLICAS_COUNT, topicConfigs);
     }
 
     private NewTopic mountTopic(String topicName, int partitions, int replicas, Map<String, String> config) {

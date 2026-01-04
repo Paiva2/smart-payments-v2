@@ -1,5 +1,7 @@
 package org.com.smartpayments.authenticator.core.domain.usecase.user.updateUserProfile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.com.smartpayments.authenticator.core.common.exception.GenericCpfCnpjInvalidException;
@@ -12,10 +14,14 @@ import org.com.smartpayments.authenticator.core.ports.in.UsecasePort;
 import org.com.smartpayments.authenticator.core.ports.in.dto.UpdateUserProfileInput;
 import org.com.smartpayments.authenticator.core.ports.out.dataProvider.ImageUploadDataProviderPort;
 import org.com.smartpayments.authenticator.core.ports.out.dataProvider.UserDataProviderPort;
+import org.com.smartpayments.authenticator.core.ports.out.dto.AsyncMessageOutput;
+import org.com.smartpayments.authenticator.core.ports.out.dto.AsyncUpdateUserOutput;
 import org.com.smartpayments.authenticator.core.ports.out.dto.UserProfileOutput;
+import org.com.smartpayments.authenticator.core.ports.out.utils.MessageUtilsPort;
 import org.com.smartpayments.authenticator.core.ports.out.utils.PersonalDocumentUtilsPort;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +38,8 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 @Service
 @RequiredArgsConstructor
 public class UpdateUserProfileUsecase implements UsecasePort<UpdateUserProfileInput, UserProfileOutput> {
+    private final static ObjectMapper mapper = new ObjectMapper();
+
     private final static String UPLOAD_IMAGE_PATH = "user-profile-picture";
 
     private final UserDataProviderPort userDataProviderPort;
@@ -39,8 +47,15 @@ public class UpdateUserProfileUsecase implements UsecasePort<UpdateUserProfileIn
     private final PersonalDocumentUtilsPort personalDocumentUtilsPort;
     private final ImageUploadDataProviderPort imageUploadDataProviderPort;
 
+    private final KafkaTemplate<String, String> kafkaTemplate;
+
+    private final MessageUtilsPort messageUtilsPort;
+
     @Value("${file.image.upload.bucket_name}")
     private String profileImageDestination;
+
+    @Value("${spring.kafka.topics.update-user}")
+    private String userUpdateTopic;
 
     @Override
     @Transactional
@@ -57,7 +72,11 @@ public class UpdateUserProfileUsecase implements UsecasePort<UpdateUserProfileIn
 
         user.setProfilePictureUrl(findProfilePictureUrl(user.getId()));
 
-        return user.toProfileOutput();
+        UserProfileOutput output = user.toProfileOutput();
+
+        sendMessageUpdate(output);
+
+        return output;
     }
 
     private User findUser(Long userId) {
@@ -67,6 +86,7 @@ public class UpdateUserProfileUsecase implements UsecasePort<UpdateUserProfileIn
     private Date parseDate(String birthdate) {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            sdf.setLenient(false);
             return sdf.parse(birthdate);
         } catch (Exception e) {
             String message = "Error while changing birthdate!";
@@ -118,5 +138,52 @@ public class UpdateUserProfileUsecase implements UsecasePort<UpdateUserProfileIn
     private String findProfilePictureUrl(Long userId) {
         String key = String.format("%s/%s", UPLOAD_IMAGE_PATH, userId);
         return imageUploadDataProviderPort.findMostRecentFromDestination(profileImageDestination, key, PROFILE_PICTURE_PRESIGNED_URL_EXP_DAYS);
+    }
+
+    private AsyncUpdateUserOutput mountAsyncUpdateUserOutput(UserProfileOutput userProfileOutput) {
+        return AsyncUpdateUserOutput.builder()
+            .id(userProfileOutput.getId())
+            .firstName(userProfileOutput.getFirstName())
+            .lastName(userProfileOutput.getLastName())
+            .email(userProfileOutput.getEmail())
+            .cpfCnpj(userProfileOutput.getCpfCnpj())
+            .type(userProfileOutput.getType())
+            .ddi(userProfileOutput.getDdi())
+            .phone(userProfileOutput.getPhone())
+            .birthdate(userProfileOutput.getBirthdate())
+            .active(userProfileOutput.getActive())
+            .emailConfirmedAt(userProfileOutput.getEmailConfirmedAt())
+            .address(AsyncUpdateUserOutput.AsyncAddressOutput.builder()
+                .street(userProfileOutput.getAddress().getStreet())
+                .neighborhood(userProfileOutput.getAddress().getNeighborhood())
+                .number(userProfileOutput.getAddress().getNumber())
+                .zipcode(userProfileOutput.getAddress().getZipcode())
+                .complement(userProfileOutput.getAddress().getComplement())
+                .city(userProfileOutput.getAddress().getCity())
+                .state(userProfileOutput.getAddress().getState())
+                .country(userProfileOutput.getAddress().getCountry()
+                ).build()
+            ).build();
+    }
+
+    private void sendMessageUpdate(UserProfileOutput userProfileOutput) {
+        String issuer = "AUTHENTICATOR";
+
+        try {
+            AsyncUpdateUserOutput updateUser = mountAsyncUpdateUserOutput(userProfileOutput);
+
+            AsyncMessageOutput<AsyncUpdateUserOutput> asyncMessage = new AsyncMessageOutput<>(
+                messageUtilsPort.generateMessageHash(issuer),
+                new Date(),
+                issuer,
+                updateUser
+            );
+
+            kafkaTemplate.send(userUpdateTopic, userProfileOutput.getId().toString(), mapper.writeValueAsString(asyncMessage));
+        } catch (JsonProcessingException exception) {
+            String message = "Error while sending user update message: {}";
+            log.error(message, exception.getMessage(), exception);
+            throw new GenericException("Error while updating user!");
+        }
     }
 }

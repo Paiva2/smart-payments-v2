@@ -2,6 +2,7 @@ package org.com.smartpayments.authenticator.core.domain.usecase.user.authUser;
 
 import lombok.AllArgsConstructor;
 import org.com.smartpayments.authenticator.core.common.exception.UserEmailNotActiveException;
+import org.com.smartpayments.authenticator.core.common.exception.UserNotActiveException;
 import org.com.smartpayments.authenticator.core.common.exception.UserNotFoundException;
 import org.com.smartpayments.authenticator.core.domain.model.User;
 import org.com.smartpayments.authenticator.core.domain.usecase.user.authUser.exception.WrongCredentialsException;
@@ -28,17 +29,21 @@ public class AuthUserUsecase implements UsecasePort<AuthUserInput, AuthUserOutpu
     public AuthUserOutput execute(AuthUserInput input) {
         User user = findUser(input.getEmail());
 
-        checkPassword(input.getPassword(), user.getPasswordHash());
-
+        if (!user.getActive()) {
+            throw new UserNotActiveException();
+        }
+        
         if (isNull(user.getEmailConfirmedAt())) {
             throw new UserEmailNotActiveException();
         }
+
+        checkPassword(input.getPassword(), user.getPasswordHash());
 
         return new AuthUserOutput(jwtUtilsPort.generateAuthJwt(user.getId(), AUTH_EXPIRATION_DAYS));
     }
 
     private User findUser(String email) {
-        return userDataProviderPort.findActiveByEmail(email).orElseThrow(UserNotFoundException::new);
+        return userDataProviderPort.findByEmail(email).orElseThrow(UserNotFoundException::new);
     }
 
     private void checkPassword(String password, String passwordHash) {
