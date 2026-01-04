@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Objects.nonNull;
 import static org.com.smartpayments.subscription.core.domain.enums.ECreditTransactionType.SAMPLE_GRANT;
 
 @Slf4j
@@ -60,7 +61,7 @@ public class NewUserUsecase implements UsecaseVoidPort<AsyncNewUserInput> {
             .ddi(input.getDdi())
             .phone(input.getPhone())
             .birthdate(input.getBirthdate())
-            .active(input.getActive())
+            .active(input.getActive() && nonNull(input.getEmailConfirmedAt()))
             .build();
 
         Address address = fillAddress(input, user);
