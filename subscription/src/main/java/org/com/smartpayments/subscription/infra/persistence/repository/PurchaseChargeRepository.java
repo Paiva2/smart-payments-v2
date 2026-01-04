@@ -11,7 +11,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PurchaseChargeRepository extends JpaRepository<PurchaseCharge, Long> {
-    Optional<PurchaseCharge> findByExternalId(String externalId);
+    @Query("select puc from PurchaseCharge puc " +
+        "join puc.purchase pur " +
+        "join pur.user " +
+        "where puc.externalId = :externalId")
+    Optional<PurchaseCharge> findByExternalId(@Param("externalId") String externalId);
 
     List<PurchaseCharge> findByPurchaseId(Long purchaseId);
 

@@ -100,7 +100,8 @@ public class PaymentEventEventsConsumer {
                     shouldSendUpdate = overduePurchaseChargeUsecase.execute(inputData);
                 }
                 case PAYMENT_REFUNDED -> {
-                    //refundedPurchaseChargeUsecase.execute(paymentEvent.getData());
+                    RefundedPurchaseChargeInput inputData = (RefundedPurchaseChargeInput) convertPaymentGatewayEventData(paymentEvent.getData(), RefundedPurchaseChargeInput.class);
+                    refundedPurchaseChargeUsecase.execute(inputData);
                     shouldSendUpdate = true;
                 }
             }
