@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  scheduler-db:
+    container_name: "scheduler-db"
+    image: "postgres:16"
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: pg
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: scheduler-db
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    networks:
+      - smart-payments
+
+networks:
+  smart-payments:
+    external: true
+
+volumes:
+  auth-db:

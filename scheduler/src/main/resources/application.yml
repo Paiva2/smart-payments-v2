@@ -1,0 +1,23 @@
+server:
+  port: 8083
+  api-suffix: api/authenticator
+
+spring:
+  application:
+    name: scheduler
+
+  jackson:
+    time-zone: America/Sao_Paulo
+
+kong:
+  url: ${KONG_URL}
+
+ui:
+  url: ${UI_URL}
+
+auth:
+  jwt:
+    secret: ${JWT_SECRET}
+  services:
+    internal:
+      secret: ${JWT_SERVICES_INTERNAL_SECRET}
