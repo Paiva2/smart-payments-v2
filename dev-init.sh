@@ -106,5 +106,23 @@ wait_for_health "subscription"
 cd ..
 cd ..
 
+# =====================
+# SCHEDULER
+# =====================
+
+echo ""
+echo -e "${BLUE}${BOLD}➡ Entering scheduler/.dev...${RESET}"
+cd scheduler/.dev
+
+echo -e "${BLUE}${BOLD}🚀 Starting scheduler docker compose...${RESET}"
+docker compose -p smart-payments up -d
+echo -e "${GREEN}✔ Scheduler started.${RESET}"
+
+check_containers "scheduler"
+wait_for_health "scheduler"
+
+cd ..
+cd ..
+
 echo ""
 echo -e "${GREEN}${BOLD}🎉 All service dependencies have been successfully started!${RESET}"
