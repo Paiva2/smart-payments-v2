@@ -1,4 +1,4 @@
-package com.smartpayments.scheduler.infra.adapters;
+package com.smartpayments.scheduler.infra.adapters.dataProvider;
 
 import com.smartpayments.scheduler.core.domain.model.PaymentScheduledNotification;
 import com.smartpayments.scheduler.core.ports.out.dataProvider.PaymentScheduledNotificationDataProviderPort;

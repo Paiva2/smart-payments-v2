@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,8 +21,9 @@ public class SchedulePaymentNotificationController {
     private final SchedulePaymentNotificationUsecase schedulePaymentNotificationUsecase;
 
     @PostMapping("/payment-notification")
-    public ResponseEntity<Void> create(/*Authentication authentication, */@RequestBody @Valid SchedulePaymentNotificationInput input) {
-        input.setUserId(1L);
+    public ResponseEntity<Void> create(Authentication authentication, @RequestBody @Valid SchedulePaymentNotificationInput input) {
+        Long userId = (Long) authentication.getPrincipal();
+        input.setUserId(userId);
         schedulePaymentNotificationUsecase.execute(input);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

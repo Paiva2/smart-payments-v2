@@ -13,6 +13,8 @@ ui:
 auth:
   jwt:
     secret: SUPER_SECRET_JWT
-  services:
-    internal:
-      secret: INTERNAL_SUPER_SECRET
+
+external:
+  authenticator:
+    uri: ${kong.url}/api/authenticator/
+    external-services-key: INTERNAL_SUPER_SECRET
