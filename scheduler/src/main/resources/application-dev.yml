@@ -1,3 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5434/scheduler-db
+    username: pg
+    password: 123
+
 kong:
   url: http://localhost:8000
 

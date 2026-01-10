@@ -1,6 +1,6 @@
 server:
   port: 8083
-  api-suffix: api/authenticator
+  api-suffix: api/scheduler
 
 spring:
   application:
@@ -8,6 +8,20 @@ spring:
 
   jackson:
     time-zone: America/Sao_Paulo
+
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB_NAME}
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
 
 kong:
   url: ${KONG_URL}
