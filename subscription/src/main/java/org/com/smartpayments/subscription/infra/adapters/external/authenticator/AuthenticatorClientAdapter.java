@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.com.smartpayments.subscription.core.common.exception.AuthenticatorClientErrorException;
-import org.com.smartpayments.subscription.core.common.exception.PaymentGatewayClientErrorException;
 import org.com.smartpayments.subscription.core.ports.out.external.authenticator.AuthenticatorClientPort;
 import org.com.smartpayments.subscription.core.ports.out.external.dto.UserAuthenticatorOutput;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,7 +66,7 @@ public class AuthenticatorClientAdapter implements AuthenticatorClientPort {
             return objectMapper.readValue(body, responseClass);
         } catch (Exception e) {
             log.error("[AuthenticatorClientAdapter#convertResponseOutput]: message: {}", e.getMessage());
-            throw new PaymentGatewayClientErrorException("Client error while fetching user on authenticator!");
+            throw new AuthenticatorClientErrorException("Client error while fetching user on authenticator!");
         }
     }
 
