@@ -1,6 +1,8 @@
 package com.smartpayments.scheduler.core.common.exception;
 
-public class InvalidAuthTokenException extends RuntimeException {
+import com.smartpayments.scheduler.core.common.exception.base.UnauthorizedException;
+
+public class InvalidAuthTokenException extends UnauthorizedException {
     public InvalidAuthTokenException() {
         super("Invalid Authorization token!");
     }
