@@ -4,6 +4,21 @@ spring:
     username: pg
     password: 123
 
+  data:
+    redis:
+      host: localhost
+      port: 6381
+      password: admin
+
+  kafka:
+    enable: true
+    bootstrap-servers: localhost:9092
+    consumer:
+      auto-offset-reset: latest
+      group-id: subscription_group
+    listener:
+      auto-startup: true
+
 kong:
   url: http://localhost:8000
 
@@ -14,7 +29,12 @@ auth:
   jwt:
     secret: SUPER_SECRET_JWT
 
+
+
 external:
   authenticator:
     uri: ${kong.url}/api/authenticator/
+    external-services-key: INTERNAL_SUPER_SECRET
+  subscription:
+    uri: ${kong.url}/api/subscription/
     external-services-key: INTERNAL_SUPER_SECRET

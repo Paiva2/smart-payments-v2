@@ -15,9 +15,23 @@ services:
     networks:
       - smart-payments
 
+  scheduler-cache:
+    container_name: "scheduler-cache"
+    image: redis:6.2-alpine
+    restart: always
+    command: redis-server --save 20 1 --loglevel debug --requirepass admin
+    volumes:
+      - scheduler-cache:/data
+    ports:
+      - "6381:6379"
+    networks:
+      - smart-payments
+
 networks:
   smart-payments:
     external: true
 
 volumes:
+  scheduler-cache:
+    driver: local
   auth-db:

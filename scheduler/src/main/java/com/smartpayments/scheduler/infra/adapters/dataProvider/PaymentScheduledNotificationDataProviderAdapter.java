@@ -6,6 +6,7 @@ import com.smartpayments.scheduler.infra.persistence.repository.SchedulePaymentN
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -22,5 +23,15 @@ public class PaymentScheduledNotificationDataProviderAdapter implements PaymentS
     @Override
     public Optional<PaymentScheduledNotification> findByTitleAndUserId(String title, Long userId) {
         return repository.findByTitleAndUser(userId, title.toLowerCase(Locale.ROOT));
+    }
+
+    @Override
+    public Optional<PaymentScheduledNotification> findByIdWithReceivers(Long id) {
+        return repository.findByIdWithReceivers(id);
+    }
+
+    @Override
+    public List<PaymentScheduledNotification> findAllToNotify() {
+        return repository.findAllToPrepareNotification();
     }
 }

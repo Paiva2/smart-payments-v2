@@ -9,6 +9,17 @@ spring:
   jackson:
     time-zone: America/Sao_Paulo
 
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST}:${KAFKA_PORT}
+    topics:
+      process-scheduled-payment-notifications: process-scheduled-payment-notifications
+      process-scheduled-payment-notifications-dlt: process-scheduled-payment-notifications.dlt
+      messaging-gateway: messaging-gateway
+      messaging-gateway-dlt: messaging-gateway.dlt
+    consumer:
+      auto-offset-reset: latest
+      group-id: scheduler_group
+
   datasource:
     url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB_NAME}
     username: ${POSTGRES_USERNAME}
@@ -23,6 +34,18 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
 
+  cache:
+    type: redis
+    enabled: true
+    redis:
+      cache-null-values: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+
 kong:
   url: ${KONG_URL}
 
@@ -36,4 +59,7 @@ auth:
 external:
   authenticator:
     uri: ${AUTHENTICATOR_URI}
+    external-services-key: ${EXTERNAL_SERVICES_KEY}
+  subscription:
+    uri: ${SUBSCRIPTION_URI}
     external-services-key: ${EXTERNAL_SERVICES_KEY}
