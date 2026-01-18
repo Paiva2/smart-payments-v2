@@ -18,12 +18,14 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 @AllArgsConstructor
 public class SecurityConfig {
     private final SecurityFilterConfig securityFilterConfig;
+    private final ServiceSignatureValidator serviceSignatureValidator;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(req -> {
             req.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll();
             req.requestMatchers(publicEndpoints()).permitAll();
+            req.requestMatchers(internalEndpoints()).access(serviceSignatureValidator);
             req.anyRequest().hasAnyRole("MEMBER", "ADMIN");
         });
 
@@ -42,6 +44,13 @@ public class SecurityConfig {
     private RequestMatcher publicEndpoints() {
         return new OrRequestMatcher(
             securityFilterConfig.NON_FILTERABLE_ENDPOINTS.getFirst()
+        );
+    }
+
+    private RequestMatcher internalEndpoints() {
+        return new OrRequestMatcher(
+            securityFilterConfig.NON_FILTERABLE_ENDPOINTS_INTERNAL.getFirst(),
+            securityFilterConfig.NON_FILTERABLE_ENDPOINTS_INTERNAL.get(1)
         );
     }
 }

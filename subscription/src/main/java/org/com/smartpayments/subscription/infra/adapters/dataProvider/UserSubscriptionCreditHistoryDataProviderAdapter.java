@@ -3,6 +3,7 @@ package org.com.smartpayments.subscription.infra.adapters.dataProvider;
 import lombok.AllArgsConstructor;
 import org.com.smartpayments.subscription.core.domain.model.UserSubscriptionCreditHistory;
 import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserSubscriptionCreditHistoryDataProviderPort;
+import org.com.smartpayments.subscription.core.ports.out.projections.GetUserCreditsResumeProjectionOutput;
 import org.com.smartpayments.subscription.infra.persistence.repository.UserSubscriptionCreditHistoryRepository;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,11 @@ public class UserSubscriptionCreditHistoryDataProviderAdapter implements UserSub
     @Override
     public List<UserSubscriptionCreditHistory> persistAll(List<UserSubscriptionCreditHistory> userSubscriptionCreditHistories) {
         return repository.saveAll(userSubscriptionCreditHistories);
+    }
+
+    @Override
+    public GetUserCreditsResumeProjectionOutput userSubscriptionCreditsResumeWithLocking(Long userSubscriptionId) {
+        return repository.getUserCreditsResumeWithLocking(userSubscriptionId);
     }
 
     @Override

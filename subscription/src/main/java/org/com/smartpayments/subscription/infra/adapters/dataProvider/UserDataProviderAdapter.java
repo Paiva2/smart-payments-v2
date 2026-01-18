@@ -19,6 +19,11 @@ public class UserDataProviderAdapter implements UserDataProviderPort {
     }
 
     @Override
+    public Optional<User> findActiveWithSubscriptionById(Long id) {
+        return repository.findByIdWithUserSubscription(id);
+    }
+
+    @Override
     public Optional<User> findById(Long id) {
         return repository.findById(id);
     }

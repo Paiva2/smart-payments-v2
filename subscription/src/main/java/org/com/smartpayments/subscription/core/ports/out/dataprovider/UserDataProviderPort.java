@@ -7,6 +7,8 @@ import java.util.Optional;
 public interface UserDataProviderPort {
     Optional<User> findActiveById(Long id);
 
+    Optional<User> findActiveWithSubscriptionById(Long id);
+
     Optional<User> findById(Long id);
 
     Optional<User> findByPaymentGatewayId(String paymentGatewayId);
