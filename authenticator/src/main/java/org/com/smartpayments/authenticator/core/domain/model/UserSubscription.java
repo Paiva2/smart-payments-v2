@@ -1,22 +1,7 @@
 package org.com.smartpayments.authenticator.core.domain.model;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import org.com.smartpayments.authenticator.core.domain.enums.EPlan;
 import org.com.smartpayments.authenticator.core.domain.enums.ESubscriptionRecurrence;
 import org.com.smartpayments.authenticator.core.domain.enums.ESubscriptionStatus;
@@ -56,23 +41,32 @@ public class UserSubscription {
     @Column(name = "plan", nullable = true)
     private EPlan plan;
 
-    @Column(name = "unlimited_email_credits")
-    private Boolean unlimitedEmailCredits;
-
     @Column(name = "email_credits")
     private Integer emailCredits;
 
-    @Column(name = "unlimited_whatsapp_credits")
-    private Boolean unlimitedWhatsAppCredits;
+    @Column(name = "subscription_email_credits")
+    private Integer subscriptionEmailCredits;
+
+    @Column(name = "sms_credits")
+    private Integer smsCredits;
+
+    @Column(name = "subscription_sms_credits")
+    private Integer subscriptionSmsCredits;
 
     @Column(name = "whatsapp_credits")
     private Integer whatsAppCredits;
 
+    @Column(name = "subscription_whatsapp_credits")
+    private Integer subscriptionWhatsAppCredits;
+
+    @Column(name = "unlimited_email_credits")
+    private Boolean unlimitedEmailCredits;
+
+    @Column(name = "unlimited_whatsapp_credits")
+    private Boolean unlimitedWhatsAppCredits;
+
     @Column(name = "unlimited_sms_credits")
     private Boolean unlimitedSmsCredits;
-
-    @Column(name = "sms_credits")
-    private Integer smsCredits;
 
     @JoinColumn(name = "user_id")
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -87,6 +81,9 @@ public class UserSubscription {
             .plan(this.plan)
             .unlimitedEmailCredits(this.unlimitedEmailCredits)
             .emailCredits(this.emailCredits)
+            .subscriptionEmailCredits(this.subscriptionEmailCredits)
+            .subscriptionSmsCredits(this.subscriptionSmsCredits)
+            .subscriptionWhatsAppCredits(this.subscriptionWhatsAppCredits)
             .unlimitedWhatsAppCredits(this.unlimitedWhatsAppCredits)
             .whatsAppCredits(this.whatsAppCredits)
             .unlimitedSmsCredits(this.unlimitedSmsCredits)

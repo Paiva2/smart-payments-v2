@@ -1,6 +1,5 @@
 package org.com.smartpayments.authenticator.core.ports.out.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +14,6 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserProfileOutput implements Serializable {
     private Long id;
     private String firstName;

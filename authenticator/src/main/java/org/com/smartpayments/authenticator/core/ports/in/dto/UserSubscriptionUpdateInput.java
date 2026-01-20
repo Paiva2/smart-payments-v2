@@ -21,10 +21,13 @@ public class UserSubscriptionUpdateInput {
     private String nextPaymentDate;
     private ESubscriptionRecurrence recurrence;
     private BigDecimal value;
-    private Boolean unlimitedEmailCredits;
     private Integer emailCredits;
-    private Boolean unlimitedWhatsAppCredits;
     private Integer whatsAppCredits;
-    private Boolean unlimitedSmsCredits;
     private Integer smsCredits;
+    private Integer subscriptionEmailCredits;
+    private Integer subscriptionSmsCredits;
+    private Integer subscriptionWhatsAppCredits;
+    private Boolean unlimitedEmailCredits;
+    private Boolean unlimitedSmsCredits;
+    private Boolean unlimitedWhatsAppCredits;
 }

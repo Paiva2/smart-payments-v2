@@ -10,6 +10,7 @@ import org.com.smartpayments.authenticator.core.common.exception.UserEmailNotAct
 import org.com.smartpayments.authenticator.core.common.exception.UserNotFoundException;
 import org.com.smartpayments.authenticator.core.domain.enums.EUserType;
 import org.com.smartpayments.authenticator.core.domain.model.User;
+import org.com.smartpayments.authenticator.core.domain.usecase.user.registerUser.exception.DocumentAlreadyUsedException;
 import org.com.smartpayments.authenticator.core.ports.in.UsecasePort;
 import org.com.smartpayments.authenticator.core.ports.in.dto.UpdateUserProfileInput;
 import org.com.smartpayments.authenticator.core.ports.out.dataProvider.ImageUploadDataProviderPort;
@@ -105,6 +106,17 @@ public class UpdateUserProfileUsecase implements UsecasePort<UpdateUserProfileIn
         }
     }
 
+    private String formatDocument(String document) {
+        return document.replaceAll("\\D", "");
+    }
+
+    private void validateDocumentAlreadyUsed(String document) {
+        userDataProviderPort.findByCpfCnpj(formatDocument(formatDocument(document)))
+            .ifPresent(userFound -> {
+                throw new DocumentAlreadyUsedException();
+            });
+    }
+
     private void updateUser(UpdateUserProfileInput input, User user) {
         user.setFirstName(isEmpty(input.getFirstName()) ? user.getFirstName() : input.getFirstName());
         user.setLastName(isEmpty(input.getLastName()) ? user.getLastName() : input.getLastName());
@@ -112,7 +124,9 @@ public class UpdateUserProfileUsecase implements UsecasePort<UpdateUserProfileIn
         user.setType(isEmpty(input.getType()) ? user.getType() : input.getType());
         user.setPhone(isEmpty(input.getPhone()) ? user.getPhone() : input.getPhone());
 
-        if (!isEmpty(input.getCpfCnpj()) && !Objects.equals(input.getCpfCnpj().replaceAll("\\D", ""), user.getCpfCnpj())) {
+        if (!isEmpty(input.getCpfCnpj()) && !Objects.equals(formatDocument(input.getCpfCnpj()), user.getCpfCnpj())) {
+            validateDocumentAlreadyUsed(input.getCpfCnpj());
+            
             user.setCpfCnpj(input.getCpfCnpj());
         }
 

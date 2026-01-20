@@ -49,6 +49,9 @@ public class UserSusbcriptionUpdateUsecase implements UsecaseVoidPort<UserSubscr
         userSubscription.setWhatsAppCredits(input.getWhatsAppCredits());
         userSubscription.setSmsCredits(input.getSmsCredits());
         userSubscription.setUnlimitedSmsCredits(input.getUnlimitedSmsCredits());
+        userSubscription.setSubscriptionEmailCredits(input.getSubscriptionEmailCredits());
+        userSubscription.setSubscriptionWhatsAppCredits(input.getSubscriptionWhatsAppCredits());
+        userSubscription.setSubscriptionSmsCredits(input.getSubscriptionSmsCredits());
     }
 
     private void persistUserSubscription(UserSubscription userSubscription) {
