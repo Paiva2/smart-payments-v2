@@ -7,23 +7,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.com.smartpayments.subscription.core.common.exception.GenericException;
 import org.com.smartpayments.subscription.core.common.exception.PlanNotFoundException;
 import org.com.smartpayments.subscription.core.common.exception.UserSubscriptionNotFoundException;
-import org.com.smartpayments.subscription.core.common.exception.UserSubscriptionResumeViewNotFoundException;
 import org.com.smartpayments.subscription.core.domain.enums.EPlan;
-import org.com.smartpayments.subscription.core.domain.enums.ESubscriptionRecurrence;
 import org.com.smartpayments.subscription.core.domain.enums.ESubscriptionStatus;
 import org.com.smartpayments.subscription.core.domain.model.Plan;
 import org.com.smartpayments.subscription.core.domain.model.User;
 import org.com.smartpayments.subscription.core.domain.model.UserSubscription;
-import org.com.smartpayments.subscription.core.domain.model.views.UserSubscriptionResumeView;
 import org.com.smartpayments.subscription.core.domain.usecase.userSubscription.cancelSubscription.event.SubscriptionCancelledEvent;
 import org.com.smartpayments.subscription.core.domain.usecase.userSubscription.cancelSubscription.exception.InvalidCancellationException;
 import org.com.smartpayments.subscription.core.domain.usecase.userSubscription.cancelSubscription.exception.SubscriptionAlreadyCancelledException;
+import org.com.smartpayments.subscription.core.domain.usecase.userSubscription.sendUserSubscriptionUpdateMessage.SendUserSubscriptionUpdateMessageUsecase;
 import org.com.smartpayments.subscription.core.ports.in.UsecaseVoidPort;
-import org.com.smartpayments.subscription.core.ports.in.utils.MessageUtilsPort;
-import org.com.smartpayments.subscription.core.ports.out.dataprovider.*;
+import org.com.smartpayments.subscription.core.ports.out.dataprovider.PlanDataProviderPort;
+import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserSubscriptionCreditHistoryDataProviderPort;
+import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserSubscriptionCreditRecurrenceDataProviderPort;
+import org.com.smartpayments.subscription.core.ports.out.dataprovider.UserSubscriptionDataProviderPort;
 import org.com.smartpayments.subscription.core.ports.out.dto.AsyncEmailOutput;
-import org.com.smartpayments.subscription.core.ports.out.dto.AsyncMessageOutput;
-import org.com.smartpayments.subscription.core.ports.out.dto.AsyncUserSubscriptionUpdateOutput;
 import org.com.smartpayments.subscription.core.ports.out.external.dto.DeleteSubscriptionOutput;
 import org.com.smartpayments.subscription.core.ports.out.external.paymentGateway.PaymentGatewaySubscriptionClientPort;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +32,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.springframework.util.ObjectUtils.isEmpty;
 
@@ -51,18 +52,14 @@ public class CancelSubscriptionUsecase implements UsecaseVoidPort<Long> {
     private final PlanDataProviderPort planDataProviderPort;
     private final UserSubscriptionCreditRecurrenceDataProviderPort userSubscriptionCreditRecurrenceDataProviderPort;
     private final UserSubscriptionCreditHistoryDataProviderPort userSubscriptionCreditHistoryDataProviderPort;
-    private final UserSubscriptionResumeViewDataProviderPort userSubscriptionResumeViewDataProviderPort;
 
+    private final SendUserSubscriptionUpdateMessageUsecase sendUserSubscriptionUpdateMessageUsecase;
     private final KafkaTemplate<String, String> kafkaTemplate;
-    private final MessageUtilsPort messageUtilsPort;
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Value("${spring.kafka.topics.mail-sender}")
     private String SEND_EMAIL_TOPIC;
-
-    @Value("${spring.kafka.topics.user-subscription-update}")
-    private String UPDATE_USER_SUBSCRIPTION_TOPIC;
 
     @Override
     @Transactional
@@ -96,7 +93,7 @@ public class CancelSubscriptionUsecase implements UsecaseVoidPort<Long> {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onSubscriptionCancelled(SubscriptionCancelledEvent event) {
-        sendUserSubscriptionUpdateMessage(event.getUser());
+        sendUserSubscriptionUpdateMessageUsecase.execute(event.getUser());
     }
 
     private UserSubscription findUserSubscription(Long userId) {
@@ -180,43 +177,6 @@ public class CancelSubscriptionUsecase implements UsecaseVoidPort<Long> {
             kafkaTemplate.send(SEND_EMAIL_TOPIC, mapper.writeValueAsString(asyncEmail));
         } catch (JsonProcessingException e) {
             String message = "Error while sending email!";
-            log.error(message, e);
-            throw new GenericException(message);
-        }
-    }
-
-    private void sendUserSubscriptionUpdateMessage(User user) {
-        UserSubscriptionResumeView userSubscriptionResumeView = userSubscriptionResumeViewDataProviderPort
-            .findByUser(user.getId()).orElseThrow(UserSubscriptionResumeViewNotFoundException::new);
-
-        try {
-            String messageIssuer = "SUBSCRIPTION";
-
-            AsyncUserSubscriptionUpdateOutput message = AsyncUserSubscriptionUpdateOutput.builder()
-                .userId(userSubscriptionResumeView.getUserId())
-                .plan(isEmpty(userSubscriptionResumeView.getPlan()) ? null : EPlan.valueOf(userSubscriptionResumeView.getPlan()))
-                .status(isEmpty(userSubscriptionResumeView.getStatus()) ? null : ESubscriptionStatus.valueOf(userSubscriptionResumeView.getStatus()))
-                .nextPaymentDate(isEmpty(userSubscriptionResumeView.getNextPaymentDate()) ? null : userSubscriptionResumeView.getNextPaymentDate().toString())
-                .recurrence(isEmpty(userSubscriptionResumeView.getRecurrence()) ? null : ESubscriptionRecurrence.valueOf(userSubscriptionResumeView.getRecurrence()))
-                .value(userSubscriptionResumeView.getValue())
-                .unlimitedEmailCredits(userSubscriptionResumeView.getUnlimitedEmailCredits())
-                .emailCredits(userSubscriptionResumeView.getEmailCredits())
-                .unlimitedWhatsAppCredits(userSubscriptionResumeView.getUnlimitedWhatsappCredits())
-                .whatsAppCredits(userSubscriptionResumeView.getWhatsappCredits())
-                .unlimitedSmsCredits(userSubscriptionResumeView.getUnlimitedSmsCredits())
-                .smsCredits(userSubscriptionResumeView.getSmsCredits())
-                .build();
-
-            AsyncMessageOutput<Object> asyncMessage = AsyncMessageOutput.builder()
-                .messageHash(messageUtilsPort.generateMessageHash(messageIssuer))
-                .timestamp(new Date())
-                .issuer(messageIssuer)
-                .data(message)
-                .build();
-
-            kafkaTemplate.send(UPDATE_USER_SUBSCRIPTION_TOPIC, mapper.writeValueAsString(asyncMessage));
-        } catch (Exception e) {
-            String message = "Error while sending user subscription update message!";
             log.error(message, e);
             throw new GenericException(message);
         }

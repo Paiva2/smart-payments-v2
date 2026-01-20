@@ -37,11 +37,20 @@ public class UserSubscriptionResumeView {
     @Column(name = "email_credits")
     private Integer emailCredits;
 
+    @Column(name = "subscription_email_credits")
+    private Integer subscriptionEmailCredits;
+
     @Column(name = "sms_credits")
     private Integer smsCredits;
 
+    @Column(name = "subscription_sms_credits")
+    private Integer subscriptionSmsCredits;
+
     @Column(name = "whatsapp_credits")
     private Integer whatsappCredits;
+
+    @Column(name = "subscription_whatsapp_credits")
+    private Integer subscriptionWhatsAppCredits;
 
     @Column(name = "unlimited_email_credits")
     private Boolean unlimitedEmailCredits;
