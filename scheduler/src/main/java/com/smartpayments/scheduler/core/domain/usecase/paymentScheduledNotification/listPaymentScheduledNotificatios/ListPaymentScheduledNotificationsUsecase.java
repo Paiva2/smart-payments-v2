@@ -9,6 +9,7 @@ import com.smartpayments.scheduler.core.ports.out.usecase.dto.ListPaymentSchedul
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.temporal.ChronoUnit;
 
@@ -22,6 +23,7 @@ public class ListPaymentScheduledNotificationsUsecase implements UsecasePort<Lis
     private final PaymentScheduledNotificationDataProviderPort paymentScheduledNotificationDataProviderPort;
 
     @Override
+    @Transactional(readOnly = true)
     public ListPaymentScheduledNotificationOutput execute(ListPaymentScheduledNotificationFilter input) {
         formatPaginationInput(input);
         validateDate(input);

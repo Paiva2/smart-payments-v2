@@ -15,6 +15,8 @@ public interface PaymentScheduledNotificationDataProviderPort {
 
     Optional<PaymentScheduledNotification> findByTitleAndUserId(String title, Long userId);
 
+    Optional<PaymentScheduledNotification> findByIdAndUserIdLocking(Long id, Long userId);
+
     Optional<PaymentScheduledNotification> findByIdWithReceivers(Long id);
 
     List<PaymentScheduledNotification> findAllToNotify();

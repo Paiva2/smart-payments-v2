@@ -20,6 +20,13 @@ public interface SchedulePaymentNotificationRepository extends JpaRepository<Pay
     Optional<PaymentScheduledNotification> findByIdWithReceivers(@Param("id") Long id);
 
     @Query(value = """
+            select * from payment_scheduled_notification psn
+                where psn.user_id = :userId and psn.id = :id
+            for update
+        """, nativeQuery = true)
+    Optional<PaymentScheduledNotification> findByIdAndUserIdLocking(@Param("id") Long id, @Param("userId") Long userId);
+
+    @Query(value = """
         select * from payment_scheduled_notification psn
         where psn.start_date <= now()
           and (psn.end_date is null or psn.end_date >= now())

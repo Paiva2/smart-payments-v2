@@ -32,6 +32,11 @@ public class PaymentScheduledNotificationDataProviderAdapter implements PaymentS
     }
 
     @Override
+    public Optional<PaymentScheduledNotification> findByIdAndUserIdLocking(Long id, Long userId) {
+        return repository.findByIdAndUserIdLocking(id, userId);
+    }
+
+    @Override
     public Optional<PaymentScheduledNotification> findByIdWithReceivers(Long id) {
         return repository.findByIdWithReceivers(id);
     }
