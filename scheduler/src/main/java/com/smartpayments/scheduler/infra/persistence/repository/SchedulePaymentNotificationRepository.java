@@ -22,6 +22,7 @@ public interface SchedulePaymentNotificationRepository extends JpaRepository<Pay
     @Query(value = """
         select * from payment_scheduled_notification psn
         where psn.start_date <= now()
+          and (psn.end_date is null or psn.end_date >= now())
           and (psn.next_date is null or psn.next_date <= now())
           and psn.status = 'ACTIVE'
         """, nativeQuery = true)
