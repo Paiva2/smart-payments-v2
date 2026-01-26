@@ -53,10 +53,12 @@ public class PreparePaymentScheduledNotification {
     }
 
     private void handleNotification(PaymentScheduledNotification paymentScheduledNotification) {
-        if (nonNull(paymentScheduledNotification.getEndDate()) && paymentScheduledNotification.getEndDate().before(new Date())) {
+        Date nextDate = defineNextPaymentNotification(paymentScheduledNotification.getRecurrence());
+
+        if (nonNull(paymentScheduledNotification.getEndDate()) && paymentScheduledNotification.getEndDate().before(nextDate)) {
             paymentScheduledNotification.setStatus(ENotificationScheduleStatus.PAUSED);
         } else {
-            paymentScheduledNotification.setNextDate(defineNextPaymentNotification(paymentScheduledNotification.getRecurrence()));
+            paymentScheduledNotification.setNextDate(nextDate);
         }
 
         paymentScheduledNotification.setLastDate(new Date());
