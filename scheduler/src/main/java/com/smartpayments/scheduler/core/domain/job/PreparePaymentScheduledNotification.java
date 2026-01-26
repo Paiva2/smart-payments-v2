@@ -2,6 +2,7 @@ package com.smartpayments.scheduler.core.domain.job;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartpayments.scheduler.core.domain.enums.ENotificationRecurrence;
+import com.smartpayments.scheduler.core.domain.enums.ENotificationScheduleStatus;
 import com.smartpayments.scheduler.core.domain.model.PaymentScheduledNotification;
 import com.smartpayments.scheduler.core.ports.in.external.messaging.AsyncMessageInput;
 import com.smartpayments.scheduler.core.ports.in.usecase.dto.ProcessPaymentScheduledNotificationInput;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Component;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import static java.util.Objects.nonNull;
 
 @Slf4j
 @Component
@@ -50,7 +53,12 @@ public class PreparePaymentScheduledNotification {
     }
 
     private void handleNotification(PaymentScheduledNotification paymentScheduledNotification) {
-        paymentScheduledNotification.setNextDate(defineNextPaymentNotification(paymentScheduledNotification.getRecurrence()));
+        if (nonNull(paymentScheduledNotification.getEndDate()) && paymentScheduledNotification.getEndDate().before(new Date())) {
+            paymentScheduledNotification.setStatus(ENotificationScheduleStatus.PAUSED);
+        } else {
+            paymentScheduledNotification.setNextDate(defineNextPaymentNotification(paymentScheduledNotification.getRecurrence()));
+        }
+
         paymentScheduledNotification.setLastDate(new Date());
 
         paymentScheduledNotificationDataProviderPort.persist(paymentScheduledNotification);
