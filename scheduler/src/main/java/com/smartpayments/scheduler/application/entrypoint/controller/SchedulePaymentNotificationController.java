@@ -2,9 +2,11 @@ package com.smartpayments.scheduler.application.entrypoint.controller;
 
 import com.smartpayments.scheduler.core.domain.usecase.paymentScheduledNotification.cancelPaymentScheduledNotification.CancelPaymentScheduledNotificationUsecase;
 import com.smartpayments.scheduler.core.domain.usecase.paymentScheduledNotification.listPaymentScheduledNotificatios.ListPaymentScheduledNotificationsUsecase;
+import com.smartpayments.scheduler.core.domain.usecase.paymentScheduledNotification.resumeCancelledPaymentScheduledNotification.ResumeCancelledPaymentScheduledNotificationUsecase;
 import com.smartpayments.scheduler.core.domain.usecase.paymentScheduledNotification.schedulePaymentNotification.SchedulePaymentNotificationUsecase;
 import com.smartpayments.scheduler.core.ports.in.usecase.dto.CancelPaymentScheduledNotificationInput;
 import com.smartpayments.scheduler.core.ports.in.usecase.dto.ListPaymentScheduledNotificationFilter;
+import com.smartpayments.scheduler.core.ports.in.usecase.dto.ResumeCancelledPaymentScheduledNotificationInput;
 import com.smartpayments.scheduler.core.ports.in.usecase.dto.SchedulePaymentNotificationInput;
 import com.smartpayments.scheduler.core.ports.out.usecase.dto.ListPaymentScheduledNotificationOutput;
 import jakarta.validation.Valid;
@@ -24,6 +26,7 @@ public class SchedulePaymentNotificationController {
     private final SchedulePaymentNotificationUsecase schedulePaymentNotificationUsecase;
     private final ListPaymentScheduledNotificationsUsecase listPaymentScheduledNotificationsUsecase;
     private final CancelPaymentScheduledNotificationUsecase cancelPaymentScheduledNotificationUsecase;
+    private final ResumeCancelledPaymentScheduledNotificationUsecase resumeCancelledPaymentScheduledNotificationUsecase;
 
     @PostMapping("/payment-notification")
     public ResponseEntity<Void> create(Authentication authentication, @RequestBody @Valid SchedulePaymentNotificationInput input) {
@@ -57,6 +60,14 @@ public class SchedulePaymentNotificationController {
         Long userId = (Long) authentication.getPrincipal();
         input.setUserId(userId);
         cancelPaymentScheduledNotificationUsecase.execute(input);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PutMapping("/payment-notification/cancel/resume")
+    public ResponseEntity<Void> resumeCancel(Authentication authentication, @RequestBody @Valid ResumeCancelledPaymentScheduledNotificationInput input) {
+        Long userId = (Long) authentication.getPrincipal();
+        input.setUserId(userId);
+        resumeCancelledPaymentScheduledNotificationUsecase.execute(input);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
