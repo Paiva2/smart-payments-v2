@@ -11,6 +11,8 @@ spring:
 
   kafka:
     bootstrap-servers: ${KAFKA_HOST}:${KAFKA_PORT}
+    properties:
+      schema.registry.url: ${SCHEMA_REGISTRY_URL}
     topics:
       process-scheduled-payment-notifications: process-scheduled-payment-notifications
       process-scheduled-payment-notifications-dlt: process-scheduled-payment-notifications.dlt

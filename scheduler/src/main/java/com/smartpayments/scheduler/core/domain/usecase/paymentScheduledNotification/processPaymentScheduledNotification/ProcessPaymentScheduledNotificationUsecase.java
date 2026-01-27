@@ -1,19 +1,17 @@
 package com.smartpayments.scheduler.core.domain.usecase.paymentScheduledNotification.processPaymentScheduledNotification;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.messaging_gateway.avro.CustomMessage;
 import com.smartpayments.scheduler.core.common.enums.EChannelTypeMessageGateway;
 import com.smartpayments.scheduler.core.common.exception.PaymentScheduledNotificationNotFoundException;
 import com.smartpayments.scheduler.core.domain.enums.ENotificationExecutionStatus;
 import com.smartpayments.scheduler.core.domain.model.PaymentReceiver;
 import com.smartpayments.scheduler.core.domain.model.PaymentScheduledNotification;
 import com.smartpayments.scheduler.core.domain.usecase.paymentScheduledNotification.processPaymentScheduledNotification.exception.ProcessPaymentScheduledNotificationException;
-import com.smartpayments.scheduler.core.ports.in.external.messaging.AsyncMessageInput;
 import com.smartpayments.scheduler.core.ports.in.external.messaging.UserSubscriptionCreditInput;
 import com.smartpayments.scheduler.core.ports.in.usecase.UsecaseVoidPort;
 import com.smartpayments.scheduler.core.ports.in.usecase.dto.ProcessPaymentScheduledNotificationInput;
 import com.smartpayments.scheduler.core.ports.out.dataProvider.PaymentScheduledNotificationDataProviderPort;
-import com.smartpayments.scheduler.core.ports.out.external.dto.AsyncMessageGatewayInput;
 import com.smartpayments.scheduler.core.ports.out.external.dto.ConsumeUserSubscriptionCreditsOutput;
 import com.smartpayments.scheduler.core.ports.out.external.dto.UserSubscriptionOutput;
 import com.smartpayments.scheduler.core.ports.out.external.subscription.SubscriptionClientPort;
@@ -47,7 +45,7 @@ public class ProcessPaymentScheduledNotificationUsecase implements UsecaseVoidPo
     private final SubscriptionClientPort subscriptionClientPort;
 
     private final MessageUtilsPort messageUtilsPort;
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaAvroTemplate;
 
     @Value("${spring.kafka.topics.messaging-gateway}")
     private String messageGatewayTopic;
@@ -55,7 +53,7 @@ public class ProcessPaymentScheduledNotificationUsecase implements UsecaseVoidPo
     @Override
     @Transactional
     public void execute(ProcessPaymentScheduledNotificationInput input) {
-        LinkedHashSet<AsyncMessageInput> asyncMessages = new LinkedHashSet<>();
+        LinkedHashSet<com.messaging_gateway.avro.CustomMessage> asyncMessages = new LinkedHashSet<>();
         PaymentScheduledNotification paymentScheduledNotification = findNotification(input.getId());
         String notificationTitle = "Smart Payments - " + paymentScheduledNotification.getTitle();
         List<EChannelTypeMessageGateway> channelsWithoutCreditToBeNotified = new ArrayList<>();
@@ -130,24 +128,24 @@ public class ProcessPaymentScheduledNotificationUsecase implements UsecaseVoidPo
         }
     }
 
-    private AsyncMessageGatewayInput mountAsyncMessageGatewayInput(EChannelTypeMessageGateway channelType, String template, String message, String subject, String to, HashMap<String, Object> variables) {
-        return AsyncMessageGatewayInput.builder()
-            .channelType(channelType)
-            .subject(subject)
-            .template(template)
-            .to(to)
-            .variables(variables)
-            .message(message)
+    private com.messaging_gateway.avro.CustomMessage mountCustomMessageGatewayInput(EChannelTypeMessageGateway channelType, String template, String message, String subject, String to, Map<CharSequence, Object> variables) {
+        return com.messaging_gateway.avro.CustomMessage.newBuilder()
+            .setChannelType(channelType.name())
+            .setSubject(subject)
+            .setTemplate(template)
+            .setTo(to)
+            .setVariables(variables)
+            .setMessage(message)
             .build();
     }
 
-    private HashMap<String, Object> mountNoCreditsEmailVariables(List<EChannelTypeMessageGateway> channelTypes) {
+    private HashMap<CharSequence, Object> mountNoCreditsEmailVariables(List<EChannelTypeMessageGateway> channelTypes) {
         return new HashMap<>() {{
             put("${PAYMENT_NOTIFICATION_TYPE}", String.join(", ", channelTypes.stream().map(EChannelTypeMessageGateway::getType).toList()));
         }};
     }
 
-    private HashMap<String, Object> mountPaymentNotificationWhatsAppVariables(UserSubscriptionOutput userSubscriptionOutput, PaymentScheduledNotification paymentScheduledNotification) {
+    private HashMap<CharSequence, Object> mountPaymentNotificationWhatsAppVariables(UserSubscriptionOutput userSubscriptionOutput, PaymentScheduledNotification paymentScheduledNotification) {
         return new HashMap<>() {{
             put("${USER_NAME}", userSubscriptionOutput.getFirstName());
             put("${PAYMENT_NOTIFICATION_TITLE}", paymentScheduledNotification.getTitle());
@@ -157,7 +155,7 @@ public class ProcessPaymentScheduledNotificationUsecase implements UsecaseVoidPo
         }};
     }
 
-    private HashMap<String, Object> mountPaymentNotificationSmsVariables(UserSubscriptionOutput userSubscriptionOutput, PaymentScheduledNotification paymentScheduledNotification) {
+    private HashMap<CharSequence, Object> mountPaymentNotificationSmsVariables(UserSubscriptionOutput userSubscriptionOutput, PaymentScheduledNotification paymentScheduledNotification) {
         return new HashMap<>() {{
             put("${USER_NAME}", userSubscriptionOutput.getFirstName());
             put("${PAYMENT_NOTIFICATION_TITLE}", paymentScheduledNotification.getTitle());
@@ -173,13 +171,13 @@ public class ProcessPaymentScheduledNotificationUsecase implements UsecaseVoidPo
         ).toString();
     }
 
-    private HashMap<String, Object> mountPaymentNotificationEmailVariables(UserSubscriptionOutput userSubscriptionOutput, PaymentScheduledNotification paymentScheduledNotification) {
+    private HashMap<CharSequence, Object> mountPaymentNotificationEmailVariables(UserSubscriptionOutput userSubscriptionOutput, PaymentScheduledNotification paymentScheduledNotification) {
         return new HashMap<>() {{
             put("${USER_NAME}", userSubscriptionOutput.getFirstName());
             put("${PAYMENT_NOTIFICATION_TITLE}", paymentScheduledNotification.getTitle());
             put("${PAYMENT_NOTIFICATION_DESCRIPTION}", paymentScheduledNotification.getDescription());
             put("${PAYMENT_NOTIFICATION_VALUE}", paymentScheduledNotification.getValue());
-            put("${PAYMENT_NOTIFICATION_NEXT_NOTIFICATION_DATE}", paymentScheduledNotification.getNextDate());
+            put("${PAYMENT_NOTIFICATION_NEXT_NOTIFICATION_DATE}", paymentScheduledNotification.getNextDate().toString());
             put("${PAYMENT_NOTIFICATION_RECEIVERS_LIST}", fillReceiverListForEmail(paymentScheduledNotification.getReceivers()));
         }};
     }
@@ -194,10 +192,10 @@ public class ProcessPaymentScheduledNotificationUsecase implements UsecaseVoidPo
         String to,
         String message,
         String template,
-        HashMap<String, Object> variables,
-        LinkedHashSet<AsyncMessageInput> asyncMessages
+        HashMap<CharSequence, Object> variables,
+        LinkedHashSet<com.messaging_gateway.avro.CustomMessage> asyncMessages
     ) {
-        AsyncMessageGatewayInput messageGatewayInput = mountAsyncMessageGatewayInput(
+        com.messaging_gateway.avro.CustomMessage customMessageInput = mountCustomMessageGatewayInput(
             channel,
             template,
             message,
@@ -206,25 +204,19 @@ public class ProcessPaymentScheduledNotificationUsecase implements UsecaseVoidPo
             variables
         );
 
-        asyncMessages.add(AsyncMessageInput.builder()
-            .messageHash(messageUtilsPort.generateMessageHash(ISSUER))
-            .data(messageGatewayInput)
-            .issuer(ISSUER)
-            .timestamp(new Date())
-            .build()
-        );
+        asyncMessages.add(customMessageInput);
     }
 
     private ConsumeUserSubscriptionCreditsOutput handleConsumeCreditsExternal(String messageHash, UserSubscriptionCreditInput input) {
         return subscriptionClientPort.consumeUserSubscriptionCredits(messageHash, input);
     }
 
-    private void fillNoCreditMessages(LinkedHashSet<AsyncMessageInput> asyncMessages, List<EChannelTypeMessageGateway> channelsWithoutCredit, String email) {
+    private void fillNoCreditMessages(LinkedHashSet<com.messaging_gateway.avro.CustomMessage> asyncMessages, List<EChannelTypeMessageGateway> channelsWithoutCredit, String email) {
         if (channelsWithoutCredit.isEmpty()) return;
 
         String emailTitle = "Smart Payments - Créditos esgotados";
 
-        AsyncMessageGatewayInput messageGatewayInput = mountAsyncMessageGatewayInput(
+        CustomMessage customMessageInput = mountCustomMessageGatewayInput(
             EChannelTypeMessageGateway.EMAIL,
             NO_CREDITS_AVAILABLE_EMAIL_TEMPLATE,
             null,
@@ -233,26 +225,11 @@ public class ProcessPaymentScheduledNotificationUsecase implements UsecaseVoidPo
             mountNoCreditsEmailVariables(channelsWithoutCredit)
         );
 
-        asyncMessages.add(AsyncMessageInput.builder()
-            .messageHash(messageUtilsPort.generateMessageHash(ISSUER))
-            .data(messageGatewayInput)
-            .issuer(ISSUER)
-            .timestamp(new Date())
-            .build()
-        );
+        asyncMessages.add(customMessageInput);
     }
 
-    private void sendAsyncMessageGatewayMessages(LinkedHashSet<AsyncMessageInput> asyncMessages) {
-        List<String> asyncMessagesString = asyncMessages.stream().map(asyncMessage -> {
-            try {
-                return mapper.writeValueAsString(asyncMessage);
-            } catch (JsonProcessingException e) {
-                log.error("[ProcessPaymentScheduledNotificationUsecase#sendAsyncMessageGatewayMessages] - Error while converting async messages  to string!", e);
-                throw new ProcessPaymentScheduledNotificationException("Error while converting messages to be sent!");
-            }
-        }).toList();
-
-        asyncMessagesString.forEach(message -> kafkaTemplate.send(messageGatewayTopic, message));
+    private void sendAsyncMessageGatewayMessages(LinkedHashSet<com.messaging_gateway.avro.CustomMessage> asyncMessages) {
+        asyncMessages.forEach(message -> kafkaAvroTemplate.send(messageGatewayTopic, message));
     }
 
     private PaymentScheduledNotification findNotification(Long id) {

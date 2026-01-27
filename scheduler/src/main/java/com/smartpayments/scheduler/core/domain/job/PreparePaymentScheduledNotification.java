@@ -35,7 +35,8 @@ public class PreparePaymentScheduledNotification {
     @Value("${spring.kafka.topics.process-scheduled-payment-notifications}")
     private String processNotificationTopic;
 
-    @Scheduled(cron = "0 */5 * * * *")
+    //@Scheduled(cron = "0 */5 * * * *")
+    @Scheduled(cron = "0/20 * * * * *")
     public void execute() {
         log.info("[PreparePaymentScheduledNotification#execute] - Preparing scheduled notifications");
 
