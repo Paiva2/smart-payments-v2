@@ -1,0 +1,35 @@
+server:
+  port: 8084
+  api-suffix: api/messaging-gateway
+
+spring:
+  application:
+    name: messaging-gateway
+
+  jackson:
+    time-zone: America/Sao_Paulo
+
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST}:${KAFKA_PORT}
+    properties:
+      schema.registry.url: ${SCHEMA_REGISTRY_URL}
+    topics:
+      messaging-gateway: messaging-gateway
+      messaging-gateway-dlt: messaging-gateway.dlt
+    consumer:
+      auto-offset-reset: latest
+      group-id: messaging_gateway_group
+
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB_NAME}
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false

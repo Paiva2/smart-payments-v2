@@ -1,0 +1,43 @@
+{
+  "type": "record",
+  "name": "CustomMessage",
+  "namespace": "com.messaging_gateway.avro",
+  "fields": [
+    {
+      "name": "channelType",
+      "type": "string"
+    },
+    {
+      "name": "subject",
+      "type": "string"
+    },
+    {
+      "name": "variables",
+      "type": {
+        "type": "map",
+        "values": ["null", "string", "int", "long", "double", "boolean"]
+      }
+    },
+    {
+      "name": "cc",
+      "type": ["null", {
+        "type": "array",
+        "items": "string"
+      }],
+      "default": null
+    },
+    {
+      "name": "template",
+      "type": "string"
+    },
+    {
+      "name": "to",
+      "type": "string"
+    },
+    {
+      "name": "message",
+      "type": ["null", "string"],
+      "default": null
+    }
+  ]
+}

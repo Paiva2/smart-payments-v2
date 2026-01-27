@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5435/messaging-gateway-db
+    username: pg
+    password: 123
+
+  kafka:
+    enable: true
+    bootstrap-servers: localhost:9092
+    properties:
+      schema.registry.url: http://localhost:9094
+    consumer:
+      auto-offset-reset: latest
+      group-id: messaging_gateway_group
+    listener:
+      auto-startup: true
