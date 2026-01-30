@@ -124,5 +124,24 @@ wait_for_health "scheduler"
 cd ..
 cd ..
 
+
+# =====================
+# MESSAGING-GATEWAY
+# =====================
+
+echo ""
+echo -e "${BLUE}${BOLD}➡ Entering messaging-gateway/.dev...${RESET}"
+cd messaging-gateway/.dev
+
+echo -e "${BLUE}${BOLD}🚀 Starting messaging-gateway docker compose...${RESET}"
+docker compose -p smart-payments up -d
+echo -e "${GREEN}✔ Messaging Gateway started.${RESET}"
+
+check_containers "messaging-gateway"
+wait_for_health "messaging-gateway"
+
+cd ..
+cd ..
+
 echo ""
 echo -e "${GREEN}${BOLD}🎉 All service dependencies have been successfully started!${RESET}"
