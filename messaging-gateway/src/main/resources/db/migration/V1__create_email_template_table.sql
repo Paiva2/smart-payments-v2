@@ -1,0 +1,8 @@
+CREATE TABLE email_templates (
+     id BIGSERIAL PRIMARY KEY,
+     name VARCHAR(150) NOT NULL UNIQUE,
+     html_body VARCHAR NOT NULL,
+     active BOOLEAN DEFAULT TRUE,
+     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+     updated_at TIMESTAMP DEFAULT NULL
+);
