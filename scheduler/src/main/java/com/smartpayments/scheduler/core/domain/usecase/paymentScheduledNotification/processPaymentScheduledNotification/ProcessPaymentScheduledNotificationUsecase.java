@@ -1,7 +1,7 @@
 package com.smartpayments.scheduler.core.domain.usecase.paymentScheduledNotification.processPaymentScheduledNotification;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.messaging_gateway.avro.CustomMessage;
+import com.messaging_gateway.avro.CustomMessageKey;
 import com.smartpayments.scheduler.core.common.enums.EChannelTypeMessageGateway;
 import com.smartpayments.scheduler.core.common.exception.PaymentScheduledNotificationNotFoundException;
 import com.smartpayments.scheduler.core.domain.enums.ENotificationExecutionStatus;
@@ -23,7 +23,14 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Slf4j
 @Service
@@ -33,19 +40,17 @@ public class ProcessPaymentScheduledNotificationUsecase implements UsecaseVoidPo
     private final static String EMAIL_TEMPLATE = "notify-payment-scheduled-notification";
     private final static String SMS_TEMPLATE = "notify-payment-scheduled-notification";
     private final static String WHATSAPP_TEMPLATE = "notify-payment-scheduled-notification";
-    private final static String NO_CREDITS_AVAILABLE_EMAIL_TEMPLATE = "no-credits-available";
+    private final static String NO_CREDITS_AVAILABLE_EMAIL_TEMPLATE = "no-credits-available-for-notification";
     private final static String EXTERNAL_CREDIT_CONSUMPTION_SUCCESS = "SUCCESS";
     private final static String EXTERNAL_CREDIT_CONSUMPTION_NO_BALANCE = "NO_BALANCE_AVAILABLE";
     private final static String CREDIT_USAGE_REASON = "PAYMENT_SCHEDULED_NOTIFICATION";
-
-    private final static ObjectMapper mapper = new ObjectMapper();
 
     private final PaymentScheduledNotificationDataProviderPort paymentScheduledNotificationDataProviderPort;
 
     private final SubscriptionClientPort subscriptionClientPort;
 
     private final MessageUtilsPort messageUtilsPort;
-    private final KafkaTemplate<String, Object> kafkaAvroTemplate;
+    private final KafkaTemplate<Object, Object> kafkaAvroTemplate;
 
     @Value("${spring.kafka.topics.messaging-gateway}")
     private String messageGatewayTopic;
@@ -72,49 +77,55 @@ public class ProcessPaymentScheduledNotificationUsecase implements UsecaseVoidPo
 
             ConsumeUserSubscriptionCreditsOutput consumptionResult = handleConsumeCreditsExternal(input.getMessageHash(), userSubscriptionCreditInput);
 
-            if (consumptionResult.getEmail().equals(EXTERNAL_CREDIT_CONSUMPTION_SUCCESS)) {
-                fillAsyncPaymentNotificationToBeSent(
-                    EChannelTypeMessageGateway.EMAIL,
-                    notificationTitle,
-                    userSubscriptionOutput.getEmail(),
-                    null,
-                    EMAIL_TEMPLATE,
-                    mountPaymentNotificationEmailVariables(userSubscriptionOutput, paymentScheduledNotification),
-                    asyncMessages
-                );
-            } else if (consumptionResult.getEmail().equals(EXTERNAL_CREDIT_CONSUMPTION_NO_BALANCE)) {
-                channelsWithoutCreditToBeNotified.add(EChannelTypeMessageGateway.EMAIL);
+            if (nonNull(consumptionResult.getEmail())) {
+                if (consumptionResult.getEmail().equals(EXTERNAL_CREDIT_CONSUMPTION_SUCCESS)) {
+                    fillAsyncPaymentNotificationToBeSent(
+                        EChannelTypeMessageGateway.EMAIL,
+                        notificationTitle,
+                        userSubscriptionOutput.getEmail(),
+                        null,
+                        EMAIL_TEMPLATE,
+                        mountPaymentNotificationEmailVariables(userSubscriptionOutput, paymentScheduledNotification),
+                        asyncMessages
+                    );
+                } else if (consumptionResult.getEmail().equals(EXTERNAL_CREDIT_CONSUMPTION_NO_BALANCE)) {
+                    channelsWithoutCreditToBeNotified.add(EChannelTypeMessageGateway.EMAIL);
+                }
             }
 
-            if (consumptionResult.getSms().equals(EXTERNAL_CREDIT_CONSUMPTION_SUCCESS)) {
-                fillAsyncPaymentNotificationToBeSent(
-                    EChannelTypeMessageGateway.SMS,
-                    notificationTitle,
-                    userSubscriptionOutput.getPhoneNumber(),
-                    null,
-                    SMS_TEMPLATE,
-                    mountPaymentNotificationSmsVariables(userSubscriptionOutput, paymentScheduledNotification),
-                    asyncMessages
-                );
-            } else if (consumptionResult.getSms().equals(EXTERNAL_CREDIT_CONSUMPTION_NO_BALANCE)) {
-                channelsWithoutCreditToBeNotified.add(EChannelTypeMessageGateway.SMS);
+            if (nonNull(consumptionResult.getSms())) {
+                if (consumptionResult.getSms().equals(EXTERNAL_CREDIT_CONSUMPTION_SUCCESS)) {
+                    fillAsyncPaymentNotificationToBeSent(
+                        EChannelTypeMessageGateway.SMS,
+                        notificationTitle,
+                        userSubscriptionOutput.getPhoneNumber(),
+                        null,
+                        SMS_TEMPLATE,
+                        mountPaymentNotificationSmsVariables(userSubscriptionOutput, paymentScheduledNotification),
+                        asyncMessages
+                    );
+                } else if (consumptionResult.getSms().equals(EXTERNAL_CREDIT_CONSUMPTION_NO_BALANCE)) {
+                    channelsWithoutCreditToBeNotified.add(EChannelTypeMessageGateway.SMS);
+                }
             }
 
-            if (consumptionResult.getWhatsapp().equals(EXTERNAL_CREDIT_CONSUMPTION_SUCCESS)) {
-                fillAsyncPaymentNotificationToBeSent(
-                    EChannelTypeMessageGateway.WHATS_APP,
-                    notificationTitle,
-                    userSubscriptionOutput.getPhoneNumber(),
-                    null,
-                    WHATSAPP_TEMPLATE,
-                    mountPaymentNotificationWhatsAppVariables(userSubscriptionOutput, paymentScheduledNotification),
-                    asyncMessages
-                );
-            } else if (consumptionResult.getWhatsapp().equals(EXTERNAL_CREDIT_CONSUMPTION_NO_BALANCE)) {
-                channelsWithoutCreditToBeNotified.add(EChannelTypeMessageGateway.WHATS_APP);
+            if (nonNull(consumptionResult.getWhatsapp())) {
+                if (consumptionResult.getWhatsapp().equals(EXTERNAL_CREDIT_CONSUMPTION_SUCCESS)) {
+                    fillAsyncPaymentNotificationToBeSent(
+                        EChannelTypeMessageGateway.WHATS_APP,
+                        notificationTitle,
+                        userSubscriptionOutput.getPhoneNumber(),
+                        null,
+                        WHATSAPP_TEMPLATE,
+                        mountPaymentNotificationWhatsAppVariables(userSubscriptionOutput, paymentScheduledNotification),
+                        asyncMessages
+                    );
+                } else if (consumptionResult.getWhatsapp().equals(EXTERNAL_CREDIT_CONSUMPTION_NO_BALANCE)) {
+                    channelsWithoutCreditToBeNotified.add(EChannelTypeMessageGateway.WHATS_APP);
+                }
             }
 
-            fillNoCreditMessages(asyncMessages, channelsWithoutCreditToBeNotified, userSubscriptionOutput.getEmail());
+            fillNoCreditMessages(asyncMessages, channelsWithoutCreditToBeNotified, userSubscriptionOutput.getFirstName(), userSubscriptionOutput.getEmail());
 
             paymentScheduledNotification.setLastExecutionStatus(ENotificationExecutionStatus.SUCCESS);
             persistNotification(paymentScheduledNotification);
@@ -139,8 +150,9 @@ public class ProcessPaymentScheduledNotificationUsecase implements UsecaseVoidPo
             .build();
     }
 
-    private HashMap<CharSequence, Object> mountNoCreditsEmailVariables(List<EChannelTypeMessageGateway> channelTypes) {
+    private HashMap<CharSequence, Object> mountNoCreditsEmailVariables(String firstName, List<EChannelTypeMessageGateway> channelTypes) {
         return new HashMap<>() {{
+            put("${FIRST_NAME}", firstName);
             put("${PAYMENT_NOTIFICATION_TYPE}", String.join(", ", channelTypes.stream().map(EChannelTypeMessageGateway::getType).toList()));
         }};
     }
@@ -172,14 +184,26 @@ public class ProcessPaymentScheduledNotificationUsecase implements UsecaseVoidPo
     }
 
     private HashMap<CharSequence, Object> mountPaymentNotificationEmailVariables(UserSubscriptionOutput userSubscriptionOutput, PaymentScheduledNotification paymentScheduledNotification) {
+        boolean hasNextPaymentDate = isNull(paymentScheduledNotification.getEndDate()) ||
+            paymentScheduledNotification.getEndDate().after(paymentScheduledNotification.getNextDate());
+
         return new HashMap<>() {{
-            put("${USER_NAME}", userSubscriptionOutput.getFirstName());
+            put("${FIRST_NAME}", userSubscriptionOutput.getFirstName());
             put("${PAYMENT_NOTIFICATION_TITLE}", paymentScheduledNotification.getTitle());
             put("${PAYMENT_NOTIFICATION_DESCRIPTION}", paymentScheduledNotification.getDescription());
-            put("${PAYMENT_NOTIFICATION_VALUE}", paymentScheduledNotification.getValue());
-            put("${PAYMENT_NOTIFICATION_NEXT_NOTIFICATION_DATE}", paymentScheduledNotification.getNextDate().toString());
+            put("${PAYMENT_NOTIFICATION_VALUE}", formatCurrencyValue(paymentScheduledNotification.getValue()));
+            put("${PAYMENT_NOTIFICATION_NEXT_NOTIFICATION_DATE}", hasNextPaymentDate ? formatDate(paymentScheduledNotification.getNextDate()) : "-");
             put("${PAYMENT_NOTIFICATION_RECEIVERS_LIST}", fillReceiverListForEmail(paymentScheduledNotification.getReceivers()));
         }};
+    }
+
+    private String formatCurrencyValue(BigDecimal value) {
+        return NumberFormat.getCurrencyInstance(Locale.of("pt", "BR")).format(value);
+    }
+
+    private String formatDate(Date date) {
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        return dateFormat.format(date);
     }
 
     public void persistNotification(PaymentScheduledNotification paymentScheduledNotification) {
@@ -211,7 +235,7 @@ public class ProcessPaymentScheduledNotificationUsecase implements UsecaseVoidPo
         return subscriptionClientPort.consumeUserSubscriptionCredits(messageHash, input);
     }
 
-    private void fillNoCreditMessages(LinkedHashSet<com.messaging_gateway.avro.CustomMessage> asyncMessages, List<EChannelTypeMessageGateway> channelsWithoutCredit, String email) {
+    private void fillNoCreditMessages(LinkedHashSet<com.messaging_gateway.avro.CustomMessage> asyncMessages, List<EChannelTypeMessageGateway> channelsWithoutCredit, String userName, String email) {
         if (channelsWithoutCredit.isEmpty()) return;
 
         String emailTitle = "Smart Payments - Créditos esgotados";
@@ -222,14 +246,21 @@ public class ProcessPaymentScheduledNotificationUsecase implements UsecaseVoidPo
             null,
             emailTitle,
             email,
-            mountNoCreditsEmailVariables(channelsWithoutCredit)
+            mountNoCreditsEmailVariables(userName, channelsWithoutCredit)
         );
 
         asyncMessages.add(customMessageInput);
     }
 
     private void sendAsyncMessageGatewayMessages(LinkedHashSet<com.messaging_gateway.avro.CustomMessage> asyncMessages) {
-        asyncMessages.forEach(message -> kafkaAvroTemplate.send(messageGatewayTopic, message));
+        asyncMessages.forEach(message -> {
+            CustomMessageKey key = CustomMessageKey.newBuilder()
+                .setMessageHash(messageUtilsPort.generateMessageHash(ISSUER))
+                .setIssuer(ISSUER)
+                .setTimestamp(new Date().toString())
+                .build();
+            kafkaAvroTemplate.send(messageGatewayTopic, key, message);
+        });
     }
 
     private PaymentScheduledNotification findNotification(Long id) {

@@ -1,0 +1,19 @@
+{
+  "type": "record",
+  "name": "CustomMessageKey",
+  "namespace": "com.messaging_gateway.avro",
+  "fields": [
+    {
+      "name": "messageHash",
+      "type": "string"
+    },
+    {
+      "name": "timestamp",
+      "type": "string"
+    },
+    {
+      "name": "issuer",
+      "type": "string"
+    }
+  ]
+}

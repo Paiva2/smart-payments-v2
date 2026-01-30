@@ -34,11 +34,11 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public ProducerFactory<String, Object> avroProducerFactory() {
+    public ProducerFactory<Object, Object> avroProducerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
 
-        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
         configProps.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
 
@@ -51,7 +51,7 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, Object> kafkaAvroTemplate() {
+    public KafkaTemplate<Object, Object> kafkaAvroTemplate() {
         return new KafkaTemplate<>(avroProducerFactory());
     }
 }
