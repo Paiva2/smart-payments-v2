@@ -1,14 +1,13 @@
 package com.smartpayments.scheduler.application.entrypoint.controller;
 
 import com.smartpayments.scheduler.core.domain.usecase.paymentScheduledNotification.cancelPaymentScheduledNotification.CancelPaymentScheduledNotificationUsecase;
+import com.smartpayments.scheduler.core.domain.usecase.paymentScheduledNotification.editPaymentScheduledNotification.EditPaymentScheduledNotificationUsecase;
 import com.smartpayments.scheduler.core.domain.usecase.paymentScheduledNotification.listPaymentScheduledNotificatios.ListPaymentScheduledNotificationsUsecase;
 import com.smartpayments.scheduler.core.domain.usecase.paymentScheduledNotification.resumeCancelledPaymentScheduledNotification.ResumeCancelledPaymentScheduledNotificationUsecase;
 import com.smartpayments.scheduler.core.domain.usecase.paymentScheduledNotification.schedulePaymentNotification.SchedulePaymentNotificationUsecase;
-import com.smartpayments.scheduler.core.ports.in.usecase.dto.CancelPaymentScheduledNotificationInput;
-import com.smartpayments.scheduler.core.ports.in.usecase.dto.ListPaymentScheduledNotificationFilter;
-import com.smartpayments.scheduler.core.ports.in.usecase.dto.ResumeCancelledPaymentScheduledNotificationInput;
-import com.smartpayments.scheduler.core.ports.in.usecase.dto.SchedulePaymentNotificationInput;
+import com.smartpayments.scheduler.core.ports.in.usecase.dto.*;
 import com.smartpayments.scheduler.core.ports.out.usecase.dto.ListPaymentScheduledNotificationOutput;
+import com.smartpayments.scheduler.core.ports.out.usecase.dto.PaymentScheduledNotificationOutput;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +26,7 @@ public class SchedulePaymentNotificationController {
     private final ListPaymentScheduledNotificationsUsecase listPaymentScheduledNotificationsUsecase;
     private final CancelPaymentScheduledNotificationUsecase cancelPaymentScheduledNotificationUsecase;
     private final ResumeCancelledPaymentScheduledNotificationUsecase resumeCancelledPaymentScheduledNotificationUsecase;
+    private final EditPaymentScheduledNotificationUsecase editPaymentScheduledNotificationUsecase;
 
     @PostMapping("/payment-notification")
     public ResponseEntity<Void> create(Authentication authentication, @RequestBody @Valid SchedulePaymentNotificationInput input) {
@@ -52,6 +52,15 @@ public class SchedulePaymentNotificationController {
         input.setSortDirection(Sort.Direction.fromString(sortDirection));
         input.setSortBy(sortBy);
         ListPaymentScheduledNotificationOutput output = listPaymentScheduledNotificationsUsecase.execute(input);
+        return ResponseEntity.status(HttpStatus.OK).body(output);
+    }
+
+    @PutMapping("/payment-notification/{id}")
+    public ResponseEntity<PaymentScheduledNotificationOutput> edit(Authentication authentication, @PathVariable Long id, @RequestBody @Valid EditPaymentScheduledNotificationInput input) {
+        Long userId = (Long) authentication.getPrincipal();
+        input.setUserId(userId);
+        input.setId(id);
+        PaymentScheduledNotificationOutput output = editPaymentScheduledNotificationUsecase.execute(input);
         return ResponseEntity.status(HttpStatus.OK).body(output);
     }
 

@@ -19,7 +19,7 @@ public class PaymentReceiver {
     @Column(name = "identification", nullable = false)
     private String identification;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_scheduled_notification_id", nullable = false)
     private PaymentScheduledNotification paymentScheduledNotification;
 }

@@ -78,6 +78,6 @@ public class PaymentScheduledNotification {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "paymentScheduledNotification")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "paymentScheduledNotification")
     private List<PaymentReceiver> receivers;
 }

@@ -16,7 +16,7 @@ public interface SchedulePaymentNotificationRepository extends JpaRepository<Pay
     @Query("select psn from PaymentScheduledNotification psn where psn.userId = :userId and lower(psn.title) = :title")
     Optional<PaymentScheduledNotification> findByTitleAndUser(@Param("userId") Long userId, @Param("title") String title);
 
-    @Query("select psn from PaymentScheduledNotification psn join psn.receivers where psn.id = :id")
+    @Query("select psn from PaymentScheduledNotification psn join fetch psn.receivers where psn.id = :id")
     Optional<PaymentScheduledNotification> findByIdWithReceivers(@Param("id") Long id);
 
     @Query(value = """
