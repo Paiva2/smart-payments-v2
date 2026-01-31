@@ -30,7 +30,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 @Slf4j
 @Service
@@ -77,52 +76,46 @@ public class ProcessPaymentScheduledNotificationUsecase implements UsecaseVoidPo
 
             ConsumeUserSubscriptionCreditsOutput consumptionResult = handleConsumeCreditsExternal(input.getMessageHash(), userSubscriptionCreditInput);
 
-            if (nonNull(consumptionResult.getEmail())) {
-                if (consumptionResult.getEmail().equals(EXTERNAL_CREDIT_CONSUMPTION_SUCCESS)) {
-                    fillAsyncPaymentNotificationToBeSent(
-                        EChannelTypeMessageGateway.EMAIL,
-                        notificationTitle,
-                        userSubscriptionOutput.getEmail(),
-                        null,
-                        EMAIL_TEMPLATE,
-                        mountPaymentNotificationEmailVariables(userSubscriptionOutput, paymentScheduledNotification),
-                        asyncMessages
-                    );
-                } else if (consumptionResult.getEmail().equals(EXTERNAL_CREDIT_CONSUMPTION_NO_BALANCE)) {
-                    channelsWithoutCreditToBeNotified.add(EChannelTypeMessageGateway.EMAIL);
-                }
+            if (consumptionResult.getEmail().equals(EXTERNAL_CREDIT_CONSUMPTION_SUCCESS)) {
+                fillAsyncPaymentNotificationToBeSent(
+                    EChannelTypeMessageGateway.EMAIL,
+                    notificationTitle,
+                    userSubscriptionOutput.getEmail(),
+                    null,
+                    EMAIL_TEMPLATE,
+                    mountPaymentNotificationEmailVariables(userSubscriptionOutput, paymentScheduledNotification),
+                    asyncMessages
+                );
+            } else if (consumptionResult.getEmail().equals(EXTERNAL_CREDIT_CONSUMPTION_NO_BALANCE)) {
+                channelsWithoutCreditToBeNotified.add(EChannelTypeMessageGateway.EMAIL);
             }
 
-            if (nonNull(consumptionResult.getSms())) {
-                if (consumptionResult.getSms().equals(EXTERNAL_CREDIT_CONSUMPTION_SUCCESS)) {
-                    fillAsyncPaymentNotificationToBeSent(
-                        EChannelTypeMessageGateway.SMS,
-                        notificationTitle,
-                        userSubscriptionOutput.getPhoneNumber(),
-                        null,
-                        SMS_TEMPLATE,
-                        mountPaymentNotificationSmsVariables(userSubscriptionOutput, paymentScheduledNotification),
-                        asyncMessages
-                    );
-                } else if (consumptionResult.getSms().equals(EXTERNAL_CREDIT_CONSUMPTION_NO_BALANCE)) {
-                    channelsWithoutCreditToBeNotified.add(EChannelTypeMessageGateway.SMS);
-                }
+            if (consumptionResult.getSms().equals(EXTERNAL_CREDIT_CONSUMPTION_SUCCESS)) {
+                fillAsyncPaymentNotificationToBeSent(
+                    EChannelTypeMessageGateway.SMS,
+                    notificationTitle,
+                    userSubscriptionOutput.getPhoneNumber(),
+                    null,
+                    SMS_TEMPLATE,
+                    mountPaymentNotificationSmsVariables(userSubscriptionOutput, paymentScheduledNotification),
+                    asyncMessages
+                );
+            } else if (consumptionResult.getSms().equals(EXTERNAL_CREDIT_CONSUMPTION_NO_BALANCE)) {
+                channelsWithoutCreditToBeNotified.add(EChannelTypeMessageGateway.SMS);
             }
 
-            if (nonNull(consumptionResult.getWhatsapp())) {
-                if (consumptionResult.getWhatsapp().equals(EXTERNAL_CREDIT_CONSUMPTION_SUCCESS)) {
-                    fillAsyncPaymentNotificationToBeSent(
-                        EChannelTypeMessageGateway.WHATS_APP,
-                        notificationTitle,
-                        userSubscriptionOutput.getPhoneNumber(),
-                        null,
-                        WHATSAPP_TEMPLATE,
-                        mountPaymentNotificationWhatsAppVariables(userSubscriptionOutput, paymentScheduledNotification),
-                        asyncMessages
-                    );
-                } else if (consumptionResult.getWhatsapp().equals(EXTERNAL_CREDIT_CONSUMPTION_NO_BALANCE)) {
-                    channelsWithoutCreditToBeNotified.add(EChannelTypeMessageGateway.WHATS_APP);
-                }
+            if (consumptionResult.getWhatsapp().equals(EXTERNAL_CREDIT_CONSUMPTION_SUCCESS)) {
+                fillAsyncPaymentNotificationToBeSent(
+                    EChannelTypeMessageGateway.WHATS_APP,
+                    notificationTitle,
+                    userSubscriptionOutput.getPhoneNumber(),
+                    null,
+                    WHATSAPP_TEMPLATE,
+                    mountPaymentNotificationWhatsAppVariables(userSubscriptionOutput, paymentScheduledNotification),
+                    asyncMessages
+                );
+            } else if (consumptionResult.getWhatsapp().equals(EXTERNAL_CREDIT_CONSUMPTION_NO_BALANCE)) {
+                channelsWithoutCreditToBeNotified.add(EChannelTypeMessageGateway.WHATS_APP);
             }
 
             fillNoCreditMessages(asyncMessages, channelsWithoutCreditToBeNotified, userSubscriptionOutput.getFirstName(), userSubscriptionOutput.getEmail());
