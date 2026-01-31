@@ -1,6 +1,5 @@
 package org.com.smartpayments.subscription.core.domain.usecase.userSubscriptionCreditsHistory.consumeUserCreditsInternal;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.com.smartpayments.subscription.core.common.exception.UserNotFoundException;
@@ -33,9 +32,9 @@ import static java.util.Objects.isNull;
 @Service
 @RequiredArgsConstructor
 public class ConsumeUserCreditsInternalUsecase implements UsecasePort<ConsumeUserCreditsInternalInput, ConsumeUserCreditsInternalOutput> {
-    private final static ObjectMapper mapper = new ObjectMapper();
     private final static String EXTERNAL_CREDIT_CONSUMPTION_SUCCESS = "SUCCESS";
     private final static String EXTERNAL_CREDIT_CONSUMPTION_NO_BALANCE = "NO_BALANCE_AVAILABLE";
+    private final static String EXTERNAL_CREDIT_CONSUMPTION_IGNORED = "IGNORED";
 
     private final UserDataProviderPort userDataProviderPort;
     private final UserSubscriptionCreditHistoryDataProviderPort userSubscriptionCreditHistoryDataProviderPort;
@@ -102,6 +101,8 @@ public class ConsumeUserCreditsInternalUsecase implements UsecasePort<ConsumeUse
                     creditsHistory.add(mountCreditHistory(userSubscription, input.getEmailCredits(), creditConsumptionExpiration, ECredit.EMAIL, input.getUsageReason(), input.getUsageReasonId()));
                 }
             }
+        } else {
+            output.setEmail(EXTERNAL_CREDIT_CONSUMPTION_IGNORED);
         }
 
         if (input.getSmsCredits() > 0) {
@@ -116,6 +117,8 @@ public class ConsumeUserCreditsInternalUsecase implements UsecasePort<ConsumeUse
                     creditsHistory.add(mountCreditHistory(userSubscription, input.getSmsCredits(), creditConsumptionExpiration, ECredit.SMS, input.getUsageReason(), input.getUsageReasonId()));
                 }
             }
+        } else {
+            output.setSms(EXTERNAL_CREDIT_CONSUMPTION_IGNORED);
         }
 
         if (input.getWhatsAppCredits() > 0) {
@@ -130,6 +133,8 @@ public class ConsumeUserCreditsInternalUsecase implements UsecasePort<ConsumeUse
                     creditsHistory.add(mountCreditHistory(userSubscription, input.getWhatsAppCredits(), creditConsumptionExpiration, ECredit.WHATS_APP, input.getUsageReason(), input.getUsageReasonId()));
                 }
             }
+        } else {
+            output.setWhatsapp(EXTERNAL_CREDIT_CONSUMPTION_IGNORED);
         }
 
         persistConsumedCredits(creditsHistory);
