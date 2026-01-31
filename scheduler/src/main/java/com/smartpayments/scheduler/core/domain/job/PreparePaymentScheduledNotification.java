@@ -1,7 +1,6 @@
 package com.smartpayments.scheduler.core.domain.job;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.smartpayments.scheduler.core.domain.enums.ENotificationRecurrence;
 import com.smartpayments.scheduler.core.domain.enums.ENotificationScheduleStatus;
 import com.smartpayments.scheduler.core.domain.model.PaymentScheduledNotification;
 import com.smartpayments.scheduler.core.ports.in.external.messaging.AsyncMessageInput;
@@ -35,8 +34,7 @@ public class PreparePaymentScheduledNotification {
     @Value("${spring.kafka.topics.process-scheduled-payment-notifications}")
     private String processNotificationTopic;
 
-    //@Scheduled(cron = "0 */5 * * * *")
-    @Scheduled(cron = "0/20 * * * * *")
+    @Scheduled(cron = "0 */5 * * * *")
     public void execute() {
         log.info("[PreparePaymentScheduledNotification#execute] - Preparing scheduled notifications");
 
@@ -54,14 +52,13 @@ public class PreparePaymentScheduledNotification {
     }
 
     private void handleNotification(PaymentScheduledNotification paymentScheduledNotification) {
-        Date nextDate = defineNextPaymentNotification(paymentScheduledNotification.getRecurrence());
+        Date nextDate = defineNextPaymentNotification(paymentScheduledNotification);
 
         if (nonNull(paymentScheduledNotification.getEndDate()) && paymentScheduledNotification.getEndDate().before(nextDate)) {
             paymentScheduledNotification.setStatus(ENotificationScheduleStatus.PAUSED);
-        } else {
-            paymentScheduledNotification.setNextDate(nextDate);
         }
 
+        paymentScheduledNotification.setNextDate(nextDate);
         paymentScheduledNotification.setLastDate(new Date());
 
         paymentScheduledNotificationDataProviderPort.persist(paymentScheduledNotification);
@@ -69,10 +66,14 @@ public class PreparePaymentScheduledNotification {
         sendNotificationToProcess(paymentScheduledNotification);
     }
 
-    private Date defineNextPaymentNotification(ENotificationRecurrence recurrence) {
+    private Date defineNextPaymentNotification(PaymentScheduledNotification psn) {
         Calendar calendar = Calendar.getInstance();
 
-        switch (recurrence) {
+        Date baseDate = nonNull(psn.getNextDate()) ? psn.getNextDate() : psn.getStartDate();
+
+        calendar.setTime(baseDate);
+
+        switch (psn.getRecurrence()) {
             case DAILY -> calendar.add(Calendar.DAY_OF_MONTH, 1);
             case WEEKLY -> calendar.add(Calendar.DAY_OF_MONTH, 7);
             case MONTHLY -> calendar.add(Calendar.MONTH, 1);
